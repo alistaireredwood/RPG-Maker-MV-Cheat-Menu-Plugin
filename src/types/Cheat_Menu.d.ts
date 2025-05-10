@@ -3,28 +3,25 @@ declare namespace Cheat_Menu {
   interface Cheat_Menu_Game_Actor extends Game_Actor {
     // Properties added by Cheat_Menu
     god_mode?: boolean;
-    god_mode_interval?: number; // Timer ID from setInterval (NodeJS.Timeout or number)
-
-    // Backup methods stored by Cheat_Menu
-    // Signatures should match the methods on Game_Battler or Game_BattlerBase
+    god_mode_interval?: NodeJS.Timeout;
 
     /** Backup of Game_Battler.prototype.gainHp */
-    gainHP_bkup: (value: number) => void;
+    gainHP_bkup?: (value: number) => void;
 
     /** Backup of Game_BattlerBase.prototype.setHp */
-    setHp_bkup: (hp: number) => void;
+    setHp_bkup?: (hp: number) => void;
 
     /** Backup of Game_Battler.prototype.gainMp */
-    gainMp_bkup: (value: number) => void;
+    gainMp_bkup?: (value: number) => void;
 
     /** Backup of Game_BattlerBase.prototype.setMp */
-    setMp_bkup: (mp: number) => void;
+    setMp_bkup?: (mp: number) => void;
 
     /** Backup of Game_Battler.prototype.gainTp */
-    gainTp_bkup: (value: number) => void;
+    gainTp_bkup?: (value: number) => void;
 
     /** Backup of Game_BattlerBase.prototype.setTp */
-    setTp_bkup: (tp: number) => void;
+    setTp_bkup?: (tp: number) => void;
 
     /** Backup of Game_BattlerBase.prototype.paySkillCost */
     // paySkillCost_bkup: (skill: DataSkill) => void; // Use DataSkill or RPG.Skill based on your RMMV types

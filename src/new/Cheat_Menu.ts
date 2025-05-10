@@ -701,22 +701,17 @@ Cheat_Menu.scroll_actor = function (direction) {
 Cheat_Menu.append_actor_selection = function (key1, key2) {
   Cheat_Menu.append_title('Actor');
 
-  let actor_name;
+  let actor_name_display;
+  const actor = $gameActors.actor(Cheat_Menu.cheat_selected_actor);
 
-  if (
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor) &&
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor).name()
-  ) {
-    actor_name =
-      "<font color='#0088ff'>" +
-      $gameActors.actor(Cheat_Menu.cheat_selected_actor).name() +
-      '</font>';
+  if (actor && actor.name()) {
+    actor_name_display = `<span class='actor-name-highlight'>${actor.name()}</span>`;
   } else {
-    actor_name = "<font color='#ff0000'>NULL</font>";
+    actor_name_display = `<span class="error-text">NULL</span>`;
   }
 
   Cheat_Menu.append_scroll_selector(
-    actor_name,
+    actor_name_display,
     key1,
     key2,
     Cheat_Menu.scroll_actor,
@@ -748,19 +743,19 @@ Cheat_Menu.god_mode_toggle = function () {
 
 // Append the god_mode cheat to the menu
 Cheat_Menu.append_godmode_status = function () {
-  let status_text;
+  let status_html;
 
   const actorInstance = $gameActors.actor(Cheat_Menu.cheat_selected_actor);
 
   if (actorInstance && (actorInstance as Cheat_Menu_Game_Actor).god_mode) {
-    status_text = "<font color='#00ff00'>on</font>";
+    status_html = '<span class="status-on">on</span>';
   } else {
-    status_text = "<font color='#ff0000'>off</font>";
+    status_html = '<span class="status-off">off</span>';
   }
 
   Cheat_Menu.append_cheat(
     'Status:',
-    status_text,
+    status_html,
     6,
     Cheat_Menu.god_mode_toggle,
   );
@@ -1068,16 +1063,17 @@ Cheat_Menu.toggle_no_clip_status = function () {
 
 // append the no clip cheat
 Cheat_Menu.append_no_clip_status = function (key1) {
-  let status_text;
+  let status_html;
+
   if ($gamePlayer.isThrough()) {
-    status_text = "<font color='#00ff00'>on</font>";
+    status_html = '<span class="status-on">on</span>';
   } else {
-    status_text = "<font color='#ff0000'>off</font>";
+    status_html = '<span class="status-off">off</span>';
   }
 
   Cheat_Menu.append_cheat(
     'Status:',
-    status_text,
+    status_html,
     key1,
     Cheat_Menu.toggle_no_clip_status,
   );
@@ -1106,12 +1102,11 @@ Cheat_Menu.scroll_amount = function (direction) {
 Cheat_Menu.append_amount_selection = function (key1, key2) {
   Cheat_Menu.append_title('Amount');
 
-  let current_amount =
-    "<font color='#0088ff'>" +
-    Cheat_Menu.amounts[Cheat_Menu.amount_index] +
-    '</font>';
+  const currentAmount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+  const currentAmountHtml = `<span class='actor-name-highlight'>${currentAmount}</span>`;
+
   Cheat_Menu.append_scroll_selector(
-    current_amount,
+    currentAmountHtml,
     key1,
     key2,
     Cheat_Menu.scroll_amount,
@@ -1141,12 +1136,12 @@ Cheat_Menu.scroll_move_amount = function (direction) {
 Cheat_Menu.append_move_amount_selection = function (key1, key2) {
   Cheat_Menu.append_title('Amount');
 
-  let current_amount =
-    "<font color='#0088ff'>" +
-    Cheat_Menu.move_amounts[Cheat_Menu.move_amount_index] +
-    '</font>';
+  const currentMoveAmount =
+    Cheat_Menu.move_amounts[Cheat_Menu.move_amount_index];
+  const currentMoveAmountHtml = `<span class='actor-name-highlight'>${currentMoveAmount}</span>`;
+
   Cheat_Menu.append_scroll_selector(
-    current_amount,
+    currentMoveAmountHtml,
     key1,
     key2,
     Cheat_Menu.scroll_move_amount,
@@ -1325,15 +1320,16 @@ Cheat_Menu.append_speed_status = function (key1, key2, key3) {
     key2,
     Cheat_Menu.apply_speed_change,
   );
-  let status_text;
+
+  let status_html;
   if (!Cheat_Menu.speed_unlocked) {
-    status_text = "<font color='#00ff00'>false</font>";
+    status_html = '<span class="status-on">false</span>';
   } else {
-    status_text = "<font color='#ff0000'>true</font>";
+    status_html = '<span class="status-off">true</span>';
   }
   Cheat_Menu.append_cheat(
     'Speed Unlocked',
-    status_text,
+    status_html,
     key3,
     Cheat_Menu.apply_speed_lock_toggle,
   );

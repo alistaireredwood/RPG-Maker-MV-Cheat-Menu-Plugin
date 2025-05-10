@@ -1,35 +1,4 @@
 declare namespace Cheat_Menu {
-  // Augments Game_Actor
-  interface Cheat_Menu_Game_Actor extends Game_Actor {
-    // Properties added by Cheat_Menu
-    god_mode?: boolean;
-    god_mode_interval?: number; // Timer ID from setInterval (NodeJS.Timeout or number)
-
-    // Backup methods stored by Cheat_Menu
-    // Signatures should match the methods on Game_Battler or Game_BattlerBase
-
-    /** Backup of Game_Battler.prototype.gainHp */
-    gainHP_bkup: (value: number) => void;
-
-    /** Backup of Game_BattlerBase.prototype.setHp */
-    setHp_bkup: (hp: number) => void;
-
-    /** Backup of Game_Battler.prototype.gainMp */
-    gainMp_bkup: (value: number) => void;
-
-    /** Backup of Game_BattlerBase.prototype.setMp */
-    setMp_bkup: (mp: number) => void;
-
-    /** Backup of Game_Battler.prototype.gainTp */
-    gainTp_bkup: (value: number) => void;
-
-    /** Backup of Game_BattlerBase.prototype.setTp */
-    setTp_bkup: (tp: number) => void;
-
-    /** Backup of Game_BattlerBase.prototype.paySkillCost */
-    // paySkillCost_bkup: (skill: DataSkill) => void; // Use DataSkill or RPG.Skill based on your RMMV types
-  }
-
   // --- Types for internal state and structures ---
 
   interface PositionData {
@@ -76,7 +45,7 @@ declare namespace Cheat_Menu {
   let cheat_menu_open: boolean;
   let overlay_openable: boolean;
   let position: number; // 0: middle, 1: TL, 2: TR, 3: BR, 4: BL
-  let menu_update_timer: number | null; // Node.js Timeout or number for browser setInterval ID
+  let menu_update_timer: NodeJS.Timeout;
 
   let cheat_selected: number; // Index for current menu page
   let cheat_selected_actor: number; // Actor ID (1-indexed usually in RMMV)
@@ -113,8 +82,8 @@ declare namespace Cheat_Menu {
   let key_listeners: KeyListeners;
 
   // Key code mappings
-  let keyCodes: {
-    [keyName: string]: KeyCodeMapping; // e.g., KEYCODE_0, KEYCODE_TILDE
+  let keyMappings: {
+    [keyName: string]: string;
   };
 
   // --- Cheat Functions ---

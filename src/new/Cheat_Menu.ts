@@ -189,15 +189,38 @@ Cheat_Menu.god_mode_off = function (actor) {
   if (actor.god_mode) {
     actor.god_mode = false;
 
-    actor.gainHp = actor.gainHP_bkup;
-    actor.setHp = actor.setHp_bkup;
-    actor.gainMp = actor.gainMp_bkup;
-    actor.setMp = actor.setMp_bkup;
-    actor.gainTp = actor.gainTp_bkup;
-    actor.setTp = actor.setTp_bkup;
-    // actor.paySkillCost = actor.paySkillCost_bkup;
+    if (typeof actor.gainHP_bkup === 'function') {
+      actor.gainHp = actor.gainHP_bkup;
+    }
 
-    clearInterval(actor.god_mode_interval);
+    if (typeof actor.setHp_bkup === 'function') {
+      actor.setHp = actor.setHp_bkup;
+    }
+
+    if (typeof actor.gainMp_bkup === 'function') {
+      actor.gainMp = actor.gainMp_bkup;
+    }
+
+    if (typeof actor.setMp_bkup === 'function') {
+      actor.setMp = actor.setMp_bkup;
+    }
+
+    if (typeof actor.gainTp_bkup === 'function') {
+      actor.gainTp = actor.gainTp_bkup;
+    }
+
+    if (typeof actor.setTp_bkup === 'function') {
+      actor.setTp = actor.setTp_bkup;
+    }
+
+    // if (typeof actor.paySkillCost_bkup === 'function') {
+    //   actor.paySkillCost = actor.paySkillCost_bkup;
+    // }
+
+    if (actor.god_mode_interval) {
+      clearInterval(actor.god_mode_interval);
+      actor.god_mode_interval = undefined;
+    }
   }
 };
 
@@ -283,8 +306,7 @@ Cheat_Menu.give_exp = function (actor, amount) {
 
 // increase stat bonus
 Cheat_Menu.give_stat = function (actor, stat_index, amount) {
-  // actor.paramPlus(stat_index)
-  if (actor._paramPlus[stat_index] != undefined) {
+  if (actor.paramPlus(stat_index) != undefined) {
     actor.addParam(stat_index, amount);
   }
 };
@@ -648,20 +670,30 @@ Cheat_Menu.append_cheat_title = function (cheat_name) {
 
 // Left and right scrollers for handling switching selected actors
 Cheat_Menu.scroll_actor = function (direction) {
+  // since Core Script is retarded and doesn't have a getter for protected field
+  const gameActorsData = ($gameActors as any)._data as Game_Actor[];
+
   if (direction == 'left') {
     Cheat_Menu.cheat_selected_actor--;
+
     if (Cheat_Menu.cheat_selected_actor < 0) {
-      Cheat_Menu.cheat_selected_actor = $gameActors._data.length - 1;
+      Cheat_Menu.cheat_selected_actor =
+        gameActorsData && gameActorsData.length > 0
+          ? gameActorsData.length - 1
+          : 0;
     }
   } else {
     Cheat_Menu.cheat_selected_actor++;
-    if (Cheat_Menu.cheat_selected_actor >= $gameActors._data.length) {
+    if (
+      gameActorsData &&
+      Cheat_Menu.cheat_selected_actor >= gameActorsData.length
+    ) {
       Cheat_Menu.cheat_selected_actor = 0;
     }
   }
 
-  SoundManager.playSystemSound(0);
-  Cheat_Menu.update_menu();
+  if (SoundManager) SoundManager.playSystemSound(0);
+  if (Cheat_Menu.update_menu) Cheat_Menu.update_menu();
 };
 
 // Append actor selection to the menu
@@ -1150,36 +1182,35 @@ Cheat_Menu.append_exp_cheat = function (key1, key2) {
 
 // Left and right scrollers for handling switching between stats for the selected character
 Cheat_Menu.scroll_stat = function (direction) {
-  if (
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor) &&
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor)._paramPlus
-  ) {
+  // another hack
+  const actorParamPlus = ($gameActors as any).actor(
+    Cheat_Menu.cheat_selected_actor,
+  )?._paramPlus as Game_Actor['_paramPlus'];
+
+  if (actorParamPlus) {
     if (direction == 'left') {
       Cheat_Menu.stat_selection--;
       if (Cheat_Menu.stat_selection < 0) {
-        Cheat_Menu.stat_selection =
-          $gameActors.actor(Cheat_Menu.cheat_selected_actor)._paramPlus.length -
-          1;
+        Cheat_Menu.stat_selection = actorParamPlus.length - 1;
       }
     } else {
       Cheat_Menu.stat_selection++;
-      if (
-        Cheat_Menu.stat_selection >=
-        $gameActors.actor(Cheat_Menu.cheat_selected_actor)._paramPlus.length
-      ) {
+      if (Cheat_Menu.stat_selection >= actorParamPlus.length) {
         Cheat_Menu.stat_selection = 0;
       }
     }
   } else {
     Cheat_Menu.stat_selection = 0;
   }
+
   SoundManager.playSystemSound(0);
   Cheat_Menu.update_menu();
 };
 
 // handlers for the stat cheat
 Cheat_Menu.apply_current_stat = function (direction) {
-  var amount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+  let amount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+
   if (direction == 'left') {
     amount = -amount;
     SoundManager.playSystemSound(2);
@@ -1198,15 +1229,13 @@ Cheat_Menu.apply_current_stat = function (direction) {
 Cheat_Menu.append_stat_selection = function (key1, key2, key3, key4) {
   Cheat_Menu.append_title('Stat');
 
-  var stat_string = '';
-  if (
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor) &&
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor)._paramPlus
-  ) {
-    if (
-      Cheat_Menu.stat_selection >=
-      $gameActors.actor(Cheat_Menu.cheat_selected_actor)._paramPlus.length
-    ) {
+  const actorParamPlus = ($gameActors as any).actor(
+    Cheat_Menu.cheat_selected_actor,
+  )?._paramPlus as Game_Actor['_paramPlus'];
+
+  let stat_string = '';
+  if ($gameActors.actor(Cheat_Menu.cheat_selected_actor) && actorParamPlus) {
+    if (Cheat_Menu.stat_selection >= actorParamPlus.length) {
       Cheat_Menu.stat_selection = 0;
     }
     stat_string += $dataSystem.terms.params[Cheat_Menu.stat_selection];
@@ -1220,12 +1249,8 @@ Cheat_Menu.append_stat_selection = function (key1, key2, key3, key4) {
   );
   let current_value: number | 'NULL' = 'NULL';
 
-  if (
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor) &&
-    $gameActors.actor(Cheat_Menu.cheat_selected_actor)._paramPlus
-  ) {
-    current_value = $gameActors.actor(Cheat_Menu.cheat_selected_actor)
-      ._paramPlus[Cheat_Menu.stat_selection];
+  if ($gameActors.actor(Cheat_Menu.cheat_selected_actor) && actorParamPlus) {
+    current_value = actorParamPlus[Cheat_Menu.stat_selection];
   }
   Cheat_Menu.append_scroll_selector(
     current_value,
@@ -1237,13 +1262,15 @@ Cheat_Menu.append_stat_selection = function (key1, key2, key3, key4) {
 
 // handlers for the gold cheat
 Cheat_Menu.apply_current_gold = function (direction) {
-  var amount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+  let amount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+
   if (direction == 'left') {
     amount = -amount;
     SoundManager.playSystemSound(2);
   } else {
     SoundManager.playSystemSound(1);
   }
+
   Cheat_Menu.give_gold(amount);
   Cheat_Menu.update_menu();
 };
@@ -1338,27 +1365,27 @@ Cheat_Menu.apply_current_item = function (direction) {
 // append the item cheat to the menu
 Cheat_Menu.append_item_selection = function (key1, key2, key3, key4) {
   Cheat_Menu.append_title('Item');
-  var current_item = '';
-  if (
-    $dataItems[Cheat_Menu.item_selection] &&
-    $dataItems[Cheat_Menu.item_selection].name &&
-    $dataItems[Cheat_Menu.item_selection].name.length > 0
-  ) {
-    current_item = $dataItems[Cheat_Menu.item_selection].name;
-  } else {
-    current_item = 'NULL';
+
+  const itemId = Cheat_Menu.item_selection;
+  const itemData = $dataItems[itemId];
+
+  let current_item_name = '';
+  if (itemData && itemData.name) {
+    current_item_name = itemData.name;
   }
 
   Cheat_Menu.append_scroll_selector(
-    current_item,
+    current_item_name,
     key1,
     key2,
     Cheat_Menu.scroll_item,
   );
-  var current_item_amount = 0;
-  if ($gameParty._items[Cheat_Menu.item_selection] != undefined) {
-    current_item_amount = $gameParty._items[Cheat_Menu.item_selection];
+
+  let current_item_amount = 0;
+  if (itemData) {
+    current_item_amount = $gameParty.numItems(itemData);
   }
+
   Cheat_Menu.append_scroll_selector(
     current_item_amount,
     key3,
@@ -1401,27 +1428,27 @@ Cheat_Menu.apply_current_weapon = function (direction) {
 // append the weapon cheat to the menu
 Cheat_Menu.append_weapon_selection = function (key1, key2, key3, key4) {
   Cheat_Menu.append_title('Weapon');
-  var current_weapon = '';
-  if (
-    $dataWeapons[Cheat_Menu.weapon_selection] &&
-    $dataWeapons[Cheat_Menu.weapon_selection].name &&
-    $dataWeapons[Cheat_Menu.weapon_selection].name.length > 0
-  ) {
-    current_weapon = $dataWeapons[Cheat_Menu.weapon_selection].name;
-  } else {
-    current_weapon = 'NULL';
+
+  const weaponId = Cheat_Menu.weapon_selection;
+  const weaponData = $dataWeapons[weaponId];
+
+  let current_weapon_name = '';
+  if (weaponData && weaponData.name) {
+    current_weapon_name = weaponData.name;
   }
 
   Cheat_Menu.append_scroll_selector(
-    current_weapon,
+    current_weapon_name,
     key1,
     key2,
     Cheat_Menu.scroll_weapon,
   );
-  var current_weapon_amount = 0;
-  if ($gameParty._weapons[Cheat_Menu.weapon_selection] != undefined) {
-    current_weapon_amount = $gameParty._weapons[Cheat_Menu.weapon_selection];
+
+  let current_weapon_amount = 0;
+  if (weaponData) {
+    current_weapon_amount = $gameParty.numItems(weaponData);
   }
+
   Cheat_Menu.append_scroll_selector(
     current_weapon_amount,
     key3,
@@ -1464,27 +1491,27 @@ Cheat_Menu.apply_current_armor = function (direction) {
 // append the armor cheat to the menu
 Cheat_Menu.append_armor_selection = function (key1, key2, key3, key4) {
   Cheat_Menu.append_title('Armor');
-  var current_armor = '';
-  if (
-    $dataArmors[Cheat_Menu.armor_selection] &&
-    $dataArmors[Cheat_Menu.armor_selection].name &&
-    $dataArmors[Cheat_Menu.armor_selection].name.length > 0
-  ) {
-    current_armor = $dataArmors[Cheat_Menu.armor_selection].name;
-  } else {
-    current_armor = 'NULL';
+
+  const armorId = Cheat_Menu.armor_selection; // Use the specific selection variable
+  const armorData = $dataArmors[armorId]; // Get from $dataArmors
+
+  let current_armor_name = '';
+  if (armorData && armorData.name) {
+    current_armor_name = armorData.name;
   }
 
   Cheat_Menu.append_scroll_selector(
-    current_armor,
+    current_armor_name,
     key1,
     key2,
     Cheat_Menu.scroll_armor,
   );
-  var current_armor_amount = 0;
-  if ($gameParty._armors[Cheat_Menu.armor_selection] != undefined) {
-    current_armor_amount = $gameParty._armors[Cheat_Menu.armor_selection];
+
+  let current_armor_amount: number = 0;
+  if (armorData) {
+    current_armor_amount = $gameParty.numItems(armorData);
   }
+
   Cheat_Menu.append_scroll_selector(
     current_armor_amount,
     key3,
@@ -1496,8 +1523,9 @@ Cheat_Menu.append_armor_selection = function (key1, key2, key3, key4) {
 // handler for the clear actor state cheat
 Cheat_Menu.clear_current_actor_states = function () {
   Cheat_Menu.clear_actor_states(
-    $gameActors._data[Cheat_Menu.cheat_selected_actor],
+    $gameActors.actor(Cheat_Menu.cheat_selected_actor),
   );
+
   SoundManager.playSystemSound(1);
   Cheat_Menu.update_menu();
 };
@@ -1521,22 +1549,14 @@ Cheat_Menu.append_party_state = function (key1) {
 // append the clear actor state cheat to the menu
 Cheat_Menu.append_current_state = function (key1) {
   Cheat_Menu.append_title('Current State');
-  var number_states = 0;
+  let number_states = 0;
 
-  if (
-    // @ts-ignore
-    $gameActors._data[Cheat_Menu.cheat_selected_actor] &&
-    // @ts-ignore
-    $gameActors._data[Cheat_Menu.cheat_selected_actor]._states &&
-    // @ts-ignore
-    $gameActors._data[Cheat_Menu.cheat_selected_actor]._states.length >= 0
-  ) {
-    number_states =
-      // @ts-ignore
-      $gameActors._data[Cheat_Menu.cheat_selected_actor]._states.length;
-  } else {
-    // @ts-ignore
-    number_states = null;
+  const selectedActorId = Cheat_Menu.cheat_selected_actor;
+  const actorInstance = $gameActors.actor(selectedActorId);
+  const activeStates = actorInstance.states();
+
+  if (activeStates) {
+    number_states = activeStates.length;
   }
 
   Cheat_Menu.append_cheat(
@@ -1566,13 +1586,15 @@ Cheat_Menu.scroll_variable = function (direction) {
 
 // handlers for the setting the current variable
 Cheat_Menu.apply_current_variable = function (direction) {
-  var amount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+  let amount = Cheat_Menu.amounts[Cheat_Menu.amount_index];
+
   if (direction == 'left') {
     amount = -amount;
     SoundManager.playSystemSound(2);
   } else {
     SoundManager.playSystemSound(1);
   }
+
   Cheat_Menu.set_variable(Cheat_Menu.variable_selection, amount);
   Cheat_Menu.update_menu();
 };
@@ -1580,7 +1602,8 @@ Cheat_Menu.apply_current_variable = function (direction) {
 // append the variable cheat to the menu
 Cheat_Menu.append_variable_selection = function (key1, key2, key3, key4) {
   Cheat_Menu.append_title('Variable');
-  var current_variable = '';
+  let current_variable = '';
+
   if (
     $dataSystem.variables[Cheat_Menu.variable_selection] &&
     $dataSystem.variables[Cheat_Menu.variable_selection].length > 0
@@ -1598,7 +1621,6 @@ Cheat_Menu.append_variable_selection = function (key1, key2, key3, key4) {
   );
   var current_variable_value = 'NULL';
   if ($gameVariables.value(Cheat_Menu.variable_selection) != undefined) {
-    // @ts-ignore
     current_variable_value = $gameVariables.value(
       Cheat_Menu.variable_selection,
     );
@@ -1642,7 +1664,8 @@ Cheat_Menu.toggle_current_switch = function () {
 // append the switch cheat to the menu
 Cheat_Menu.append_switch_selection = function (key1, key2, key3) {
   Cheat_Menu.append_title('Switch');
-  var current_switch = '';
+  let current_switch = '';
+
   if (
     $dataSystem.switches[Cheat_Menu.switch_selection] &&
     $dataSystem.switches[Cheat_Menu.switch_selection].length > 0
@@ -1661,7 +1684,6 @@ Cheat_Menu.append_switch_selection = function (key1, key2, key3) {
   let current_switch_value = 'NULL';
 
   if ($gameSwitches.value(Cheat_Menu.switch_selection) != undefined) {
-    // @ts-ignore
     current_switch_value = $gameSwitches.value(Cheat_Menu.switch_selection);
   }
 
@@ -2049,7 +2071,7 @@ window.addEventListener('keydown', function (event) {
     // open debug menu
     event.stopPropagation();
     event.preventDefault();
-    // @ts-ignore
+
     require('nw.gui').Window.get().showDevTools();
   } else if (
     !event.altKey &&
@@ -2060,12 +2082,10 @@ window.addEventListener('keydown', function (event) {
     !$gameTemp.isPlaytest()
   ) {
     // trick the game into thinking its a playtest so it will open the switch/variable debug menu
-    // @ts-ignore
-    $gameTemp._isPlaytest = true;
+    // another Hack
+    ($gameTemp as any)._isPlaytest = true;
     setTimeout(function () {
-      // back to not being playtest
-      // @ts-ignore
-      $gameTemp._isPlaytest = false;
+      ($gameTemp as any) = false;
     }, 100);
   } else if (
     Cheat_Menu.overlay_openable &&
@@ -2076,15 +2096,11 @@ window.addEventListener('keydown', function (event) {
     // open and close menu
     if (event.keyCode == Cheat_Menu.keyCodes.KEYCODE_1.keyCode) {
       if (!Cheat_Menu.initialized) {
-        // @ts-ignore
-        for (var i = 0; i < $gameActors._data.length; i++) {
-          // @ts-ignore
+        for (let i = 0; i < $gameActors._data.length; i++) {
           if ($gameActors._data[i]) {
-            // @ts-ignore
             $gameActors._data[i].god_mode = false;
-            // @ts-ignore
+
             if ($gameActors._data[i].god_mode_interval) {
-              // @ts-ignore
               clearInterval($gameActors._data[i].god_mode_interval);
             }
           }
@@ -2092,15 +2108,12 @@ window.addEventListener('keydown', function (event) {
 
         // reset to inital values
         for (var name in Cheat_Menu.initial_values) {
-          // @ts-ignore
           Cheat_Menu[name] = Cheat_Menu.initial_values[name];
         }
         // load saved values if they exist
-        // @ts-ignore
+
         if ($gameSystem.Cheat_Menu) {
-          // @ts-ignore
           for (var name in $gameSystem.Cheat_Menu) {
-            // @ts-ignore
             Cheat_Menu[name] = $gameSystem.Cheat_Menu[name];
           }
         }
@@ -2141,7 +2154,7 @@ window.addEventListener('keydown', function (event) {
         }
         Cheat_Menu.update_menu();
       } else {
-        for (var keyCode in Cheat_Menu.keyCodes) {
+        for (const keyCode in Cheat_Menu.keyCodes) {
           if (
             Cheat_Menu.key_listeners[
               Cheat_Menu.keyCodes[keyCode].key_listener
@@ -2182,36 +2195,30 @@ Cheat_Menu.initialize = function () {
 };
 
 // add hook for loading a game
-// @ts-ignore
 DataManager.default_loadGame = DataManager.loadGame;
 DataManager.loadGame = function (savefileId) {
   Cheat_Menu.initialize();
-  // @ts-ignore
   return DataManager.default_loadGame(savefileId);
 };
 
 // add hook for new game
-// @ts-ignore
 DataManager.default_setupNewGame = DataManager.setupNewGame;
 DataManager.setupNewGame = function () {
   Cheat_Menu.initialize();
 
-  // @ts-ignore
   DataManager.default_setupNewGame();
 };
 
 // add hook for saving values (just added into $gameSystem to be saved)
-// @ts-ignore
+
 DataManager.default_saveGame = DataManager.saveGame;
 DataManager.saveGame = function (savefileId) {
   // save values that are in intial values
-  // @ts-ignore
+
   $gameSystem.Cheat_Menu = {};
   for (var name in Cheat_Menu.initial_values) {
-    // @ts-ignore
     $gameSystem.Cheat_Menu[name] = Cheat_Menu[name];
   }
 
-  // @ts-ignore
   return DataManager.default_saveGame(savefileId);
 };

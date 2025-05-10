@@ -82,8 +82,8 @@ declare namespace Cheat_Menu {
   let key_listeners: KeyListeners;
 
   // Key code mappings
-  let keyCodes: {
-    [keyName: string]: KeyCodeMapping; // e.g., KEYCODE_0, KEYCODE_TILDE
+  let keyMappings: {
+    [keyName: string]: string;
   };
 
   // --- Cheat Functions ---

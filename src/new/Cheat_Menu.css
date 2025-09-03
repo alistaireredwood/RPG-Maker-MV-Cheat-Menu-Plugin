@@ -1,4 +1,4 @@
-#cheat_menu{
+#cheatMenu{
 	position: absolute;
 	width: 280px;
 	height: 100px;
@@ -10,7 +10,7 @@
 	padding: 10px;
 }
 
-#cheat_menu_text{
+#cheatMenuText{
 	position: absolute;
 	width: 300px;
 	z-index: 1001;

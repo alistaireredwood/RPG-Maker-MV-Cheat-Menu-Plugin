@@ -1,7 +1,7 @@
 declare interface ICheatMenu {
   initialized: boolean;
-  cheat_menu_open: boolean;
-  overlay_openable: boolean;
+  isCheatMenuOpen: boolean;
+  isOverlayOpenable: boolean;
   position: number;
   menu_update_timer: NodeJS.Timeout;
 
@@ -13,18 +13,18 @@ declare interface ICheatMenu {
   saved_positions: SavedPosition[];
 
   // Methods
-  god_mode?: (actor: Cheat_Menu_Game_Actor) => void;
-  god_mode_off?: (actor: Cheat_Menu_Game_Actor) => void;
+  godMode?: (actor: CheatMenu_Game_Actor) => void;
+  godMode_off?: (actor: CheatMenu_Game_Actor) => void;
   initialize?: () => void;
   update_menu?: () => void;
   append_title?: (title: string) => void;
 
-  initial_values: Partial<ICheatMenu>;
+  initialValues: Partial<ICheatMenu>;
 }
 
-declare class Cheat_Menu_Game_Actor extends Game_Actor {
-  god_mode?: boolean;
-  god_mode_interval?: NodeJS.Timeout;
+declare class CheatMenu_Game_Actor extends Game_Actor {
+  godMode?: boolean;
+  godMode_interval?: NodeJS.Timeout;
 
   gainHP_bkup?: (value: number) => void;
   setHp_bkup?: (hp: number) => void;
@@ -40,7 +40,7 @@ declare class Cheat_Menu_Game_Actor extends Game_Actor {
 }
 
 declare class Game_System {
-  Cheat_Menu?: ICheatMenu | {};
+  CheatMenu?: ICheatMenu | {};
 }
 
 declare class DataManager {

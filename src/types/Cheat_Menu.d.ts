@@ -1,4 +1,4 @@
-declare namespace Cheat_Menu {
+declare namespace CheatMenu {
   // --- Types for internal state and structures ---
 
   interface PositionData {
@@ -35,15 +35,15 @@ declare namespace Cheat_Menu {
     speed_unlocked: boolean;
   }
 
-  // Type for data saved in $gameSystem.Cheat_Menu
+  // Type for data saved in $gameSystem.CheatMenu
   // This should mirror InitialValues as that's what's being saved/loaded
   type SavedValues = InitialValues;
 
   // --- Properties ---
 
   let initialized: boolean;
-  let cheat_menu_open: boolean;
-  let overlay_openable: boolean;
+  let isCheatMenuOpen: boolean;
+  let isOverlayOpenable: boolean;
   let position: number; // 0: middle, 1: TL, 2: TR, 3: BR, 4: BL
   let menu_update_timer: NodeJS.Timeout;
 
@@ -68,7 +68,7 @@ declare namespace Cheat_Menu {
   let speed_unlocked: boolean;
   let speed_initialized: boolean;
 
-  let initial_values: InitialValues;
+  let initialValues: InitialValues;
 
   // DOM Elements
   let overlay_box: HTMLDivElement;
@@ -88,8 +88,8 @@ declare namespace Cheat_Menu {
 
   // --- Cheat Functions ---
 
-  function god_mode(actor: Cheat_Menu_Game_Actor): void;
-  function god_mode_off(actor: Cheat_Menu_Game_Actor): void;
+  function godMode(actor: CheatMenu_Game_Actor): void;
+  function godMode_off(actor: CheatMenu_Game_Actor): void;
   function set_party_hp(hp: number, alive: boolean): void;
   function set_party_mp(mp: number, alive: boolean): void;
   function set_party_tp(tp: number, alive: boolean): void;
@@ -97,9 +97,9 @@ declare namespace Cheat_Menu {
   function recover_party_mp(alive: boolean): void;
   function recover_party_tp(alive: boolean): void;
   function set_enemy_hp(hp: number, alive: boolean): void;
-  function give_exp(actor: Cheat_Menu_Game_Actor, amount: number): void;
+  function give_exp(actor: CheatMenu_Game_Actor, amount: number): void;
   function give_stat(
-    actor: Cheat_Menu_Game_Actor,
+    actor: CheatMenu_Game_Actor,
     stat_index: number,
     amount: number,
   ): void;
@@ -147,7 +147,7 @@ declare namespace Cheat_Menu {
     key2: string | number,
   ): void;
 
-  function god_mode_toggle(event?: MouseEvent): void;
+  function toggleGodMode(event?: MouseEvent): void;
   function append_godmode_status(): void;
 
   function enemy_hp_cheat_1(): void;
@@ -365,6 +365,13 @@ declare namespace Cheat_Menu {
   // --- Core Menu Logic ---
   function update_menu(): void;
   function initialize(): void; // For load/new game hooks
+
+  //
+  function handleShowDevTools(event: KeyboardEvent): void;
+
+  function handleShowRpgMakerDebug(event: KeyboardEvent): void;
+
+  function handleToggleCheatMenu(event: KeyboardEvent): void;
 }
 
 // Make Cheat_Menu available globally if it's intended to be used as such.

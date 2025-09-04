@@ -48,7 +48,7 @@ export type CheatMenuT = {
   isCheatMenuOpen: boolean;
   isOverlayOpenable: boolean;
   position: number; // 0: middle, 1: TL, 2: TR, 3: BR, 4: BL
-  menu_update_timer: any; // Using `any` is safer than NodeJS.Timeout for browser compatibility
+  menu_update_timer: NodeJS.Timeout | null;
 
   cheat_selected: number; // Index for current menu page
   cheat_selected_actor: number; // Actor ID
@@ -158,7 +158,12 @@ export type CheatMenuT = {
   enemy_hp_cheat_2: () => void;
   enemy_hp_cheat_3: () => void;
   enemy_hp_cheat_4: () => void;
-  append_enemy_cheats: (key1: any, key2: any, key3: any, key4: any) => void;
+  append_enemy_cheats: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+  ) => void;
 
   party_hp_cheat_1: () => void;
   party_hp_cheat_2: () => void;
@@ -167,12 +172,12 @@ export type CheatMenuT = {
   party_hp_cheat_5: () => void;
   party_hp_cheat_6: () => void;
   append_hp_cheats: (
-    key1: any,
-    key2: any,
-    key3: any,
-    key4: any,
-    key5: any,
-    key6: any,
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+    key5: string | number,
+    key6: string | number,
   ) => void;
 
   party_mp_cheat_1: () => void;
@@ -182,12 +187,12 @@ export type CheatMenuT = {
   party_mp_cheat_5: () => void;
   party_mp_cheat_6: () => void;
   append_mp_cheats: (
-    key1: any,
-    key2: any,
-    key3: any,
-    key4: any,
-    key5: any,
-    key6: any,
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+    key5: string | number,
+    key6: string | number,
   ) => void;
 
   party_tp_cheat_1: () => void;
@@ -197,12 +202,12 @@ export type CheatMenuT = {
   party_tp_cheat_5: () => void;
   party_tp_cheat_6: () => void;
   append_tp_cheats: (
-    key1: any,
-    key2: any,
-    key3: any,
-    key4: any,
-    key5: any,
-    key6: any,
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+    key5: string | number,
+    key6: string | number,
   ) => void;
 
   toggle_no_clip_status: (event?: MouseEvent) => void;
@@ -225,32 +230,56 @@ export type CheatMenuT = {
 
   scroll_stat: (direction: 'left' | 'right', event?: MouseEvent) => void;
   apply_current_stat: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  append_stat_selection: (key1: any, key2: any, key3: any, key4: any) => void;
+  append_stat_selection: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+  ) => void;
 
   apply_current_gold: (direction: 'left' | 'right', event?: MouseEvent) => void;
   append_gold_status: (key1: string | number, key2: string | number) => void;
 
   apply_speed_change: (direction: 'left' | 'right', event?: MouseEvent) => void;
   apply_speed_lock_toggle: () => void;
-  append_speed_status: (key1: any, key2: any, key3: any) => void;
+  append_speed_status: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+  ) => void;
 
   scroll_item: (direction: 'left' | 'right', event?: MouseEvent) => void;
   apply_current_item: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  append_item_selection: (key1: any, key2: any, key3: any, key4: any) => void;
+  append_item_selection: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+  ) => void;
 
   scroll_weapon: (direction: 'left' | 'right', event?: MouseEvent) => void;
   apply_current_weapon: (
     direction: 'left' | 'right',
     event?: MouseEvent,
   ) => void;
-  append_weapon_selection: (key1: any, key2: any, key3: any, key4: any) => void;
+  append_weapon_selection: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+  ) => void;
 
   scroll_armor: (direction: 'left' | 'right', event?: MouseEvent) => void;
   apply_current_armor: (
     direction: 'left' | 'right',
     event?: MouseEvent,
   ) => void;
-  append_armor_selection: (key1: any, key2: any, key3: any, key4: any) => void;
+  append_armor_selection: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+  ) => void;
 
   clear_current_actor_states: () => void;
   party_clear_states_cheat: () => void;
@@ -263,25 +292,29 @@ export type CheatMenuT = {
     event?: MouseEvent,
   ) => void;
   append_variable_selection: (
-    key1: any,
-    key2: any,
-    key3: any,
-    key4: any,
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
   ) => void;
 
   scroll_switch: (direction: 'left' | 'right', event?: MouseEvent) => void;
   toggle_current_switch: (event?: MouseEvent) => void;
-  append_switch_selection: (key1: any, key2: any, key3: any) => void;
+  append_switch_selection: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+  ) => void;
 
   save_position: (pos_num: number, event?: MouseEvent) => void;
   recall_position: (pos_num: number, event?: MouseEvent) => void;
   append_save_recall: (
-    key1: any,
-    key2: any,
-    key3: any,
-    key4: any,
-    key5: any,
-    key6: any,
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+    key5: string | number,
+    key6: string | number,
   ) => void;
 
   scroll_map_teleport_selection: (
@@ -298,13 +331,13 @@ export type CheatMenuT = {
   ) => void;
   teleport_current_location: (event?: MouseEvent) => void;
   append_teleport: (
-    key1: any,
-    key2: any,
-    key3: any,
-    key4: any,
-    key5: any,
-    key6: any,
-    key7: any,
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+    key4: string | number,
+    key5: string | number,
+    key6: string | number,
+    key7: string | number,
   ) => void;
 
   // --- Core Menu Logic & Input Handlers ---

@@ -70,3 +70,9 @@ CheatMenu.append_weapon_selection = function (key1, key2, key3, key4) {
     CheatMenu.apply_current_weapon,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Weapons');
+  CheatMenu.append_amount_selection(4, 5);
+  CheatMenu.append_weapon_selection(6, 7, 8, 9);
+});

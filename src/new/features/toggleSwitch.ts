@@ -70,3 +70,8 @@ CheatMenu.append_switch_selection = function (key1, key2, key3) {
     CheatMenu.toggle_current_switch,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Switches');
+  CheatMenu.append_switch_selection(4, 5, 6);
+});

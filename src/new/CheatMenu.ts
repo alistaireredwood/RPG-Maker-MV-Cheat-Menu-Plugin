@@ -29,4 +29,29 @@ const CheatMenu = {
   speed_initialized: false,
 } as CheatMenuT;
 
+// Check if already defined (allows game specific extensions to be loaded in any order)
+if (!CheatMenu.initialValues) {
+  CheatMenu.initialValues = {
+    position: 1,
+    cheat_selected: 0,
+    cheat_selected_actor: 1,
+    amount_index: 0,
+    stat_selection: 0,
+    item_selection: 1,
+    weapon_selection: 1,
+    armor_selection: 1,
+    move_amount_index: 1,
+    variable_selection: 1,
+    switch_selection: 1,
+    saved_positions: [
+      { m: -1, x: -1, y: -1 },
+      { m: -1, x: -1, y: -1 },
+      { m: -1, x: -1, y: -1 },
+    ],
+    teleport_location: { m: 1, x: 0, y: 0 },
+    speed: 5,
+    speed_unlocked: true,
+  };
+}
+
 export default CheatMenu;

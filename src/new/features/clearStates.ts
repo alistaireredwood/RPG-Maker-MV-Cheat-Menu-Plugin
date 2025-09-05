@@ -61,3 +61,10 @@ CheatMenu.append_current_state = function (key1) {
     CheatMenu.clear_current_actor_states,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Clear States');
+  CheatMenu.append_party_state(4);
+  CheatMenu.append_actor_selection(5, 6);
+  CheatMenu.append_current_state(7);
+});

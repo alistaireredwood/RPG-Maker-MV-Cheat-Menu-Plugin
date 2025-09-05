@@ -86,3 +86,10 @@ CheatMenu.scroll_stat = function (direction) {
   SoundManager.playSystemSound(0);
   CheatMenu.update_menu();
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Stats');
+  CheatMenu.append_actor_selection(4, 5);
+  CheatMenu.append_amount_selection(6, 7);
+  CheatMenu.append_stat_selection(8, 9, 0, '-');
+});

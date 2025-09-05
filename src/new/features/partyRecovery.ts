@@ -296,3 +296,21 @@ CheatMenu.append_tp_cheats = function (key1, key2, key3, key4, key5, key6) {
     CheatMenu.party_tp_cheat_6,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Party TP');
+
+  CheatMenu.append_tp_cheats(4, 5, 6, 7, 8, 9);
+});
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Party MP');
+
+  CheatMenu.append_mp_cheats(4, 5, 6, 7, 8, 9);
+});
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Party HP');
+
+  CheatMenu.append_hp_cheats(4, 5, 6, 7, 8, 9);
+});

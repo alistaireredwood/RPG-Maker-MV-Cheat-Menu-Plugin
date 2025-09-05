@@ -29,3 +29,9 @@ CheatMenu.append_no_clip_status = function (key1) {
     CheatMenu.toggle_no_clip_status,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('No Clip');
+
+  CheatMenu.append_no_clip_status(4);
+});

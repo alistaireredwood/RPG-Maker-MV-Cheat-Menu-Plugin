@@ -194,3 +194,10 @@ CheatMenu.append_godmode_status = function () {
 
   CheatMenu.append_cheat('Status:', status_html, 6, CheatMenu.toggleGodMode);
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('God Mode');
+  CheatMenu.append_actor_selection(4, 5);
+
+  CheatMenu.append_godmode_status();
+});

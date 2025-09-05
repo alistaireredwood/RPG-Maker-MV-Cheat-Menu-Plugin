@@ -35,3 +35,10 @@ CheatMenu.append_exp_cheat = function (key1, key2) {
     CheatMenu.apply_current_exp,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Give Exp');
+  CheatMenu.append_actor_selection(4, 5);
+  CheatMenu.append_amount_selection(6, 7);
+  CheatMenu.append_exp_cheat(8, 9);
+});

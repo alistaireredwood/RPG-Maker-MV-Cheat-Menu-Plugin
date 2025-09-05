@@ -67,3 +67,9 @@ CheatMenu.append_item_selection = function (key1, key2, key3, key4) {
     CheatMenu.apply_current_item,
   );
 };
+
+CheatMenu.menus.splice(0, 0, function () {
+  CheatMenu.append_cheat_title('Items');
+  CheatMenu.append_amount_selection(4, 5);
+  CheatMenu.append_item_selection(6, 7, 8, 9);
+});

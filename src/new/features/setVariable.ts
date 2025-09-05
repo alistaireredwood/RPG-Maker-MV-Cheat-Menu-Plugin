@@ -78,8 +78,11 @@ CheatMenu.append_variable_selection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Variables');
-  CheatMenu.append_amount_selection(4, 5);
-  CheatMenu.append_variable_selection(6, 7, 8, 9);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Variables',
+  render: () => {
+    CheatMenu.append_cheat_title('Variables');
+    CheatMenu.append_amount_selection(4, 5);
+    CheatMenu.append_variable_selection(6, 7, 8, 9);
+  },
 });

@@ -113,8 +113,11 @@ CheatMenu.append_move_amount_selection = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Speed');
-  CheatMenu.append_move_amount_selection(4, 5);
-  CheatMenu.append_speed_status(6, 7, 8);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Speed',
+  render: () => {
+    CheatMenu.append_cheat_title('Speed');
+    CheatMenu.append_move_amount_selection(4, 5);
+    CheatMenu.append_speed_status(6, 7, 8);
+  },
 });

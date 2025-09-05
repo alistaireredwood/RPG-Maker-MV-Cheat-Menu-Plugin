@@ -31,8 +31,11 @@ CheatMenu.append_gold_status = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Gold');
-  CheatMenu.append_amount_selection(4, 5);
-  CheatMenu.append_gold_status(6, 7);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Gold',
+  render: () => {
+    CheatMenu.append_cheat_title('Gold'); // Sub-menu title
+    CheatMenu.append_amount_selection(4, 5);
+    CheatMenu.append_gold_status(6, 7);
+  },
 });

@@ -74,3 +74,52 @@
   color: #ff0000;
   font-style: italic;
 }
+
+
+/* ... your existing table styles for sub-menus ... */
+
+.cheat_menu_text {
+  /* Your existing table styles */
+}
+
+/* --- NEW STYLES FOR THE GRID --- */
+.cheat-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cheat-menu-grid-button {
+  background: linear-gradient(to bottom, #444, #222);
+  color: white;
+  border: 1px solid #666;
+  border-radius: 5px;
+  padding: 12px 8px;
+  font-family: GameFont, sans-serif;
+  font-size: 18px;
+  text-shadow: 1px 1px #000;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.cheat-menu-grid-button:hover {
+  background: linear-gradient(to bottom, #555, #333);
+  border-color: #fff;
+  color: #ffffaa; /* Gold text on hover */
+}
+
+/* --- NEW STYLE FOR THE BACK BUTTON --- */
+.cheat-menu-back-button {
+  cursor: pointer;
+  color: #ffdd55; /* Bright yellow/gold */
+  font-size: 20px;
+  text-align: left !important;
+  padding: 4px 0 12px 0 !important; /* Give it space */
+}
+
+.cheat-menu-back-button:hover span {
+  text-decoration: underline;
+}

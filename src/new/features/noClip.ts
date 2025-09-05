@@ -30,8 +30,11 @@ CheatMenu.append_no_clip_status = function (key1) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('No Clip');
+CheatMenu.menus.splice(0, 0, {
+  name: 'No Clip',
+  render: () => {
+    CheatMenu.append_cheat_title('No Clip');
 
-  CheatMenu.append_no_clip_status(4);
+    CheatMenu.append_no_clip_status(4);
+  },
 });

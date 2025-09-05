@@ -121,7 +121,10 @@ CheatMenu.append_teleport = function (
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Teleport');
-  CheatMenu.append_teleport(4, 5, 6, 7, 8, 9, 0);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Teleport',
+  render: () => {
+    CheatMenu.append_cheat_title('Teleport');
+    CheatMenu.append_teleport(4, 5, 6, 7, 8, 9, 0);
+  },
 });

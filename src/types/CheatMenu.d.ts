@@ -36,6 +36,7 @@ export type InitialValues = {
   teleport_location: PositionData;
   speed: number | null;
   speed_unlocked: boolean;
+  currentMenuIndex: number | null;
 };
 
 // --- The Main CheatMenu Type Definition ---
@@ -78,8 +79,12 @@ export type CheatMenuT = {
   overlay: HTMLTableElement;
   style_css: HTMLLinkElement;
 
-  // Menu building functions list
-  menus: Array<() => void>;
+  // // Menu building functions list
+  // menus: Array<() => void>;
+  menus: MenuEntry[];
+  currentMenuIndex: number | null;
+  renderMainMenuGrid: () => void;
+  append_back_button: () => void;
 
   // Key listeners (dynamically populated)
   key_listeners: KeyListeners;
@@ -346,4 +351,9 @@ export type CheatMenuT = {
   handleShowDevTools: (event: KeyboardEvent) => void;
   handleShowRpgMakerDebug: (event: KeyboardEvent) => void;
   handleToggleCheatMenu: (event: KeyboardEvent) => void;
+};
+
+export type MenuEntry = {
+  name: string; // The text for the grid button
+  render: () => void; // The function to render the sub-menu
 };

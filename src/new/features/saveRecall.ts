@@ -74,7 +74,10 @@ CheatMenu.append_save_recall = function (...keys: (string | number)[]) {
   }
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Save and Recall');
-  CheatMenu.append_save_recall(4, 5, 6, 7, 8, 9);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Save and Recall',
+  render: () => {
+    CheatMenu.append_cheat_title('Save and Recall');
+    CheatMenu.append_save_recall(4, 5, 6, 7, 8, 9);
+  },
 });

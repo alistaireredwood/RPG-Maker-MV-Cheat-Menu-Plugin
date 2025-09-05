@@ -332,25 +332,89 @@ CheatMenu.append_amount_selection = function (key1, key2) {
   );
 };
 
-if (typeof CheatMenu.menus == 'undefined') {
-  CheatMenu.menus = [];
-}
-
-// update whats being displayed in menu
-CheatMenu.update_menu = function () {
-  // clear menu
-  CheatMenu.overlay.innerHTML = '';
-  // clear key listeners
-  CheatMenu.key_listeners = {};
-
-  CheatMenu.menus[CheatMenu.cheat_selected]();
-
-  CheatMenu.position_menu();
-};
-
 // Menu title with scroll options to go between menu, should be first
 //	append on each menu
 CheatMenu.append_cheat_title = function (cheat_name) {
   CheatMenu.append_title('Cheat');
   CheatMenu.append_scroll_selector(cheat_name, 2, 3, CheatMenu.scroll_cheat);
+};
+
+CheatMenu.append_back_button = function () {
+  const backRow = CheatMenu.overlay.insertRow(0); // Insert at the very top of the table
+  const backCell = backRow.insertCell();
+  backCell.colSpan = 3; // Span all 3 columns of your sub-menu table
+  backCell.className = 'cheat-menu-back-button';
+  backCell.innerHTML = `<span>&larr; Back to Main Menu</span>`; // &larr; is a left-arrow
+
+  // When clicked, go back to the grid and re-render.
+  backCell.onclick = () => {
+    SoundManager.playSystemSound(1);
+    CheatMenu.currentMenuIndex = null; // Set state back to the main grid
+    CheatMenu.update_menu();
+  };
+};
+
+CheatMenu.renderMainMenuGrid = function () {
+  const overlay = CheatMenu.overlay;
+  overlay.innerHTML = ''; // Clear any previous content
+  overlay.className = 'cheat-menu-grid'; // Apply grid styling
+  console.log('running CheatMenu.renderMainMenuGrid');
+  console.log(
+    `[CheatMenu.renderMainMenuGrid] Found ${CheatMenu.menus.length} menus.`,
+  );
+
+  CheatMenu.menus.forEach((menuEntry, index) => {
+    const button = document.createElement('button');
+    button.className = 'cheat-menu-grid-button';
+    button.textContent = menuEntry.name;
+
+    // When a button is clicked, change the state and re-render.
+    button.onclick = () => {
+      SoundManager.playSystemSound(0);
+      CheatMenu.currentMenuIndex = index; // Set state to the selected sub-menu
+      CheatMenu.update_menu(); // Re-render to show the new view
+    };
+
+    overlay.appendChild(button);
+  });
+};
+
+if (typeof CheatMenu.menus == 'undefined') {
+  CheatMenu.menus = [];
+}
+
+CheatMenu.update_menu = function () {
+  // // clear menu
+  // CheatMenu.overlay.innerHTML = '';
+  // // clear key listeners
+  // CheatMenu.key_listeners = {};
+  //
+  // CheatMenu.menus[CheatMenu.cheat_selected]();
+  //
+  // CheatMenu.position_menu();
+
+  // Always clear old key listeners when changing views
+  CheatMenu.key_listeners = {};
+
+  if (CheatMenu.currentMenuIndex === null) {
+    // STATE: We are on the main menu.
+    CheatMenu.renderMainMenuGrid();
+  } else {
+    // STATE: We are in a sub-menu.
+    const menuToRender = CheatMenu.menus[CheatMenu.currentMenuIndex];
+    if (menuToRender) {
+      // Prepare the container for a table-based sub-menu
+      CheatMenu.overlay.innerHTML = '';
+      CheatMenu.overlay.className = 'cheat_menu_text'; // Your original table class
+
+      // Add the "Back" button first
+      CheatMenu.append_back_button();
+
+      // Now render the specific feature's sub-menu content
+      menuToRender.render();
+    }
+  }
+
+  // After rendering, always reposition the main container.
+  CheatMenu.position_menu();
 };

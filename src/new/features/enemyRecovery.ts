@@ -66,8 +66,11 @@ CheatMenu.append_enemy_cheats = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Enemy HP');
+CheatMenu.menus.splice(0, 0, {
+  name: 'Enemy HP',
+  render: () => {
+    CheatMenu.append_cheat_title('Enemy HP');
 
-  CheatMenu.append_enemy_cheats(4, 5, 6, 7);
+    CheatMenu.append_enemy_cheats(4, 5, 6, 7);
+  },
 });

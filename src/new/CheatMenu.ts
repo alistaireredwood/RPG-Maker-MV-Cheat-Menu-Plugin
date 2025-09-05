@@ -51,6 +51,7 @@ if (!CheatMenu.initialValues) {
     teleport_location: { m: 1, x: 0, y: 0 },
     speed: 5,
     speed_unlocked: true,
+    currentMenuIndex: null,
   };
 }
 

@@ -24,11 +24,5 @@ dist-ssr
 *.sln
 *.sw?
 
-src/MVPluginPatcher/.vs
-src/MVPluginPatcher/Debug
-src/MVPluginPatcher/Release
-src/MVPluginPatcher/x64
-src/MVPluginPatcher/MVPluginPatcher/Debug
-src/MVPluginPatcher/MVPluginPatcher/Release
-src/MVPluginPatcher/MVPluginPatcher/x64
-*.sdf
+src/old
+src/plus

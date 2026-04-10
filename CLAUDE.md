@@ -14,7 +14,20 @@ Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`.
 
 ## Architecture
 
-This is a TypeScript plugin for RPG Maker MV games, bundled with Vite. The source lives in `src/new/`; `src/old/` is the legacy JS version.
+This repo contains two independent plugin implementations:
+
+- **`src/new/`** — active development, TypeScript + Vite (root `package.json` / `pnpm`)
+- **`src/plus/`** — separate, more feature-rich implementation, TypeScript + Webpack (its own `package.json` / `npm`)
+
+### `src/plus/` build
+
+```bash
+cd src/plus
+npm run build:plugin        # full build (webpack + postbuild)
+npm run build:plugin:legacy # legacy browser compat build
+```
+
+`src/plus/` uses a class-based `Renderer` pattern. `App.ts` is the root — it statically declares all modules and wires keyboard shortcuts. Each module in `src/plus/src/module/` extends `Renderer` and implements `render()` + a static `MyName` string.
 
 ### Module loading pattern
 
@@ -45,6 +58,10 @@ Features interact with RPG Maker via its global objects (`$gameActors`, `$gamePl
 - `globals.d.ts` — ambient declarations extending RPG Maker classes
 - `rpgmaker/mv/` — RPG Maker MV engine type stubs (core, data, managers, objects, windows)
 
-### Adding a new feature
+### Adding a new feature (`src/new/`)
 
 Create a new file in `src/new/features/`. It will be auto-loaded by `import.meta.glob`. Register to `CheatMenu.menus` with a name and render function. Use `CheatMenu.key_listeners` for keyboard shortcuts within the sub-menu.
+
+### Adding a new module (`src/plus/`)
+
+Create a class in `src/plus/src/module/` that extends `Renderer`, add a static `MyName` string, and manually import + add it to `App.Modules` in `src/plus/src/App.ts`.

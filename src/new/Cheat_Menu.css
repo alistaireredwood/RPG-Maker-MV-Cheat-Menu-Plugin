@@ -30,14 +30,17 @@
 #cheat-menu-indicator {
   position: fixed;
   z-index: 999;
-  background: transparent;
+  background: rgba(2, 8, 18, 0.72);
+  border: 1px solid var(--cm-border);
+  border-left: 2px solid var(--cm-cyan);
+  box-shadow: 0 0 10px rgba(0, 200, 240, 0.08);
   color: var(--cm-cyan);
   font-size: 11px;
   font-family: var(--cm-font);
-  opacity: 0.65;
+  letter-spacing: 0.05em;
+  padding: 3px 6px;
   pointer-events: none;
   text-shadow: 0 0 6px var(--cm-cyan);
-  letter-spacing: 0.05em;
 }
 
 .scroll-selector-row {

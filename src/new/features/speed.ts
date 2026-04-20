@@ -1,123 +1,116 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// initialize speed hook for locking
-CheatMenu.initialize_speed_lock = () => {
-  if (!CheatMenu.speed_initialized) {
+CheatMenu.initializeSpeedLock = () => {
+  if (!CheatMenu.speedInitialized) {
     CheatMenu.speed = $gamePlayer.moveSpeed();
     Object.defineProperty($gamePlayer, '_moveSpeed', {
       get: function () {
         return CheatMenu.speed;
       },
       set: function (newVal) {
-        if (CheatMenu.speed_unlocked) {
+        if (CheatMenu.speedUnlocked) {
           CheatMenu.speed = newVal;
         }
       },
     });
-    CheatMenu.speed_initialized = true;
+    CheatMenu.speedInitialized = true;
   }
 };
 
-// change player movement speed
-CheatMenu.change_player_speed = (amount) => {
-  CheatMenu.initialize_speed_lock();
+CheatMenu.changePlayerSpeed = (amount) => {
+  CheatMenu.initializeSpeedLock();
   if (CheatMenu.speed) {
-    CheatMenu.speed += amount; // probably type error
+    CheatMenu.speed += amount;
   }
 };
 
-// toggle locking of player speed
-CheatMenu.toggle_lock_player_speed = () => {
-  CheatMenu.initialize_speed_lock();
-  CheatMenu.speed_unlocked = !CheatMenu.speed_unlocked;
+CheatMenu.toggleLockPlayerSpeed = () => {
+  CheatMenu.initializeSpeedLock();
+  CheatMenu.speedUnlocked = !CheatMenu.speedUnlocked;
 };
 
-// handler for the movement speed cheat
-CheatMenu.apply_speed_change = function (direction) {
-  let amount = CheatMenu.move_amounts[CheatMenu.move_amount_index];
+CheatMenu.applySpeedChange = function (direction) {
+  let amount = CheatMenu.move_amounts[CheatMenu.moveAmountIndex];
   if (direction == 'left') {
     amount = -amount;
     SoundManager.playSystemSound(2);
   } else {
     SoundManager.playSystemSound(1);
   }
-  CheatMenu.change_player_speed(amount);
-  CheatMenu.update_menu();
+  CheatMenu.changePlayerSpeed(amount);
+  CheatMenu.updateMenu();
 };
 
-CheatMenu.apply_speed_lock_toggle = function () {
-  CheatMenu.toggle_lock_player_speed();
-  if (CheatMenu.speed_unlocked) {
+CheatMenu.applySpeedLockToggle = function () {
+  CheatMenu.toggleLockPlayerSpeed();
+  if (CheatMenu.speedUnlocked) {
     SoundManager.playSystemSound(2);
   } else {
     SoundManager.playSystemSound(1);
   }
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// append the movement speed to the menu
-CheatMenu.append_speed_status = function (key1, key2, key3) {
-  CheatMenu.append_title('Current Speed');
-  CheatMenu.append_scroll_selector(
+CheatMenu.appendSpeedStatus = function (key1, key2, key3) {
+  CheatMenu.appendTitle('Current Speed');
+  CheatMenu.appendScrollSelector(
     $gamePlayer.moveSpeed(),
     key1,
     key2,
-    CheatMenu.apply_speed_change,
+    CheatMenu.applySpeedChange,
   );
 
-  let status_html;
-  if (!CheatMenu.speed_unlocked) {
-    status_html = '<span class="status-on">false</span>';
+  let statusHtml;
+  if (!CheatMenu.speedUnlocked) {
+    statusHtml = '<span class="status-on">false</span>';
   } else {
-    status_html = '<span class="status-off">true</span>';
+    statusHtml = '<span class="status-off">true</span>';
   }
-  CheatMenu.append_cheat(
+  CheatMenu.appendCheat(
     'Speed Unlocked',
-    status_html,
+    statusHtml,
     key3,
-    CheatMenu.apply_speed_lock_toggle,
+    CheatMenu.applySpeedLockToggle,
   );
 };
 
-// Left and right scrolls for handling switching amount to modify for the movement cheat
-CheatMenu.scroll_move_amount = function (direction) {
+CheatMenu.scrollMoveAmount = function (direction) {
   if (direction == 'left') {
-    CheatMenu.move_amount_index--;
-    if (CheatMenu.move_amount_index < 0) {
-      CheatMenu.move_amount_index = 0;
+    CheatMenu.moveAmountIndex--;
+    if (CheatMenu.moveAmountIndex < 0) {
+      CheatMenu.moveAmountIndex = 0;
     }
     SoundManager.playSystemSound(2);
   } else {
-    CheatMenu.move_amount_index++;
-    if (CheatMenu.move_amount_index >= CheatMenu.move_amounts.length) {
-      CheatMenu.move_amount_index = CheatMenu.move_amounts.length - 1;
+    CheatMenu.moveAmountIndex++;
+    if (CheatMenu.moveAmountIndex >= CheatMenu.move_amounts.length) {
+      CheatMenu.moveAmountIndex = CheatMenu.move_amounts.length - 1;
     }
     SoundManager.playSystemSound(1);
   }
 
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// append the movement speed amount to the menu
-CheatMenu.append_move_amount_selection = function (key1, key2) {
-  CheatMenu.append_title('Amount');
+CheatMenu.appendMoveAmountSelection = function (key1, key2) {
+  CheatMenu.appendTitle('Amount');
 
-  const currentMoveAmount = CheatMenu.move_amounts[CheatMenu.move_amount_index];
+  const currentMoveAmount = CheatMenu.move_amounts[CheatMenu.moveAmountIndex];
   const currentMoveAmountHtml = `<span class='actor-name-highlight'>${currentMoveAmount}</span>`;
 
-  CheatMenu.append_scroll_selector(
+  CheatMenu.appendScrollSelector(
     currentMoveAmountHtml,
     key1,
     key2,
-    CheatMenu.scroll_move_amount,
+    CheatMenu.scrollMoveAmount,
   );
 };
 
 CheatMenu.menus.splice(0, 0, {
   name: 'Speed',
   render: () => {
-    CheatMenu.append_cheat_title('Speed');
-    CheatMenu.append_move_amount_selection(4, 5);
-    CheatMenu.append_speed_status(6, 7, 8);
+    CheatMenu.appendCheatTitle('Speed');
+    CheatMenu.appendMoveAmountSelection(4, 5);
+    CheatMenu.appendSpeedStatus(6, 7, 8);
   },
 });

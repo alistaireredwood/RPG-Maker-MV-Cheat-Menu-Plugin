@@ -1,15 +1,13 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// increase stat bonus
-CheatMenu.give_stat = (actor, stat_index, amount) => {
-  if (actor.paramPlus(stat_index) != undefined) {
-    actor.addParam(stat_index, amount);
+CheatMenu.giveStat = (actor, statIndex, amount) => {
+  if (actor.paramPlus(statIndex) != undefined) {
+    actor.addParam(statIndex, amount);
   }
 };
 
-// handlers for the stat cheat
-CheatMenu.apply_current_stat = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amount_index];
+CheatMenu.applyCurrentStat = function (direction) {
+  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
 
   if (direction == 'left') {
     amount = -amount;
@@ -17,82 +15,79 @@ CheatMenu.apply_current_stat = function (direction) {
   } else {
     SoundManager.playSystemSound(1);
   }
-  CheatMenu.give_stat(
-    $gameActors.actor(CheatMenu.cheat_selected_actor),
-    CheatMenu.stat_selection,
+  CheatMenu.giveStat(
+    $gameActors.actor(CheatMenu.cheatSelectedActor),
+    CheatMenu.statSelection,
     amount,
   );
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// append the stat selection to the menu
-CheatMenu.append_stat_selection = function (key1, key2, key3, key4) {
-  CheatMenu.append_title('Stat');
+CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendTitle('Stat');
 
   const actorParamPlus = ($gameActors as any).actor(
-    CheatMenu.cheat_selected_actor,
+    CheatMenu.cheatSelectedActor,
   )?._paramPlus as Game_Actor['_paramPlus'];
 
-  let stat_string = '';
-  if ($gameActors.actor(CheatMenu.cheat_selected_actor) && actorParamPlus) {
-    if (CheatMenu.stat_selection >= actorParamPlus.length) {
-      CheatMenu.stat_selection = 0;
+  let statString = '';
+  if ($gameActors.actor(CheatMenu.cheatSelectedActor) && actorParamPlus) {
+    if (CheatMenu.statSelection >= actorParamPlus.length) {
+      CheatMenu.statSelection = 0;
     }
-    stat_string += $dataSystem.terms.params[CheatMenu.stat_selection];
+    statString += $dataSystem.terms.params[CheatMenu.statSelection];
   }
 
-  CheatMenu.append_scroll_selector(
-    stat_string,
+  CheatMenu.appendScrollSelector(
+    statString,
     key1,
     key2,
-    CheatMenu.scroll_stat,
+    CheatMenu.scrollStat,
   );
-  let current_value: number | 'NULL' = 'NULL';
+  let currentValue: number | 'NULL' = 'NULL';
 
-  if ($gameActors.actor(CheatMenu.cheat_selected_actor) && actorParamPlus) {
-    current_value = actorParamPlus[CheatMenu.stat_selection];
+  if ($gameActors.actor(CheatMenu.cheatSelectedActor) && actorParamPlus) {
+    currentValue = actorParamPlus[CheatMenu.statSelection];
   }
-  CheatMenu.append_scroll_selector(
-    current_value,
+  CheatMenu.appendScrollSelector(
+    currentValue,
     key3,
     key4,
-    CheatMenu.apply_current_stat,
+    CheatMenu.applyCurrentStat,
   );
 };
 
-// Left and right scrolls for handling switching between stats for the selected character
-CheatMenu.scroll_stat = function (direction) {
-  // another hack
+CheatMenu.scrollStat = function (direction) {
   const actorParamPlus = ($gameActors as any).actor(
-    CheatMenu.cheat_selected_actor,
+    CheatMenu.cheatSelectedActor,
   )?._paramPlus as Game_Actor['_paramPlus'];
 
   if (actorParamPlus) {
     if (direction == 'left') {
-      CheatMenu.stat_selection--;
-      if (CheatMenu.stat_selection < 0) {
-        CheatMenu.stat_selection = actorParamPlus.length - 1;
+      CheatMenu.statSelection--;
+      if (CheatMenu.statSelection < 0) {
+        CheatMenu.statSelection = actorParamPlus.length - 1;
       }
     } else {
-      CheatMenu.stat_selection++;
-      if (CheatMenu.stat_selection >= actorParamPlus.length) {
-        CheatMenu.stat_selection = 0;
+      CheatMenu.statSelection++;
+      if (CheatMenu.statSelection >= actorParamPlus.length) {
+        CheatMenu.statSelection = 0;
       }
     }
   } else {
-    CheatMenu.stat_selection = 0;
+    CheatMenu.statSelection = 0;
   }
 
   SoundManager.playSystemSound(0);
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
 CheatMenu.menus.splice(0, 0, {
   name: 'Stats',
   render: () => {
-    CheatMenu.append_cheat_title('Stats');
-    CheatMenu.append_actor_selection(4, 5);
-    CheatMenu.append_amount_selection(6, 7);
-    CheatMenu.append_stat_selection(8, 9, 0, '-');
+    CheatMenu.appendCheatTitle('Stats');
+    CheatMenu.appendActorSelection(4, 5);
+    CheatMenu.appendAmountSelection(6, 7);
+    CheatMenu.appendStatSelection(8, 9, 0, '-');
   },
 });

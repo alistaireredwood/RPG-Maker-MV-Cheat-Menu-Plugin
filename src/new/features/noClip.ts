@@ -1,10 +1,9 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// handler for the toggle no clip cheat
-CheatMenu.toggle_no_clip_status = function () {
+CheatMenu.toggleNoClipStatus = function () {
   $gamePlayer.setThrough(!$gamePlayer.isThrough());
 
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
   if ($gamePlayer.isThrough()) {
     SoundManager.playSystemSound(1);
   } else {
@@ -12,29 +11,27 @@ CheatMenu.toggle_no_clip_status = function () {
   }
 };
 
-// append the no clip cheat
-CheatMenu.append_no_clip_status = function (key1) {
-  let status_html;
+CheatMenu.appendNoClipStatus = function (key1) {
+  let statusHtml;
 
   if ($gamePlayer.isThrough()) {
-    status_html = '<span class="status-on">on</span>';
+    statusHtml = '<span class="status-on">on</span>';
   } else {
-    status_html = '<span class="status-off">off</span>';
+    statusHtml = '<span class="status-off">off</span>';
   }
 
-  CheatMenu.append_cheat(
+  CheatMenu.appendCheat(
     'Status:',
-    status_html,
+    statusHtml,
     key1,
-    CheatMenu.toggle_no_clip_status,
+    CheatMenu.toggleNoClipStatus,
   );
 };
 
 CheatMenu.menus.splice(0, 0, {
   name: 'No Clip',
   render: () => {
-    CheatMenu.append_cheat_title('No Clip');
-
-    CheatMenu.append_no_clip_status(4);
+    CheatMenu.appendCheatTitle('No Clip');
+    CheatMenu.appendNoClipStatus(4);
   },
 });

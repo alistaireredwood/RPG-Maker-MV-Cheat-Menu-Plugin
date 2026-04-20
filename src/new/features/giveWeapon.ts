@@ -1,33 +1,29 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// increase weapon count for party of item, by id
-CheatMenu.give_weapon = (weapon_id, amount) => {
-  if ($dataWeapons[weapon_id] != undefined) {
-    $gameParty.gainItem($dataWeapons[weapon_id], amount, false);
+CheatMenu.giveWeapon = (weaponId, amount) => {
+  if ($dataWeapons[weaponId] != undefined) {
+    $gameParty.gainItem($dataWeapons[weaponId], amount, false);
   }
 };
 
-// Left and right scrolls for handling switching between weapon selected
-CheatMenu.scroll_weapon = function (direction) {
+CheatMenu.scrollWeapon = function (direction) {
   if (direction == 'left') {
-    CheatMenu.weapon_selection--;
-    if (CheatMenu.weapon_selection < 0) {
-      CheatMenu.weapon_selection = $dataWeapons.length - 1;
+    CheatMenu.weaponSelection--;
+    if (CheatMenu.weaponSelection < 0) {
+      CheatMenu.weaponSelection = $dataWeapons.length - 1;
     }
   } else {
-    CheatMenu.weapon_selection++;
-    if (CheatMenu.weapon_selection >= $dataWeapons.length) {
-      CheatMenu.weapon_selection = 0;
+    CheatMenu.weaponSelection++;
+    if (CheatMenu.weaponSelection >= $dataWeapons.length) {
+      CheatMenu.weaponSelection = 0;
     }
   }
   SoundManager.playSystemSound(0);
-
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// handlers for the weapon cheat
-CheatMenu.apply_current_weapon = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amount_index];
+CheatMenu.applyCurrentWeapon = function (direction) {
+  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
 
   if (direction == 'left') {
     amount = -amount;
@@ -36,46 +32,45 @@ CheatMenu.apply_current_weapon = function (direction) {
     SoundManager.playSystemSound(1);
   }
 
-  CheatMenu.give_weapon(CheatMenu.weapon_selection, amount);
-  CheatMenu.update_menu();
+  CheatMenu.giveWeapon(CheatMenu.weaponSelection, amount);
+  CheatMenu.updateMenu();
 };
 
-// append the weapon cheat to the menu
-CheatMenu.append_weapon_selection = function (key1, key2, key3, key4) {
-  CheatMenu.append_title('Weapon');
+CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendTitle('Weapon');
 
-  const weaponData = $dataWeapons[CheatMenu.weapon_selection];
+  const weaponData = $dataWeapons[CheatMenu.weaponSelection];
 
-  let current_weapon_name = '';
+  let currentWeaponName = '';
   if (weaponData && weaponData.name) {
-    current_weapon_name = weaponData.name;
+    currentWeaponName = weaponData.name;
   }
 
-  CheatMenu.append_scroll_selector(
-    current_weapon_name,
+  CheatMenu.appendScrollSelector(
+    currentWeaponName,
     key1,
     key2,
-    CheatMenu.scroll_weapon,
+    CheatMenu.scrollWeapon,
   );
 
-  let current_weapon_amount = 0;
+  let currentWeaponAmount = 0;
   if (weaponData) {
-    current_weapon_amount = $gameParty.numItems(weaponData);
+    currentWeaponAmount = $gameParty.numItems(weaponData);
   }
 
-  CheatMenu.append_scroll_selector(
-    current_weapon_amount,
+  CheatMenu.appendScrollSelector(
+    currentWeaponAmount,
     key3,
     key4,
-    CheatMenu.apply_current_weapon,
+    CheatMenu.applyCurrentWeapon,
   );
 };
 
 CheatMenu.menus.splice(0, 0, {
   name: 'Weapons',
   render: () => {
-    CheatMenu.append_cheat_title('Weapons');
-    CheatMenu.append_amount_selection(4, 5);
-    CheatMenu.append_weapon_selection(6, 7, 8, 9);
+    CheatMenu.appendCheatTitle('Weapons');
+    CheatMenu.appendAmountSelection(4, 5);
+    CheatMenu.appendWeaponSelection(6, 7, 8, 9);
   },
 });

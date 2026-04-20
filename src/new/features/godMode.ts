@@ -2,32 +2,24 @@ console.log('[CheatMenu] Loading feature: godMode.ts');
 
 import CheatMenu from '../CheatMenu.ts';
 
-// enable god mode for an actor
 CheatMenu.godMode = (actor) => {
   if (!actor.godMode) {
     actor.godMode = true;
 
-    // Store backups
-    actor.gainHP_bkup = actor.gainHp;
-    actor.setHp_bkup = actor.setHp;
-    actor.gainMp_bkup = actor.gainMp;
-    actor.setMp_bkup = actor.setMp;
-    actor.gainTp_bkup = actor.gainTp;
-    actor.setTp_bkup = actor.setTp;
-    // actor.paySkillCost_bkup = actor.paySkillCost;
+    actor.gainHpBackup = actor.gainHp;
+    actor.setHpBackup = actor.setHp;
+    actor.gainMpBackup = actor.gainMp;
+    actor.setMpBackup = actor.setMp;
+    actor.gainTpBackup = actor.gainTp;
+    actor.setTpBackup = actor.setTp;
 
-    // Override methods
     actor.gainHp = function (this, value: number): void {
-      // 'this' needs to be explicitly typed in function expressions assigned to object properties
-      // if you intend to use 'this' with its original context.
       let finalValue = value;
       if (this.godMode) {
-        // 'this' refers to the Game_Actor instance
-        finalValue = this.mhp; // mhp is on Game_BattlerBase
+        finalValue = this.mhp;
       }
-      // Call the original/backup method, ensuring 'this' context is preserved
-      if (this.gainHP_bkup) {
-        this.gainHP_bkup.call(this, finalValue);
+      if (this.gainHpBackup) {
+        this.gainHpBackup.call(this, finalValue);
       }
     };
 
@@ -36,18 +28,18 @@ CheatMenu.godMode = (actor) => {
       if (this.godMode) {
         finalHp = this.mhp;
       }
-      if (this.setHp_bkup) {
-        this.setHp_bkup.call(this, finalHp);
+      if (this.setHpBackup) {
+        this.setHpBackup.call(this, finalHp);
       }
     };
 
     actor.gainMp = function (this, value: number): void {
       let finalValue = value;
       if (this.godMode) {
-        finalValue = this.mmp; // mmp is on Game_BattlerBase
+        finalValue = this.mmp;
       }
-      if (this.gainMp_bkup) {
-        this.gainMp_bkup.call(this, finalValue);
+      if (this.gainMpBackup) {
+        this.gainMpBackup.call(this, finalValue);
       }
     };
 
@@ -56,18 +48,18 @@ CheatMenu.godMode = (actor) => {
       if (this.godMode) {
         finalMp = this.mmp;
       }
-      if (this.setMp_bkup) {
-        this.setMp_bkup.call(this, finalMp);
+      if (this.setMpBackup) {
+        this.setMpBackup.call(this, finalMp);
       }
     };
 
     actor.gainTp = function (this, value: number): void {
       let finalValue = value;
       if (this.godMode) {
-        finalValue = this.maxTp(); // maxTp is on Game_BattlerBase
+        finalValue = this.maxTp();
       }
-      if (this.gainTp_bkup) {
-        this.gainTp_bkup.call(this, finalValue);
+      if (this.gainTpBackup) {
+        this.gainTpBackup.call(this, finalValue);
       }
     };
 
@@ -76,92 +68,67 @@ CheatMenu.godMode = (actor) => {
       if (this.godMode) {
         finalTp = this.maxTp();
       }
-      if (this.setTp_bkup) {
-        this.setTp_bkup.call(this, finalTp);
+      if (this.setTpBackup) {
+        this.setTpBackup.call(this, finalTp);
       }
     };
 
-    // actor.paySkillCost = function (this: Game_Actor, skill: DataSkill): void {
-    //   // The parameter `skill` is part of the original signature,
-    //   // even if the godMode override doesn't use it.
-    //   if (this.godMode) {
-    //     // Do nothing, cost is free
-    //     return;
-    //   }
-    //   // Call the original if godMode is off
-    //   if (this.paySkillCost_bkup) {
-    //     this.paySkillCost_bkup.call(this, skill);
-    //   }
-    // };
-
-    // Clear existing interval before setting a new one to prevent duplicates
-    if (actor.godMode_interval) {
-      clearInterval(actor.godMode_interval);
+    if (actor.godModeInterval) {
+      clearInterval(actor.godModeInterval);
     }
 
-    actor.godMode_interval = setInterval(() => {
-      // Use arrow function for setInterval to lexically bind 'actor' if needed,
-      // or ensure 'actor' is correctly captured if using a 'function() {}'
-      // The original JS code was fine as 'actor' was from the outer scope.
+    actor.godModeInterval = setInterval(() => {
       if (actor.godMode) {
-        // 'actor' is from the outer scope of CM.godMode function
-        actor.gainHp(actor.mhp); // This will call the *newly assigned* actor.gainHp
+        actor.gainHp(actor.mhp);
         actor.gainMp(actor.mmp);
         actor.gainTp(actor.maxTp());
       } else {
-        // God mode was turned off externally, clear interval
-        if (actor.godMode_interval) {
-          clearInterval(actor.godMode_interval);
-          actor.godMode_interval = undefined; // Clear the ID
+        if (actor.godModeInterval) {
+          clearInterval(actor.godModeInterval);
+          actor.godModeInterval = undefined;
         }
       }
     }, 100);
   }
 };
 
-// disable god mode for an actor
 CheatMenu.godMode_off = (actor) => {
   if (actor.godMode) {
     actor.godMode = false;
 
-    if (typeof actor.gainHP_bkup === 'function') {
-      actor.gainHp = actor.gainHP_bkup;
+    if (typeof actor.gainHpBackup === 'function') {
+      actor.gainHp = actor.gainHpBackup;
     }
 
-    if (typeof actor.setHp_bkup === 'function') {
-      actor.setHp = actor.setHp_bkup;
+    if (typeof actor.setHpBackup === 'function') {
+      actor.setHp = actor.setHpBackup;
     }
 
-    if (typeof actor.gainMp_bkup === 'function') {
-      actor.gainMp = actor.gainMp_bkup;
+    if (typeof actor.gainMpBackup === 'function') {
+      actor.gainMp = actor.gainMpBackup;
     }
 
-    if (typeof actor.setMp_bkup === 'function') {
-      actor.setMp = actor.setMp_bkup;
+    if (typeof actor.setMpBackup === 'function') {
+      actor.setMp = actor.setMpBackup;
     }
 
-    if (typeof actor.gainTp_bkup === 'function') {
-      actor.gainTp = actor.gainTp_bkup;
+    if (typeof actor.gainTpBackup === 'function') {
+      actor.gainTp = actor.gainTpBackup;
     }
 
-    if (typeof actor.setTp_bkup === 'function') {
-      actor.setTp = actor.setTp_bkup;
+    if (typeof actor.setTpBackup === 'function') {
+      actor.setTp = actor.setTpBackup;
     }
 
-    // if (typeof actor.paySkillCost_bkup === 'function') {
-    //   actor.paySkillCost = actor.paySkillCost_bkup;
-    // }
-
-    if (actor.godMode_interval) {
-      clearInterval(actor.godMode_interval);
-      actor.godMode_interval = undefined;
+    if (actor.godModeInterval) {
+      clearInterval(actor.godModeInterval);
+      actor.godModeInterval = undefined;
     }
   }
 };
 
-// Handler for the godMode cheat
 CheatMenu.toggleGodMode = function () {
-  const actorInstance = $gameActors.actor(CheatMenu.cheat_selected_actor);
+  const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
 
   if (actorInstance) {
     const cheatActor = actorInstance as CheatMenu_Game_Actor;
@@ -178,30 +145,29 @@ CheatMenu.toggleGodMode = function () {
       }
     }
 
-    CheatMenu.update_menu();
+    CheatMenu.updateMenu();
   }
 };
 
-// Append the godMode cheat to the menu
-CheatMenu.append_godmode_status = function () {
-  let status_html;
+CheatMenu.appendGodmodeStatus = function () {
+  let statusHtml;
 
-  const actorInstance = $gameActors.actor(CheatMenu.cheat_selected_actor);
+  const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
 
   if (actorInstance && (actorInstance as CheatMenu_Game_Actor).godMode) {
-    status_html = '<span class="status-on">on</span>';
+    statusHtml = '<span class="status-on">on</span>';
   } else {
-    status_html = '<span class="status-off">off</span>';
+    statusHtml = '<span class="status-off">off</span>';
   }
 
-  CheatMenu.append_cheat('Status:', status_html, 6, CheatMenu.toggleGodMode);
+  CheatMenu.appendCheat('Status:', statusHtml, 6, CheatMenu.toggleGodMode);
 };
 
 CheatMenu.menus.splice(0, 0, {
   name: 'God Mode',
   render: () => {
-    CheatMenu.append_cheat_title('God Mode');
-    CheatMenu.append_actor_selection(4, 5);
-    CheatMenu.append_godmode_status();
+    CheatMenu.appendCheatTitle('God Mode');
+    CheatMenu.appendActorSelection(4, 5);
+    CheatMenu.appendGodmodeStatus();
   },
 });

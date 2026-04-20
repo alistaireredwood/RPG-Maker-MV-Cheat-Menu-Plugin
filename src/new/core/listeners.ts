@@ -1,9 +1,5 @@
 import CheatMenu from '../CheatMenu';
 
-/////////////////////////////////////////////////
-// Cheat Menu Key Listener
-/////////////////////////////////////////////////
-
 if (typeof CheatMenu.keyMappings == 'undefined') {
   CheatMenu.keyMappings = {};
 }
@@ -35,7 +31,6 @@ CheatMenu.handleShowDevTools = (event) => {
     $gameTemp &&
     !$gameTemp.isPlaytest()
   ) {
-    // open debug menu
     event.stopPropagation();
     event.preventDefault();
     try {
@@ -72,7 +67,6 @@ CheatMenu.handleToggleCheatMenu = (event) => {
     !event.ctrlKey &&
     !event.shiftKey
   ) {
-    // open and close menu
     if (event.key === '1') {
       if (!CheatMenu.initialized) {
         const gameActorsData = ($gameActors as any)._data as Game_Actor[];
@@ -83,13 +77,12 @@ CheatMenu.handleToggleCheatMenu = (event) => {
           if (actorInstance) {
             actorInstance.godMode = false;
 
-            if (actorInstance.godMode_interval) {
-              clearInterval(actorInstance.godMode_interval);
+            if (actorInstance.godModeInterval) {
+              clearInterval(actorInstance.godModeInterval);
             }
           }
         }
 
-        // reset to initial values
         for (let name in CheatMenu.initialValues) {
           // @ts-ignore
           CheatMenu[name] =
@@ -98,7 +91,6 @@ CheatMenu.handleToggleCheatMenu = (event) => {
             ];
         }
 
-        // load saved values if they exist
         if ($gameSystem.CheatMenu) {
           for (let name in $gameSystem.CheatMenu) {
             // @ts-ignore
@@ -106,49 +98,40 @@ CheatMenu.handleToggleCheatMenu = (event) => {
           }
         }
 
-        // if speed is locked then initialize it so effect is active
-        if (!CheatMenu.speed_unlocked) {
-          CheatMenu.initialize_speed_lock();
+        if (!CheatMenu.speedUnlocked) {
+          CheatMenu.initializeSpeedLock();
         }
 
-        // only do this once per load or new game
         CheatMenu.initialized = true;
       }
 
-      // open menu
       if (!CheatMenu.isCheatMenuOpen) {
         CheatMenu.isCheatMenuOpen = true;
-        document.body.appendChild(CheatMenu.overlay_box);
+        document.body.appendChild(CheatMenu.overlayBox);
         document.body.appendChild(CheatMenu.overlay);
-        CheatMenu.update_menu();
+        CheatMenu.updateMenu();
         SoundManager.playSystemSound(1);
-      }
-      // close menu
-      else {
+      } else {
         CheatMenu.isCheatMenuOpen = false;
-        CheatMenu.overlay_box.remove();
+        CheatMenu.overlayBox.remove();
         CheatMenu.overlay.remove();
         SoundManager.playSystemSound(2);
       }
-    }
-
-    // navigate and activate cheats
-    else if (CheatMenu.isCheatMenuOpen) {
-      // move menu position
+    } else if (CheatMenu.isCheatMenuOpen) {
       if (event.key == '~') {
         CheatMenu.position++;
         if (CheatMenu.position > 4) {
           CheatMenu.position = 0;
         }
-        CheatMenu.update_menu();
+        CheatMenu.updateMenu();
       } else {
         for (const keyCode in CheatMenu.keyMappings) {
           if (
-            CheatMenu.key_listeners[CheatMenu.keyMappings[keyCode]] &&
+            CheatMenu.keyListeners[CheatMenu.keyMappings[keyCode]] &&
             event.key === CheatMenu.keyMappings[keyCode]
           ) {
             // @ts-ignore
-            CheatMenu.key_listeners[CheatMenu.keyMappings[keyCode]](event);
+            CheatMenu.keyListeners[CheatMenu.keyMappings[keyCode]](event);
           }
         }
       }
@@ -162,4 +145,4 @@ window.addEventListener('keydown', (event) => {
   CheatMenu.handleToggleCheatMenu(event);
 });
 
-window.addEventListener('resize', () => CheatMenu.position_menu());
+window.addEventListener('resize', () => CheatMenu.positionMenu());

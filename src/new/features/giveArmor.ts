@@ -1,79 +1,74 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// increase armor count for party of item, by id
-CheatMenu.give_armor = (armor_id, amount) => {
-  if ($dataArmors[armor_id] != undefined) {
-    $gameParty.gainItem($dataArmors[armor_id], amount, false);
+CheatMenu.giveArmor = (armorId, amount) => {
+  if ($dataArmors[armorId] != undefined) {
+    $gameParty.gainItem($dataArmors[armorId], amount, false);
   }
 };
 
-// Left and right scrolls for handling switching between armor selected
-CheatMenu.scroll_armor = function (direction) {
+CheatMenu.scrollArmor = function (direction) {
   if (direction == 'left') {
-    CheatMenu.armor_selection--;
-    if (CheatMenu.armor_selection < 0) {
-      CheatMenu.armor_selection = $dataArmors.length - 1;
+    CheatMenu.armorSelection--;
+    if (CheatMenu.armorSelection < 0) {
+      CheatMenu.armorSelection = $dataArmors.length - 1;
     }
   } else {
-    CheatMenu.armor_selection++;
-    if (CheatMenu.armor_selection >= $dataArmors.length) {
-      CheatMenu.armor_selection = 0;
+    CheatMenu.armorSelection++;
+    if (CheatMenu.armorSelection >= $dataArmors.length) {
+      CheatMenu.armorSelection = 0;
     }
   }
   SoundManager.playSystemSound(0);
-
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// handler for the armor cheat
-CheatMenu.apply_current_armor = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amount_index];
+CheatMenu.applyCurrentArmor = function (direction) {
+  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
   if (direction == 'left') {
     amount = -amount;
     SoundManager.playSystemSound(2);
   } else {
     SoundManager.playSystemSound(1);
   }
-  CheatMenu.give_armor(CheatMenu.armor_selection, amount);
-  CheatMenu.update_menu();
+  CheatMenu.giveArmor(CheatMenu.armorSelection, amount);
+  CheatMenu.updateMenu();
 };
 
-// append the armor cheat to the menu
-CheatMenu.append_armor_selection = function (key1, key2, key3, key4) {
-  CheatMenu.append_title('Armor');
+CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendTitle('Armor');
 
-  const armorData = $dataArmors[CheatMenu.armor_selection]; // Get from $dataArmors
+  const armorData = $dataArmors[CheatMenu.armorSelection];
 
-  let current_armor_name = '';
+  let currentArmorName = '';
   if (armorData && armorData.name) {
-    current_armor_name = armorData.name;
+    currentArmorName = armorData.name;
   }
 
-  CheatMenu.append_scroll_selector(
-    current_armor_name,
+  CheatMenu.appendScrollSelector(
+    currentArmorName,
     key1,
     key2,
-    CheatMenu.scroll_armor,
+    CheatMenu.scrollArmor,
   );
 
-  let current_armor_amount: number = 0;
+  let currentArmorAmount: number = 0;
   if (armorData) {
-    current_armor_amount = $gameParty.numItems(armorData);
+    currentArmorAmount = $gameParty.numItems(armorData);
   }
 
-  CheatMenu.append_scroll_selector(
-    current_armor_amount,
+  CheatMenu.appendScrollSelector(
+    currentArmorAmount,
     key3,
     key4,
-    CheatMenu.apply_current_armor,
+    CheatMenu.applyCurrentArmor,
   );
 };
 
 CheatMenu.menus.splice(0, 0, {
   name: 'Armors',
   render: () => {
-    CheatMenu.append_cheat_title('Armors');
-    CheatMenu.append_amount_selection(4, 5);
-    CheatMenu.append_armor_selection(6, 7, 8, 9);
+    CheatMenu.appendCheatTitle('Armors');
+    CheatMenu.appendAmountSelection(4, 5);
+    CheatMenu.appendArmorSelection(6, 7, 8, 9);
   },
 });

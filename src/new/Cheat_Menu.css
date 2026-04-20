@@ -1,115 +1,135 @@
+:root {
+  --cm-bg:        rgba(2, 8, 18, 0.92);
+  --cm-border:    #0e2a38;
+  --cm-text:      #b8d8e8;
+  --cm-dim:       #4a7a96;
+  --cm-cyan:      #00c8f0;
+  --cm-green:     #00e888;
+  --cm-red:       #ff3d5a;
+  --cm-gold:      #f0c040;
+  --cm-blue:      #38aaff;
+  --cm-font:      'Courier New', Courier, monospace;
+}
+
 #cheat-menu-text {
-	position: fixed;
-	z-index: 1000;
-	background-color: rgba(0, 0, 0, 0.75);
-	color: #ffffff;
-	text-align: center;
-	padding: 10px;
-	border-spacing: 0;
+  position: fixed;
+  z-index: 1000;
+  background: var(--cm-bg);
+  border: 1px solid var(--cm-border);
+  border-left: 2px solid var(--cm-cyan);
+  box-shadow: 0 0 18px rgba(0, 200, 240, 0.12), inset 0 0 40px rgba(0, 0, 0, 0.4);
+  color: var(--cm-text);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  text-align: center;
+  padding: 5px 6px;
+  border-spacing: 0;
+  letter-spacing: 0.02em;
 }
 
 #cheat-menu-indicator {
-	position: fixed;
-	z-index: 999;
-	color: #00ff00;
-	font-size: 12px;
-	opacity: 0.6;
-	pointer-events: none;
-	font-family: monospace;
-	text-shadow: 0 0 4px #00ff00;
+  position: fixed;
+  z-index: 999;
+  background: transparent;
+  color: var(--cm-cyan);
+  font-size: 11px;
+  font-family: var(--cm-font);
+  opacity: 0.65;
+  pointer-events: none;
+  text-shadow: 0 0 6px var(--cm-cyan);
+  letter-spacing: 0.05em;
 }
 
 .scroll-selector-row {
-	width: 100%;
-	text-align: center;
+  width: 100%;
+  text-align: center;
 }
 
 .scroll-selector-buttons:hover {
-	color: #ff0000;
-	text-shadow: 0 0 5px #ff0000;
+  color: var(--cm-cyan);
+  text-shadow: 0 0 6px var(--cm-cyan);
+  cursor: pointer;
 }
 
 .cheat-menu-buttons:hover {
-	color: #ff0000;
-	text-shadow: 0 0 5px #ff0000;
+  color: var(--cm-cyan);
+  text-shadow: 0 0 6px var(--cm-cyan);
+  cursor: pointer;
 }
 
 .cheat-menu-cell {
-	border-bottom: 1px solid #6f6f6f;
-	max-width: 100px;
-	width: 100px;
-
-	font-weight: normal;
-	font-size: 15px;
-	padding-top: 5px;
-	padding-bottom: 5px;
+  border-bottom: 1px solid var(--cm-border);
+  max-width: 80px;
+  width: 80px;
+  font-weight: normal;
+  font-size: 11px;
+  padding: 2px 3px;
+  color: var(--cm-text);
 }
 
 .cheat-menu-cell-title {
-	max-width: 100px;
-	width: 100px;
-	font-weight: bold;
-	font-size: 20px;
-	padding-top: 8px;
-	padding-bottom: 5px;
+  max-width: 80px;
+  width: 80px;
+  font-weight: bold;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cm-dim);
+  padding: 4px 3px 1px;
+  border-bottom: 1px solid var(--cm-border);
 }
 
-.status-on {
-  color: #00ff00;
-}
+.status-on  { color: var(--cm-green); text-shadow: 0 0 4px rgba(0,232,136,0.5); }
+.status-off { color: var(--cm-red);   text-shadow: 0 0 4px rgba(255,61,90,0.4); }
 
-.status-off {
-  color: #ff0000;
-}
-
-.actor-name-highlight {
-  color: #0088ff;
-}
+.actor-name-highlight { color: var(--cm-blue); }
 
 .error-text {
-  color: #ff0000;
+  color: var(--cm-red);
   font-style: italic;
 }
 
-.cheat-menu-text {
-  /* table sub-menu container */
-}
+.cheat-menu-text { /* table sub-menu container */ }
 
 /* --- GRID --- */
 .cheat-menu-grid {
   display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
 }
 
 .cheat-menu-grid-button {
-  background: linear-gradient(to bottom, #444, #222);
-  color: white;
-  border: 1px solid #666;
-  border-radius: 5px;
-  padding: 12px 8px;
-  font-family: GameFont, sans-serif;
-  font-size: 18px;
-  text-shadow: 1px 1px #000;
+  background: rgba(0, 20, 35, 0.6);
+  color: var(--cm-text);
+  border: 1px solid var(--cm-border);
+  border-radius: 2px;
+  padding: 5px 8px;
+  font-family: var(--cm-font);
+  font-size: 11px;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: all 0.2s ease-out;
+  transition: border-color 0.15s, color 0.15s, text-shadow 0.15s, background 0.15s;
+  text-align: center;
 }
 
 .cheat-menu-grid-button:hover {
-  background: linear-gradient(to bottom, #555, #333);
-  border-color: #fff;
-  color: #ffffaa;
+  background: rgba(0, 200, 240, 0.07);
+  border-color: var(--cm-cyan);
+  color: var(--cm-cyan);
+  text-shadow: 0 0 8px rgba(0, 200, 240, 0.6);
 }
 
 /* --- BACK BUTTON --- */
 .cheat-menu-back-button {
   cursor: pointer;
-  color: #ffdd55;
-  font-size: 20px;
+  color: var(--cm-gold);
+  font-size: 11px;
   text-align: left !important;
-  padding: 4px 0 12px 0 !important;
+  padding: 2px 0 5px 0 !important;
+  letter-spacing: 0.04em;
 }
 
 .cheat-menu-back-button:hover span {
   text-decoration: underline;
+  text-shadow: 0 0 6px rgba(240, 192, 64, 0.5);
 }

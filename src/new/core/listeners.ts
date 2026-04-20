@@ -118,7 +118,7 @@ CheatMenu.handleToggleCheatMenu = (event) => {
         if (ind) ind.style.display = '';
       }
     } else if (CheatMenu.isCheatMenuOpen) {
-      if (event.key == '~') {
+      if (event.key === CheatMenu.keyMappings.TILDE) {
         CheatMenu.position++;
         if (CheatMenu.position > 4) {
           CheatMenu.position = 0;

@@ -34,6 +34,7 @@ export type InitialValues = {
 };
 
 export type CheatMenuT = {
+  _prevMenuIndex: number | null;
   // --- Properties ---
 
   initialized: boolean;

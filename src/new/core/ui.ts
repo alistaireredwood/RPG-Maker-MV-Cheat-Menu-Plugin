@@ -1,5 +1,7 @@
 import CheatMenu from '../CheatMenu';
 
+let _gridFocusIndex = 0;
+
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
 
@@ -244,7 +246,14 @@ CheatMenu.appendBackButton = function () {
 CheatMenu.renderMainMenuGrid = function () {
   const overlay = CheatMenu.overlay;
   overlay.innerHTML = '';
-  overlay.className = 'cheat-menu-grid';
+  overlay.className = '';
+
+  const cell = overlay.insertRow().insertCell();
+  cell.style.padding = '0';
+
+  const grid = document.createElement('div');
+  grid.className = 'cheat-menu-grid';
+  cell.appendChild(grid);
 
   CheatMenu.menus.forEach((menuEntry, index) => {
     const button = document.createElement('button');
@@ -257,7 +266,26 @@ CheatMenu.renderMainMenuGrid = function () {
       CheatMenu.updateMenu();
     };
 
-    overlay.appendChild(button);
+    grid.appendChild(button);
+  });
+
+  const buttons = Array.from(grid.querySelectorAll<HTMLElement>('.cheat-menu-grid-button'));
+  if (buttons.length) {
+    _gridFocusIndex = Math.min(_gridFocusIndex, buttons.length - 1);
+    buttons[_gridFocusIndex].focus();
+  }
+
+  grid.addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab') return;
+    event.preventDefault();
+    event.stopPropagation();
+    const idx = buttons.indexOf(document.activeElement as HTMLElement);
+    const current = idx >= 0 ? idx : _gridFocusIndex;
+    const next = event.shiftKey
+      ? (current <= 0 ? buttons.length - 1 : current - 1)
+      : (current >= buttons.length - 1 ? 0 : current + 1);
+    _gridFocusIndex = next;
+    buttons[next].focus();
   });
 };
 
@@ -268,7 +296,11 @@ if (typeof CheatMenu.menus == 'undefined') {
 CheatMenu.updateMenu = function () {
   CheatMenu.keyListeners = {};
 
+  const prev = CheatMenu._prevMenuIndex ?? null;
+  CheatMenu._prevMenuIndex = CheatMenu.currentMenuIndex;
+
   if (CheatMenu.currentMenuIndex === null) {
+    if (prev !== null) _gridFocusIndex = 0;
     CheatMenu.renderMainMenuGrid();
   } else {
     const menuToRender = CheatMenu.menus[CheatMenu.currentMenuIndex];

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:release": "pnpm build && node scripts/build-release.js",
     "preview": "vite preview"
   },
   "devDependencies": {

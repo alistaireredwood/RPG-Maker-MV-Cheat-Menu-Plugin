@@ -67,7 +67,7 @@ CheatMenu.handleToggleCheatMenu = (event) => {
     !event.ctrlKey &&
     !event.shiftKey
   ) {
-    if (event.key === '1') {
+    if (event.key === CheatMenu.keyMappings.KEY_1) {
       if (!CheatMenu.initialized) {
         const gameActorsData = ($gameActors as any)._data as Game_Actor[];
 
@@ -107,15 +107,15 @@ CheatMenu.handleToggleCheatMenu = (event) => {
 
       if (!CheatMenu.isCheatMenuOpen) {
         CheatMenu.isCheatMenuOpen = true;
-        document.body.appendChild(CheatMenu.overlayBox);
         document.body.appendChild(CheatMenu.overlay);
         CheatMenu.updateMenu();
         SoundManager.playSystemSound(1);
       } else {
         CheatMenu.isCheatMenuOpen = false;
-        CheatMenu.overlayBox.remove();
         CheatMenu.overlay.remove();
         SoundManager.playSystemSound(2);
+        const ind = document.getElementById('cheat-menu-indicator');
+        if (ind) ind.style.display = '';
       }
     } else if (CheatMenu.isCheatMenuOpen) {
       if (event.key == '~') {

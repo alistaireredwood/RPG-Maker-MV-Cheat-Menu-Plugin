@@ -1,18 +1,7 @@
 import CheatMenu from '../CheatMenu';
 
-CheatMenu.overlayBox = document.createElement('div');
-CheatMenu.overlayBox.id = 'cheat-menu';
-CheatMenu.overlayBox.style.left = '5px';
-CheatMenu.overlayBox.style.top = '5px';
-CheatMenu.overlayBox.style.right = '';
-CheatMenu.overlayBox.style.bottom = '';
-
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
-CheatMenu.overlay.style.left = '5px';
-CheatMenu.overlay.style.top = '5px';
-CheatMenu.overlay.style.right = '';
-CheatMenu.overlay.style.bottom = '';
 
 CheatMenu.styleCss = document.createElement('link');
 CheatMenu.styleCss.type = 'text/css';
@@ -20,89 +9,46 @@ CheatMenu.styleCss.rel = 'stylesheet';
 CheatMenu.styleCss.href = 'js/plugins/Cheat_Menu.css';
 document.head.appendChild(CheatMenu.styleCss);
 
+const indicator = document.createElement('div');
+indicator.id = 'cheat-menu-indicator';
+document.body.appendChild(indicator);
+
+const positions: [string, string, string, string][] = [
+  // [left, top, right, bottom]
+  ['50%', '50%', '', ''],   // 0: center
+  ['5px', '5px', '', ''],   // 1: top-left
+  ['', '5px', '5px', ''],   // 2: top-right
+  ['', '', '5px', '5px'],   // 3: bottom-right
+  ['5px', '', '', '5px'],   // 4: bottom-left
+];
+
 CheatMenu.positionMenu = () => {
-  if (CheatMenu.position == 0) {
-    CheatMenu.overlayBox.style.left = '' + window.innerWidth / 2 + 'px';
-    CheatMenu.overlayBox.style.top = '' + window.innerHeight / 2 + 'px';
-    CheatMenu.overlayBox.style.right = '';
-    CheatMenu.overlayBox.style.bottom = '';
-    CheatMenu.overlayBox.style.marginLeft = '-110px';
-    CheatMenu.overlayBox.style.marginTop = '-50px';
+  const pos = positions[CheatMenu.position] ?? positions[1];
+  const overlay = CheatMenu.overlay;
 
-    CheatMenu.overlay.style.left = '' + window.innerWidth / 2 + 'px';
-    CheatMenu.overlay.style.top = '' + window.innerHeight / 2 + 'px';
-    CheatMenu.overlay.style.right = '';
-    CheatMenu.overlay.style.bottom = '';
-    CheatMenu.overlay.style.marginLeft = '-110px';
-    CheatMenu.overlay.style.marginTop = '-50px';
-  } else if (CheatMenu.position == 1) {
-    CheatMenu.overlayBox.style.left = '5px';
-    CheatMenu.overlayBox.style.top = '5px';
-    CheatMenu.overlayBox.style.right = '';
-    CheatMenu.overlayBox.style.bottom = '';
-    CheatMenu.overlayBox.style.marginLeft = '';
-    CheatMenu.overlayBox.style.marginTop = '';
+  overlay.style.left = pos[0];
+  overlay.style.top = pos[1];
+  overlay.style.right = pos[2];
+  overlay.style.bottom = pos[3];
+  overlay.style.transform = CheatMenu.position === 0 ? 'translate(-50%, -50%)' : '';
 
-    CheatMenu.overlay.style.left = '5px';
-    CheatMenu.overlay.style.top = '5px';
-    CheatMenu.overlay.style.right = '';
-    CheatMenu.overlay.style.bottom = '';
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  } else if (CheatMenu.position == 2) {
-    CheatMenu.overlayBox.style.left = '';
-    CheatMenu.overlayBox.style.top = '5px';
-    CheatMenu.overlayBox.style.right = '5px';
-    CheatMenu.overlayBox.style.bottom = '';
-    CheatMenu.overlayBox.style.marginLeft = '';
-    CheatMenu.overlayBox.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '';
-    CheatMenu.overlay.style.top = '5px';
-    CheatMenu.overlay.style.right = '-15px';
-    CheatMenu.overlay.style.bottom = '';
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  } else if (CheatMenu.position == 3) {
-    CheatMenu.overlayBox.style.left = '';
-    CheatMenu.overlayBox.style.top = '';
-    CheatMenu.overlayBox.style.right = '5px';
-    CheatMenu.overlayBox.style.bottom = '5px';
-    CheatMenu.overlayBox.style.marginLeft = '';
-    CheatMenu.overlayBox.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '';
-    CheatMenu.overlay.style.top = '';
-    CheatMenu.overlay.style.right = '-15px';
-    CheatMenu.overlay.style.bottom = '5px';
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  } else if (CheatMenu.position == 4) {
-    CheatMenu.overlayBox.style.left = '5px';
-    CheatMenu.overlayBox.style.top = '';
-    CheatMenu.overlayBox.style.right = '';
-    CheatMenu.overlayBox.style.bottom = '5px';
-    CheatMenu.overlayBox.style.marginLeft = '';
-    CheatMenu.overlayBox.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '5px';
-    CheatMenu.overlay.style.top = '';
-    CheatMenu.overlay.style.right = '';
-    CheatMenu.overlay.style.bottom = '5px';
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
+  const ind = document.getElementById('cheat-menu-indicator');
+  if (ind) {
+    ind.style.left = pos[0];
+    ind.style.top = pos[1];
+    ind.style.right = pos[2];
+    ind.style.bottom = pos[3];
+    ind.textContent = `[${CheatMenu.keyMappings.KEY_1}]`;
+    ind.style.display = CheatMenu.isCheatMenuOpen ? 'none' : '';
   }
-
-  let height = 20;
-  for (let i = 0; i < CheatMenu.overlay.children.length; i++) {
-    height += CheatMenu.overlay.children[i].scrollHeight;
-  }
-  CheatMenu.overlayBox.style.height = '' + height + 'px';
 };
 
 CheatMenu.overlay.addEventListener('mousedown', (event) =>
   event.stopPropagation(),
 );
+
+// set initial indicator position/text before menu is ever opened
+CheatMenu.positionMenu();
 
 /////////////////////////////////////////////////
 // Menu item types

@@ -1,26 +1,22 @@
-#cheat-menu {
-	position: absolute;
-	width: 280px;
-	height: 100px;
+#cheat-menu-text {
+	position: fixed;
 	z-index: 1000;
-	background-color: #000000;
+	background-color: rgba(0, 0, 0, 0.75);
 	color: #ffffff;
-	opacity: 0.75;
 	text-align: center;
 	padding: 10px;
+	border-spacing: 0;
 }
 
-#cheat-menu-text {
-	position: absolute;
-	width: 300px;
-	z-index: 1001;
-	background-color: transparent;
-	color: #ffffff;
-	opacity: 1;
-	text-align: center;
-	padding: 10px;
-
-	border-spacing: 0;
+#cheat-menu-indicator {
+	position: fixed;
+	z-index: 999;
+	color: #00ff00;
+	font-size: 12px;
+	opacity: 0.6;
+	pointer-events: none;
+	font-family: monospace;
+	text-shadow: 0 0 4px #00ff00;
 }
 
 .scroll-selector-row {
@@ -82,11 +78,8 @@
 /* --- GRID --- */
 .cheat-menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(2, auto);
   gap: 8px;
-  padding: 10px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .cheat-menu-grid-button {

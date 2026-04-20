@@ -5,7 +5,6 @@ CheatMenu.initialize = () => {
   CheatMenu.initialized = false;
   CheatMenu.isCheatMenuOpen = false;
   CheatMenu.speedInitialized = false;
-  CheatMenu.overlayBox.remove();
   CheatMenu.overlay.remove();
 
   clearInterval(CheatMenu.menuUpdateTimer || undefined);

@@ -66,7 +66,6 @@ export type CheatMenuT = {
   initialValues: InitialValues;
 
   // DOM Elements
-  overlayBox: HTMLDivElement;
   overlay: HTMLTableElement;
   styleCss: HTMLLinkElement;
 

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
+    target: 'chrome66',
     outDir: './www/js/plugins',
     rollupOptions: {
       input: {

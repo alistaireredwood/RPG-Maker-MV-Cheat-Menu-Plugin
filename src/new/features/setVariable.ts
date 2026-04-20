@@ -1,34 +1,31 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// change game variable value, by id
-CheatMenu.set_variable = (variable_id, value) => {
-  if ($dataSystem.variables[variable_id] != undefined) {
-    let new_value = $gameVariables.value(variable_id) + value;
+CheatMenu.setVariable = (variableId, value) => {
+  if ($dataSystem.variables[variableId] != undefined) {
+    let newValue = $gameVariables.value(variableId) + value;
 
-    $gameVariables.setValue(variable_id, new_value);
+    $gameVariables.setValue(variableId, newValue);
   }
 };
 
-// Left and right scrolls for handling switching between selected variable
-CheatMenu.scroll_variable = function (direction) {
+CheatMenu.scrollVariable = function (direction) {
   if (direction == 'left') {
-    CheatMenu.variable_selection--;
-    if (CheatMenu.variable_selection < 0) {
-      CheatMenu.variable_selection = $dataSystem.variables.length - 1;
+    CheatMenu.variableSelection--;
+    if (CheatMenu.variableSelection < 0) {
+      CheatMenu.variableSelection = $dataSystem.variables.length - 1;
     }
   } else {
-    CheatMenu.variable_selection++;
-    if (CheatMenu.variable_selection >= $dataSystem.variables.length) {
-      CheatMenu.variable_selection = 0;
+    CheatMenu.variableSelection++;
+    if (CheatMenu.variableSelection >= $dataSystem.variables.length) {
+      CheatMenu.variableSelection = 0;
     }
   }
   SoundManager.playSystemSound(0);
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// handlers for the setting the current variable
-CheatMenu.apply_current_variable = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amount_index];
+CheatMenu.applyCurrentVariable = function (direction) {
+  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
 
   if (direction == 'left') {
     amount = -amount;
@@ -37,49 +34,51 @@ CheatMenu.apply_current_variable = function (direction) {
     SoundManager.playSystemSound(1);
   }
 
-  CheatMenu.set_variable(CheatMenu.variable_selection, amount);
-  CheatMenu.update_menu();
+  CheatMenu.setVariable(CheatMenu.variableSelection, amount);
+  CheatMenu.updateMenu();
 };
 
-// append the variable cheat to the menu
-CheatMenu.append_variable_selection = function (key1, key2, key3, key4) {
-  CheatMenu.append_title('Variable');
+CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendTitle('Variable');
 
-  let current_variable;
+  let currentVariable;
 
   if (
-    $dataSystem.variables[CheatMenu.variable_selection] &&
-    $dataSystem.variables[CheatMenu.variable_selection].length > 0
+    $dataSystem.variables[CheatMenu.variableSelection] &&
+    $dataSystem.variables[CheatMenu.variableSelection].length > 0
   ) {
-    current_variable = $dataSystem.variables[CheatMenu.variable_selection];
+    currentVariable = $dataSystem.variables[CheatMenu.variableSelection];
   } else {
-    current_variable = 'NULL';
+    currentVariable = 'NULL';
   }
 
-  CheatMenu.append_scroll_selector(
-    current_variable,
+  CheatMenu.appendScrollSelector(
+    currentVariable,
     key1,
     key2,
-    CheatMenu.scroll_variable,
+    CheatMenu.scrollVariable,
   );
 
-  let current_variable_value;
-  if ($gameVariables.value(CheatMenu.variable_selection) != undefined) {
-    current_variable_value = $gameVariables.value(CheatMenu.variable_selection);
+  let currentVariableValue;
+  if ($gameVariables.value(CheatMenu.variableSelection) != undefined) {
+    currentVariableValue = $gameVariables.value(CheatMenu.variableSelection);
   } else {
-    current_variable_value = 'NULL';
+    currentVariableValue = 'NULL';
   }
 
-  CheatMenu.append_scroll_selector(
-    current_variable_value,
+  CheatMenu.appendScrollSelector(
+    currentVariableValue,
     key3,
     key4,
-    CheatMenu.apply_current_variable,
+    CheatMenu.applyCurrentVariable,
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Variables');
-  CheatMenu.append_amount_selection(4, 5);
-  CheatMenu.append_variable_selection(6, 7, 8, 9);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Variables',
+  render: () => {
+    CheatMenu.appendCheatTitle('Variables');
+    CheatMenu.appendAmountSelection(4, 5);
+    CheatMenu.appendVariableSelection(6, 7, 8, 9);
+  },
 });

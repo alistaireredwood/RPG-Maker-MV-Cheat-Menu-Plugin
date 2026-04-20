@@ -1,29 +1,20 @@
 import CheatMenu from '../CheatMenu';
 
-/////////////////////////////////////////////////
-// Load Hook
-/////////////////////////////////////////////////
-
-// close the menu and set for initialization on first open
-//	timer to provide periodic updates if the menu is open
 CheatMenu.initialize = () => {
   CheatMenu.isOverlayOpenable = true;
   CheatMenu.initialized = false;
   CheatMenu.isCheatMenuOpen = false;
-  CheatMenu.speed_initialized = false;
-  CheatMenu.overlay_box.remove();
+  CheatMenu.speedInitialized = false;
   CheatMenu.overlay.remove();
 
-  // periodic update
-  clearInterval(CheatMenu.menu_update_timer || undefined);
-  CheatMenu.menu_update_timer = setInterval(function () {
+  clearInterval(CheatMenu.menuUpdateTimer || undefined);
+  CheatMenu.menuUpdateTimer = setInterval(function () {
     if (CheatMenu.isCheatMenuOpen) {
-      CheatMenu.update_menu();
+      CheatMenu.updateMenu();
     }
   }, 1000);
 };
 
-// add hook for loading a game
 DataManager.default_loadGame = DataManager.loadGame;
 DataManager.loadGame = function (saveFileId) {
   CheatMenu.initialize();
@@ -35,7 +26,6 @@ DataManager.loadGame = function (saveFileId) {
   return false;
 };
 
-// add hook for new game
 DataManager.default_setupNewGame = DataManager.setupNewGame;
 DataManager.setupNewGame = function () {
   CheatMenu.initialize();
@@ -45,12 +35,8 @@ DataManager.setupNewGame = function () {
   }
 };
 
-// add hook for saving values (just added into $gameSystem to be saved)
-
 DataManager.default_saveGame = DataManager.saveGame;
 DataManager.saveGame = function (saveFileId) {
-  // save values that are in intial values
-
   $gameSystem.CheatMenu = {};
   for (let name in CheatMenu.initialValues) {
     // @ts-ignore

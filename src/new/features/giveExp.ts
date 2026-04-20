@@ -1,44 +1,44 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// increase exp
-CheatMenu.give_exp = (actor, amount) => {
+CheatMenu.giveExp = (actor, amount) => {
   actor.gainExp(amount);
 };
 
-// handlers for the exp cheat
-CheatMenu.apply_current_exp = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amount_index];
+CheatMenu.applyCurrentExp = function (direction) {
+  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
   if (direction == 'left') {
     amount = -amount;
     SoundManager.playSystemSound(2);
   } else {
     SoundManager.playSystemSound(1);
   }
-  CheatMenu.give_exp($gameActors.actor(CheatMenu.cheat_selected_actor), amount);
-  CheatMenu.update_menu();
+  CheatMenu.giveExp($gameActors.actor(CheatMenu.cheatSelectedActor), amount);
+  CheatMenu.updateMenu();
 };
 
-// append the exp cheat to the menu
-CheatMenu.append_exp_cheat = function (key1, key2) {
-  let current_exp;
+CheatMenu.appendExpCheat = function (key1, key2) {
+  let currentExp;
 
-  if ($gameActors.actor(CheatMenu.cheat_selected_actor)) {
-    current_exp = $gameActors
-      .actor(CheatMenu.cheat_selected_actor)
+  if ($gameActors.actor(CheatMenu.cheatSelectedActor)) {
+    currentExp = $gameActors
+      .actor(CheatMenu.cheatSelectedActor)
       .currentExp();
   }
-  CheatMenu.append_title('EXP');
-  CheatMenu.append_scroll_selector(
-    current_exp || 0,
+  CheatMenu.appendTitle('EXP');
+  CheatMenu.appendScrollSelector(
+    currentExp || 0,
     key1,
     key2,
-    CheatMenu.apply_current_exp,
+    CheatMenu.applyCurrentExp,
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Give Exp');
-  CheatMenu.append_actor_selection(4, 5);
-  CheatMenu.append_amount_selection(6, 7);
-  CheatMenu.append_exp_cheat(8, 9);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Give Exp',
+  render: () => {
+    CheatMenu.appendCheatTitle('Give Exp');
+    CheatMenu.appendActorSelection(4, 5);
+    CheatMenu.appendAmountSelection(6, 7);
+    CheatMenu.appendExpCheat(8, 9);
+  },
 });

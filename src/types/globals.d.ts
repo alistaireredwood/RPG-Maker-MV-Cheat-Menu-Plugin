@@ -3,40 +3,40 @@ declare interface ICheatMenu {
   isCheatMenuOpen: boolean;
   isOverlayOpenable: boolean;
   position: number;
-  menu_update_timer: NodeJS.Timeout;
+  menuUpdateTimer: NodeJS.Timeout;
 
-  cheat_selected: number;
-  cheat_selected_actor: number;
+  cheatSelected: number;
+  cheatSelectedActor: number;
   amounts: number[];
-  amount_index: number;
+  amountIndex: number;
 
-  saved_positions: SavedPosition[];
+  savedPositions: SavedPosition[];
 
   // Methods
   godMode?: (actor: CheatMenu_Game_Actor) => void;
   godMode_off?: (actor: CheatMenu_Game_Actor) => void;
   initialize?: () => void;
-  update_menu?: () => void;
-  append_title?: (title: string) => void;
+  updateMenu?: () => void;
+  appendTitle?: (title: string) => void;
 
   initialValues: Partial<ICheatMenu>;
 }
 
 declare class CheatMenu_Game_Actor extends Game_Actor {
   godMode?: boolean;
-  godMode_interval?: NodeJS.Timeout;
+  godModeInterval?: NodeJS.Timeout;
 
-  gainHP_bkup?: (value: number) => void;
-  setHp_bkup?: (hp: number) => void;
+  gainHpBackup?: (value: number) => void;
+  setHpBackup?: (hp: number) => void;
 
-  gainMp_bkup?: (value: number) => void;
-  setMp_bkup?: (mp: number) => void;
+  gainMpBackup?: (value: number) => void;
+  setMpBackup?: (mp: number) => void;
 
-  gainTp_bkup?: (value: number) => void;
-  setTp_bkup?: (tp: number) => void;
+  gainTpBackup?: (value: number) => void;
+  setTpBackup?: (tp: number) => void;
 
   /** Backup of Game_BattlerBase.prototype.paySkillCost */
-  // paySkillCost_bkup: (skill: DataSkill) => void;
+  // paySkillCostBackup: (skill: DataSkill) => void;
 }
 
 declare class Game_System {

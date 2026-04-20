@@ -1,13 +1,11 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// increase gold
-CheatMenu.give_gold = (amount) => {
+CheatMenu.giveGold = (amount) => {
   $gameParty.gainGold(amount);
 };
 
-// handlers for the gold cheat
-CheatMenu.apply_current_gold = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amount_index];
+CheatMenu.applyCurrentGold = function (direction) {
+  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
 
   if (direction == 'left') {
     amount = -amount;
@@ -16,23 +14,25 @@ CheatMenu.apply_current_gold = function (direction) {
     SoundManager.playSystemSound(1);
   }
 
-  CheatMenu.give_gold(amount);
-  CheatMenu.update_menu();
+  CheatMenu.giveGold(amount);
+  CheatMenu.updateMenu();
 };
 
-// append the gold cheat to the menu
-CheatMenu.append_gold_status = function (key1, key2) {
-  CheatMenu.append_title('Gold');
-  CheatMenu.append_scroll_selector(
+CheatMenu.appendGoldStatus = function (key1, key2) {
+  CheatMenu.appendTitle('Gold');
+  CheatMenu.appendScrollSelector(
     $gameParty.gold(),
     key1,
     key2,
-    CheatMenu.apply_current_gold,
+    CheatMenu.applyCurrentGold,
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Gold');
-  CheatMenu.append_amount_selection(4, 5);
-  CheatMenu.append_gold_status(6, 7);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Gold',
+  render: () => {
+    CheatMenu.appendCheatTitle('Gold');
+    CheatMenu.appendAmountSelection(4, 5);
+    CheatMenu.appendGoldStatus(6, 7);
+  },
 });

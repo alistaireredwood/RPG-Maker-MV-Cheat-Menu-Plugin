@@ -1,70 +1,67 @@
 import CheatMenu from '../CheatMenu.ts';
 
-// clear active states on an actor
-CheatMenu.clear_actor_states = (actor) => {
+CheatMenu.clearActorStates = (actor) => {
   if (actor.states() != undefined && actor.states().length > 0) {
     actor.clearStates();
   }
 };
 
-// clear active states on party
-CheatMenu.clear_party_states = () => {
+CheatMenu.clearPartyStates = () => {
   const members = $gameParty.allMembers();
 
   for (let i = 0; i < members.length; i++) {
-    CheatMenu.clear_actor_states(members[i]);
+    CheatMenu.clearActorStates(members[i]);
   }
 };
 
-// handler for the clear actor state cheat
-CheatMenu.clear_current_actor_states = function () {
-  CheatMenu.clear_actor_states(
-    $gameActors.actor(CheatMenu.cheat_selected_actor),
+CheatMenu.clearCurrentActorStates = function () {
+  CheatMenu.clearActorStates(
+    $gameActors.actor(CheatMenu.cheatSelectedActor),
   );
 
   SoundManager.playSystemSound(1);
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// handler for the party state clear cheat
-CheatMenu.party_clear_states_cheat = function () {
-  CheatMenu.clear_party_states();
+CheatMenu.partyClearStatesCheat = function () {
+  CheatMenu.clearPartyStates();
   SoundManager.playSystemSound(1);
 };
 
-// append the party hp cheats
-CheatMenu.append_party_state = function (key1) {
-  CheatMenu.append_cheat(
+CheatMenu.appendPartyState = function (key1) {
+  CheatMenu.appendCheat(
     'Clear Party States',
     'Activate',
     key1,
-    CheatMenu.party_clear_states_cheat,
+    CheatMenu.partyClearStatesCheat,
   );
 };
 
-// append the clear actor state cheat to the menu
-CheatMenu.append_current_state = function (key1) {
-  CheatMenu.append_title('Current State');
-  let number_states = 0;
+CheatMenu.appendCurrentState = function (key1) {
+  CheatMenu.appendTitle('Current State');
+  let numberStates = 0;
 
-  const actorInstance = $gameActors.actor(CheatMenu.cheat_selected_actor);
+  const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
   const activeStates = actorInstance.states();
 
   if (activeStates) {
-    number_states = activeStates.length;
+    numberStates = activeStates.length;
   }
 
-  CheatMenu.append_cheat(
+  CheatMenu.appendCheat(
     'Number Effects:',
-    number_states,
+    numberStates,
     key1,
-    CheatMenu.clear_current_actor_states,
+    CheatMenu.clearCurrentActorStates,
   );
 };
 
-CheatMenu.menus.splice(0, 0, function () {
-  CheatMenu.append_cheat_title('Clear States');
-  CheatMenu.append_party_state(4);
-  CheatMenu.append_actor_selection(5, 6);
-  CheatMenu.append_current_state(7);
+CheatMenu.menus.splice(0, 0, {
+  name: 'Clear States',
+  render: () => {
+    CheatMenu.appendCheatTitle('Clear States');
+    CheatMenu.appendPartyState(4);
+    CheatMenu.appendActorSelection(5, 6);
+    CheatMenu.appendCurrentState(7);
+  },
 });

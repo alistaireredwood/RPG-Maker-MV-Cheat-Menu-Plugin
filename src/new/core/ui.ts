@@ -1,356 +1,286 @@
 import CheatMenu from '../CheatMenu';
 
-// HTML elements and some CSS for positioning
-//	other css in CSS file attached
-CheatMenu.overlay_box = document.createElement('div');
-CheatMenu.overlay_box.id = 'cheatMenu';
-CheatMenu.overlay_box.style.left = '5px';
-CheatMenu.overlay_box.style.top = '5px';
-CheatMenu.overlay_box.style.right = '';
-CheatMenu.overlay_box.style.bottom = '';
-
 CheatMenu.overlay = document.createElement('table');
-CheatMenu.overlay.id = 'cheatMenuText';
-CheatMenu.overlay.style.left = '5px';
-CheatMenu.overlay.style.top = '5px';
-CheatMenu.overlay.style.right = '';
-CheatMenu.overlay.style.bottom = '';
+CheatMenu.overlay.id = 'cheat-menu-text';
 
-// Attach other css for styling
-CheatMenu.style_css = document.createElement('link');
-CheatMenu.style_css.type = 'text/css';
-CheatMenu.style_css.rel = 'stylesheet';
-CheatMenu.style_css.href = 'js/plugins/Cheat_Menu.css';
-document.head.appendChild(CheatMenu.style_css);
+CheatMenu.styleCss = document.createElement('link');
+CheatMenu.styleCss.type = 'text/css';
+CheatMenu.styleCss.rel = 'stylesheet';
+CheatMenu.styleCss.href = 'js/plugins/Cheat_Menu.css';
+document.head.appendChild(CheatMenu.styleCss);
 
-// keep menu in correct location
-CheatMenu.position_menu = () => {
-  //middle of screen
-  if (CheatMenu.position == 0) {
-    CheatMenu.overlay_box.style.left = '' + window.innerWidth / 2 + 'px';
-    CheatMenu.overlay_box.style.top = '' + window.innerHeight / 2 + 'px';
-    CheatMenu.overlay_box.style.right = '';
-    CheatMenu.overlay_box.style.bottom = '';
+const indicator = document.createElement('div');
+indicator.id = 'cheat-menu-indicator';
+document.body.appendChild(indicator);
 
-    CheatMenu.overlay_box.style.marginLeft = '-110px';
-    CheatMenu.overlay_box.style.marginTop = '-50px';
+const positions: [string, string, string, string][] = [
+  // [left, top, right, bottom]
+  ['50%', '50%', '', ''],   // 0: center
+  ['5px', '5px', '', ''],   // 1: top-left
+  ['', '5px', '5px', ''],   // 2: top-right
+  ['', '', '5px', '5px'],   // 3: bottom-right
+  ['5px', '', '', '5px'],   // 4: bottom-left
+];
 
-    CheatMenu.overlay.style.left = '' + window.innerWidth / 2 + 'px';
-    CheatMenu.overlay.style.top = '' + window.innerHeight / 2 + 'px';
-    CheatMenu.overlay.style.right = '';
-    CheatMenu.overlay.style.bottom = '';
+CheatMenu.positionMenu = () => {
+  const pos = positions[CheatMenu.position] ?? positions[1];
+  const overlay = CheatMenu.overlay;
 
-    CheatMenu.overlay.style.marginLeft = '-110px';
-    CheatMenu.overlay.style.marginTop = '-50px';
+  overlay.style.left = pos[0];
+  overlay.style.top = pos[1];
+  overlay.style.right = pos[2];
+  overlay.style.bottom = pos[3];
+  overlay.style.transform = CheatMenu.position === 0 ? 'translate(-50%, -50%)' : '';
+
+  const ind = document.getElementById('cheat-menu-indicator');
+  if (ind) {
+    ind.style.left = pos[0];
+    ind.style.top = pos[1];
+    ind.style.right = pos[2];
+    ind.style.bottom = pos[3];
+    ind.textContent = `[${CheatMenu.keyMappings.KEY_1}]`;
+    ind.style.display = CheatMenu.isCheatMenuOpen ? 'none' : '';
   }
-  // top left corner
-  else if (CheatMenu.position == 1) {
-    CheatMenu.overlay_box.style.left = '5px';
-    CheatMenu.overlay_box.style.top = '5px';
-    CheatMenu.overlay_box.style.right = '';
-    CheatMenu.overlay_box.style.bottom = '';
-
-    CheatMenu.overlay_box.style.marginLeft = '';
-    CheatMenu.overlay_box.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '5px';
-    CheatMenu.overlay.style.top = '5px';
-    CheatMenu.overlay.style.right = '';
-    CheatMenu.overlay.style.bottom = '';
-
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  }
-  // top right corner
-  else if (CheatMenu.position == 2) {
-    CheatMenu.overlay_box.style.left = '';
-    CheatMenu.overlay_box.style.top = '5px';
-    CheatMenu.overlay_box.style.right = '5px';
-    CheatMenu.overlay_box.style.bottom = '';
-
-    CheatMenu.overlay_box.style.marginLeft = '';
-    CheatMenu.overlay_box.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '';
-    CheatMenu.overlay.style.top = '5px';
-    CheatMenu.overlay.style.right = '-15px';
-    CheatMenu.overlay.style.bottom = '';
-
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  }
-  // bottom right corner
-  else if (CheatMenu.position == 3) {
-    CheatMenu.overlay_box.style.left = '';
-    CheatMenu.overlay_box.style.top = '';
-    CheatMenu.overlay_box.style.right = '5px';
-    CheatMenu.overlay_box.style.bottom = '5px';
-
-    CheatMenu.overlay_box.style.marginLeft = '';
-    CheatMenu.overlay_box.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '';
-    CheatMenu.overlay.style.top = '';
-    CheatMenu.overlay.style.right = '-15px';
-    CheatMenu.overlay.style.bottom = '5px';
-
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  }
-  // bottom left corner
-  else if (CheatMenu.position == 4) {
-    CheatMenu.overlay_box.style.left = '5px';
-    CheatMenu.overlay_box.style.top = '';
-    CheatMenu.overlay_box.style.right = '';
-    CheatMenu.overlay_box.style.bottom = '5px';
-
-    CheatMenu.overlay_box.style.marginLeft = '';
-    CheatMenu.overlay_box.style.marginTop = '';
-
-    CheatMenu.overlay.style.left = '5px';
-    CheatMenu.overlay.style.top = '';
-    CheatMenu.overlay.style.right = '';
-    CheatMenu.overlay.style.bottom = '5px';
-
-    CheatMenu.overlay.style.marginLeft = '';
-    CheatMenu.overlay.style.marginTop = '';
-  }
-
-  // adjust background box size to match contents
-  let height = 20;
-  for (let i = 0; i < CheatMenu.overlay.children.length; i++) {
-    height += CheatMenu.overlay.children[i].scrollHeight;
-  }
-  CheatMenu.overlay_box.style.height = '' + height + 'px';
 };
 
-// Prevent clicking from passing through the menu
 CheatMenu.overlay.addEventListener('mousedown', (event) =>
   event.stopPropagation(),
 );
+
+// set initial indicator position/text before menu is ever opened
+CheatMenu.positionMenu();
 
 /////////////////////////////////////////////////
 // Menu item types
 /////////////////////////////////////////////////
 
-// insert row with buttons to scroll left and right for some context
-//	appears as:
-//	<-[key1] text [key2]->
-//	scrolling is handled by scroll_left_handler and scroll_right_handler functions
-//	text: string
-//	key1,key2: key mapping
-//	scroll_handler: single function that handles the left and right scroll arguments should be (direction, event)
-CheatMenu.append_scroll_selector = function (text, key1, key2, scroll_handler) {
-  const scroll_selector = CheatMenu.overlay.insertRow();
-  scroll_selector.className = 'scroll_selector_row';
+CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler) {
+  const scrollSelector = CheatMenu.overlay.insertRow();
+  scrollSelector.className = 'scroll-selector-row';
 
-  const scroll_left_button = scroll_selector.insertCell();
-  scroll_left_button.className = 'scroll_selector_buttons cheat_menu_cell';
+  const scrollLeftButton = scrollSelector.insertCell();
+  scrollLeftButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
-  const scroll_text = scroll_selector.insertCell();
-  scroll_text.className = 'cheat_menu_cell';
+  const scrollText = scrollSelector.insertCell();
+  scrollText.className = 'cheat-menu-cell';
 
-  const scroll_right_button = scroll_selector.insertCell();
-  scroll_right_button.className = 'scroll_selector_buttons cheat_menu_cell';
+  const scrollRightButton = scrollSelector.insertCell();
+  scrollRightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
-  scroll_left_button.innerHTML = '←[' + key1 + ']';
-  scroll_text.innerHTML = text + ''; // TODO: rethink method
-  scroll_right_button.innerHTML = '[' + key2 + ']→';
+  scrollLeftButton.innerHTML = '←[' + key1 + ']';
+  scrollText.innerHTML = text + '';
+  scrollRightButton.innerHTML = '[' + key2 + ']→';
 
-  scroll_left_button.addEventListener(
+  scrollLeftButton.addEventListener(
     'mousedown',
-    scroll_handler.bind(null, 'left'),
+    scrollHandler.bind(null, 'left'),
   );
-  scroll_right_button.addEventListener(
+  scrollRightButton.addEventListener(
     'mousedown',
-    scroll_handler.bind(null, 'right'),
+    scrollHandler.bind(null, 'right'),
   );
 
   // @ts-ignore
-  CheatMenu.key_listeners[key1] = scroll_handler.bind(null, 'left');
+  CheatMenu.keyListeners[key1] = scrollHandler.bind(null, 'left');
   // @ts-ignore
-  CheatMenu.key_listeners[key2] = scroll_handler.bind(null, 'right');
+  CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
 };
 
-// Insert a title row
-//	A row in the menu that is just text
-//	title: string
-CheatMenu.append_title = function (title) {
-  let title_row = CheatMenu.overlay.insertRow();
-  let temp = title_row.insertCell();
-  temp.className = 'cheat_menu_cell_title';
-  let title_text = title_row.insertCell();
-  title_text.className = 'cheat_menu_cell_title';
-  temp = title_row.insertCell();
-  temp.className = 'cheat_menu_cell_title';
-  title_text.innerHTML = title;
+CheatMenu.appendTitle = function (title) {
+  let titleRow = CheatMenu.overlay.insertRow();
+  let temp = titleRow.insertCell();
+  temp.className = 'cheat-menu-cell-title';
+  let titleText = titleRow.insertCell();
+  titleText.className = 'cheat-menu-cell-title';
+  temp = titleRow.insertCell();
+  temp.className = 'cheat-menu-cell-title';
+  titleText.innerHTML = title;
 };
 
-// Insert a desciption row
-//	A row in the menu that is just text (smaller than title)
-//	text: string
-CheatMenu.append_description = function (text) {
-  let title_row = CheatMenu.overlay.insertRow();
-  let temp = title_row.insertCell();
-  temp.className = 'cheat_menu_cell';
-  let title_text = title_row.insertCell();
-  title_text.className = 'cheat_menu_cell';
-  temp = title_row.insertCell();
-  temp.className = 'cheat_menu_cell';
-  title_text.innerHTML = text;
+CheatMenu.appendDescription = function (text) {
+  let titleRow = CheatMenu.overlay.insertRow();
+  let temp = titleRow.insertCell();
+  temp.className = 'cheat-menu-cell';
+  let titleText = titleRow.insertCell();
+  titleText.className = 'cheat-menu-cell';
+  temp = titleRow.insertCell();
+  temp.className = 'cheat-menu-cell';
+  titleText.innerHTML = text;
 };
 
-// Append a cheat with some handler to activate
-//	Appears as:
-//	cheat text	status text[key]
-//	cheat_text: string
-//	status_text: string
-//	key: key mapping
-//	click_handler: function
-CheatMenu.append_cheat = function (
-  cheat_text,
-  status_text,
-  key,
-  click_handler,
-) {
-  const cheat_row = CheatMenu.overlay.insertRow();
+CheatMenu.appendCheat = function (cheatText, statusText, key, clickHandler) {
+  const cheatRow = CheatMenu.overlay.insertRow();
 
-  const cheat_title = cheat_row.insertCell();
-  cheat_title.className = 'cheat_menu_cell';
-  const temp = cheat_row.insertCell();
-  temp.className = 'cheat_menu_cell';
-  const cheat = cheat_row.insertCell();
-  cheat.className = 'cheat_menu_buttons cheat_menu_cell';
+  const cheatTitle = cheatRow.insertCell();
+  cheatTitle.className = 'cheat-menu-cell';
+  const temp = cheatRow.insertCell();
+  temp.className = 'cheat-menu-cell';
+  const cheat = cheatRow.insertCell();
+  cheat.className = 'cheat-menu-buttons cheat-menu-cell';
 
-  cheat_title.innerHTML = cheat_text;
-  cheat.innerHTML = status_text + '[' + key + ']';
+  cheatTitle.innerHTML = cheatText;
+  cheat.innerHTML = statusText + '[' + key + ']';
 
-  cheat.addEventListener('mousedown', click_handler);
+  cheat.addEventListener('mousedown', clickHandler);
 
   // @ts-ignore
-  CheatMenu.key_listeners[key] = click_handler;
+  CheatMenu.keyListeners[key] = clickHandler;
 };
 
-// Left and right scrolls for handling switching between menus
-CheatMenu.scroll_cheat = function (direction) {
+CheatMenu.scrollCheat = function (direction) {
   if (direction == 'left') {
-    CheatMenu.cheat_selected--;
-    if (CheatMenu.cheat_selected < 0) {
-      CheatMenu.cheat_selected = CheatMenu.menus.length - 1;
+    CheatMenu.cheatSelected--;
+    if (CheatMenu.cheatSelected < 0) {
+      CheatMenu.cheatSelected = CheatMenu.menus.length - 1;
     }
   } else {
-    CheatMenu.cheat_selected++;
-    if (CheatMenu.cheat_selected > CheatMenu.menus.length - 1) {
-      CheatMenu.cheat_selected = 0;
+    CheatMenu.cheatSelected++;
+    if (CheatMenu.cheatSelected > CheatMenu.menus.length - 1) {
+      CheatMenu.cheatSelected = 0;
     }
   }
 
   SoundManager.playSystemSound(0);
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// Left and right scrolls for handling switching selected actors
-CheatMenu.scroll_actor = function (direction) {
-  // since Core Script is retarded and doesn't have a getter for protected field
+CheatMenu.scrollActor = function (direction) {
   const gameActorsData = ($gameActors as any)._data as Game_Actor[];
 
   if (direction == 'left') {
-    CheatMenu.cheat_selected_actor--;
+    CheatMenu.cheatSelectedActor--;
 
-    if (CheatMenu.cheat_selected_actor < 0) {
-      CheatMenu.cheat_selected_actor =
+    if (CheatMenu.cheatSelectedActor < 0) {
+      CheatMenu.cheatSelectedActor =
         gameActorsData && gameActorsData.length > 0
           ? gameActorsData.length - 1
           : 0;
     }
   } else {
-    CheatMenu.cheat_selected_actor++;
+    CheatMenu.cheatSelectedActor++;
     if (
       gameActorsData &&
-      CheatMenu.cheat_selected_actor >= gameActorsData.length
+      CheatMenu.cheatSelectedActor >= gameActorsData.length
     ) {
-      CheatMenu.cheat_selected_actor = 0;
+      CheatMenu.cheatSelectedActor = 0;
     }
   }
 
   if (SoundManager) SoundManager.playSystemSound(0);
-  if (CheatMenu.update_menu) CheatMenu.update_menu();
+  if (CheatMenu.updateMenu) CheatMenu.updateMenu();
 };
 
-// Append actor selection to the menu
-CheatMenu.append_actor_selection = function (key1, key2) {
-  CheatMenu.append_title('Actor');
+CheatMenu.appendActorSelection = function (key1, key2) {
+  CheatMenu.appendTitle('Actor');
 
-  let actor_name_display;
-  const actor = $gameActors.actor(CheatMenu.cheat_selected_actor);
+  let actorNameDisplay;
+  const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
 
   if (actor && actor.name()) {
-    actor_name_display = `<span class='actor-name-highlight'>${actor.name()}</span>`;
+    actorNameDisplay = `<span class='actor-name-highlight'>${actor.name()}</span>`;
   } else {
-    actor_name_display = `<span class="error-text">NULL</span>`;
+    actorNameDisplay = `<span class="error-text">NULL</span>`;
   }
 
-  CheatMenu.append_scroll_selector(
-    actor_name_display,
+  CheatMenu.appendScrollSelector(
+    actorNameDisplay,
     key1,
     key2,
-    CheatMenu.scroll_actor,
+    CheatMenu.scrollActor,
   );
 };
 
-// Left and right scrolls for handling switching amount to modify numerical cheats
-CheatMenu.scroll_amount = function (direction) {
+CheatMenu.scrollAmount = function (direction) {
   if (direction == 'left') {
-    CheatMenu.amount_index--;
-    if (CheatMenu.amount_index < 0) {
-      CheatMenu.amount_index = 0;
+    CheatMenu.amountIndex--;
+    if (CheatMenu.amountIndex < 0) {
+      CheatMenu.amountIndex = 0;
     }
     SoundManager.playSystemSound(2);
   } else {
-    CheatMenu.amount_index++;
-    if (CheatMenu.amount_index >= CheatMenu.amounts.length) {
-      CheatMenu.amount_index = CheatMenu.amounts.length - 1;
+    CheatMenu.amountIndex++;
+    if (CheatMenu.amountIndex >= CheatMenu.amounts.length) {
+      CheatMenu.amountIndex = CheatMenu.amounts.length - 1;
     }
     SoundManager.playSystemSound(1);
   }
 
-  CheatMenu.update_menu();
+  CheatMenu.updateMenu();
 };
 
-// append the amount selection to the menu
-CheatMenu.append_amount_selection = function (key1, key2) {
-  CheatMenu.append_title('Amount');
+CheatMenu.appendAmountSelection = function (key1, key2) {
+  CheatMenu.appendTitle('Amount');
 
-  const currentAmount = CheatMenu.amounts[CheatMenu.amount_index];
+  const currentAmount = CheatMenu.amounts[CheatMenu.amountIndex];
   const currentAmountHtml = `<span class='actor-name-highlight'>${currentAmount}</span>`;
 
-  CheatMenu.append_scroll_selector(
+  CheatMenu.appendScrollSelector(
     currentAmountHtml,
     key1,
     key2,
-    CheatMenu.scroll_amount,
+    CheatMenu.scrollAmount,
   );
+};
+
+CheatMenu.appendCheatTitle = function (cheatName) {
+  CheatMenu.appendTitle('Cheat');
+  CheatMenu.appendScrollSelector(cheatName, 2, 3, CheatMenu.scrollCheat);
+};
+
+CheatMenu.appendBackButton = function () {
+  const backRow = CheatMenu.overlay.insertRow(0);
+  const backCell = backRow.insertCell();
+  backCell.colSpan = 3;
+  backCell.className = 'cheat-menu-back-button';
+  backCell.innerHTML = `<span>&larr; Back to Main Menu</span>`;
+
+  backCell.onclick = () => {
+    SoundManager.playSystemSound(1);
+    CheatMenu.currentMenuIndex = null;
+    CheatMenu.updateMenu();
+  };
+};
+
+CheatMenu.renderMainMenuGrid = function () {
+  const overlay = CheatMenu.overlay;
+  overlay.innerHTML = '';
+  overlay.className = 'cheat-menu-grid';
+
+  CheatMenu.menus.forEach((menuEntry, index) => {
+    const button = document.createElement('button');
+    button.className = 'cheat-menu-grid-button';
+    button.textContent = menuEntry.name;
+
+    button.onclick = () => {
+      SoundManager.playSystemSound(0);
+      CheatMenu.currentMenuIndex = index;
+      CheatMenu.updateMenu();
+    };
+
+    overlay.appendChild(button);
+  });
 };
 
 if (typeof CheatMenu.menus == 'undefined') {
   CheatMenu.menus = [];
 }
 
-// update whats being displayed in menu
-CheatMenu.update_menu = function () {
-  // clear menu
-  CheatMenu.overlay.innerHTML = '';
-  // clear key listeners
-  CheatMenu.key_listeners = {};
+CheatMenu.updateMenu = function () {
+  CheatMenu.keyListeners = {};
 
-  CheatMenu.menus[CheatMenu.cheat_selected]();
+  if (CheatMenu.currentMenuIndex === null) {
+    CheatMenu.renderMainMenuGrid();
+  } else {
+    const menuToRender = CheatMenu.menus[CheatMenu.currentMenuIndex];
+    if (menuToRender) {
+      CheatMenu.overlay.innerHTML = '';
+      CheatMenu.overlay.className = 'cheat-menu-text';
 
-  CheatMenu.position_menu();
-};
+      CheatMenu.appendBackButton();
 
-// Menu title with scroll options to go between menu, should be first
-//	append on each menu
-CheatMenu.append_cheat_title = function (cheat_name) {
-  CheatMenu.append_title('Cheat');
-  CheatMenu.append_scroll_selector(cheat_name, 2, 3, CheatMenu.scroll_cheat);
+      menuToRender.render();
+    }
+  }
+
+  CheatMenu.positionMenu();
 };

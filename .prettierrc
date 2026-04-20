@@ -1,11 +1,11 @@
 {
-  "trailingComma": "all",
-  "tabWidth": 2,
+  "arrowParens": "always",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "endOfLine": "lf",
+  "htmlWhitespaceSensitivity": "ignore",
   "semi": true,
   "singleQuote": true,
-  "bracketSpacing": true,
-  "bracketSameLine": false,
-  "arrowParens": "always",
-  "htmlWhitespaceSensitivity": "ignore",
-  "endOfLine": "lf"
+  "tabWidth": 2,
+  "trailingComma": "all"
 }

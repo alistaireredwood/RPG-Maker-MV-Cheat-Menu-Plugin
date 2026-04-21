@@ -1,6 +1,7 @@
 import CheatMenu from '../CheatMenu';
 
 let _gridFocusIndex = 0;
+let _updatingMenu = false;
 
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
@@ -73,12 +74,21 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   });
   input.addEventListener('mousedown', (e) => e.stopPropagation());
 
+  input.addEventListener('focus', () => {
+    CheatMenu._activeSearchKey = stateKey;
+  });
+
+  input.addEventListener('blur', () => {
+    if (!_updatingMenu && CheatMenu._activeSearchKey === stateKey) {
+      CheatMenu._activeSearchKey = null;
+    }
+  });
+
   input.addEventListener('input', () => {
     const keyword = input.value.toLowerCase();
     if (!CheatMenu.searchKeywords) CheatMenu.searchKeywords = {};
     CheatMenu.searchKeywords[stateKey] = keyword;
     onSearchChange?.(keyword);
-    CheatMenu._activeSearchKey = stateKey;
     CheatMenu.updateMenu();
   });
 
@@ -328,6 +338,7 @@ if (typeof CheatMenu.menus == 'undefined') {
 }
 
 CheatMenu.updateMenu = function () {
+  _updatingMenu = true;
   CheatMenu.keyListeners = {};
 
   const prev = CheatMenu._prevMenuIndex ?? null;
@@ -349,4 +360,5 @@ CheatMenu.updateMenu = function () {
   }
 
   CheatMenu.positionMenu();
+  _updatingMenu = false;
 };

@@ -39,9 +39,9 @@ Single singleton object holding all runtime state (current menu, position, amoun
 
 ### Core modules (`src/new/core/`)
 
-- `state.ts` — hooks `DataManager.makeSaveContents` / `extractSaveContents` to persist `CheatMenu` state inside `$gameSystem.CheatMenu`
-- `ui.ts` — creates/destroys the DOM overlay, injects CSS, handles positioning (5 positions cycled with tilde key)
-- `listeners.ts` — keyboard event handlers; keys 0–9 dispatch to `CheatMenu.key_listeners`; tilde cycles position; F8/F9 open dev tools / debug menu
+- `state.ts` — hooks `DataManager` to persist `CheatMenu` state in `$gameSystem.CheatMenu`; runs a 1 s interval to re-render open sub-menus (skips main grid to avoid hover-pulse)
+- `ui.ts` — creates/destroys the DOM overlay, injects CSS, handles positioning (5 positions cycled with tilde key); all `append*` helpers live here
+- `listeners.ts` — keyboard event handlers; keys 0–9 dispatch to `CheatMenu.keyListeners`; tilde cycles position; F8/F9 open dev tools / debug menu
 
 ### Feature modules (`src/new/features/`)
 
@@ -58,9 +58,40 @@ Features interact with RPG Maker via its global objects (`$gameActors`, `$gamePl
 - `globals.d.ts` — ambient declarations extending RPG Maker classes
 - `rpgmaker/mv/` — RPG Maker MV engine type stubs (core, data, managers, objects, windows)
 
+### UI helpers (`src/new/core/ui.ts`)
+
+Key `append*` functions available inside any `render()`:
+
+| Helper | Purpose |
+|---|---|
+| `appendCheatTitle()` | Top row with current menu name + left/right nav |
+| `appendTitle(text)` | Section header row |
+| `appendScrollSelector(text, key1, key2, handler)` | ← value → row with key bindings |
+| `appendCheat(label, status, key, handler)` | Label + status + action button row |
+| `appendSearchInput(placeholder, stateKey, onSearchChange?)` | Text filter input; stops key propagation so typing doesn't trigger game/menu keys; persists keyword in `CheatMenu.searchKeywords[stateKey]`; restores focus across re-renders via `CheatMenu._activeSearchKey` |
+| `appendAmountSelection(key1, key2)` | Amount selector (uses `CheatMenu.amounts` / `amountIndex`) |
+| `appendActorSelection(key1, key2)` | Actor selector |
+| `appendBackButton()` | Injected automatically by `updateMenu()` — don't call manually |
+
+### Re-render behaviour
+
+`updateMenu()` tears down and rebuilds the entire sub-menu DOM on every call. Avoid storing DOM references across renders. The 1 s timer only fires when a sub-menu is open (`currentMenuIndex !== null`).
+
+### Search inputs
+
+Features with large lists (Items, Weapons, Armors, Variables, Switches) use `appendSearchInput`. The scroll handler for each checks `CheatMenu.searchKeywords['<key>']` and skips non-matching entries. `onSearchChange` callback jumps to the first match when the keyword changes.
+
+### State fields to know
+
+- `CheatMenu.searchKeywords` — `Record<string, string>`, per-feature search terms (not persisted to save)
+- `CheatMenu._activeSearchKey` — which search input currently owns focus; managed by `focus`/`blur` events and the `_updatingMenu` flag in `ui.ts`
+- `CheatMenu.initialValues` — keys listed here are persisted to `$gameSystem.CheatMenu` on save/load; do **not** add `searchKeywords` or `_activeSearchKey` here
+
 ### Adding a new feature (`src/new/`)
 
-Create a new file in `src/new/features/`. It will be auto-loaded by `import.meta.glob`. Register to `CheatMenu.menus` with a name and render function. Use `CheatMenu.key_listeners` for keyboard shortcuts within the sub-menu.
+Create a new file in `src/new/features/`. It will be auto-loaded by `import.meta.glob`. Register to `CheatMenu.menus` with a name and render function. Use `CheatMenu.keyListeners` for keyboard shortcuts within the sub-menu.
+
+If the feature scrolls through a large list, add `appendSearchInput` before the title row and filter inside the scroll handler using `CheatMenu.searchKeywords['<key>']`.
 
 ### Adding a new module (`src/plus/`)
 

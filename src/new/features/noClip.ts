@@ -28,7 +28,7 @@ CheatMenu.appendNoClipStatus = function (key1) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'No Clip',
   render: () => {
     CheatMenu.appendCheatTitle();

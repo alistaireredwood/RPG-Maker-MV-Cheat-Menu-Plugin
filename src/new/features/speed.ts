@@ -106,7 +106,7 @@ CheatMenu.appendMoveAmountSelection = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Speed',
   render: () => {
     CheatMenu.appendCheatTitle();

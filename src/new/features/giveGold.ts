@@ -28,7 +28,7 @@ CheatMenu.appendGoldStatus = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Gold',
   render: () => {
     CheatMenu.appendCheatTitle();

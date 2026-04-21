@@ -74,7 +74,7 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Variables',
   render: () => {
     CheatMenu.appendCheatTitle();

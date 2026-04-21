@@ -115,7 +115,7 @@ CheatMenu.appendTeleport = function (
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Teleport',
   render: () => {
     CheatMenu.appendCheatTitle();

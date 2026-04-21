@@ -54,7 +54,7 @@ CheatMenu.appendCurrentState = function (key1) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Clear States',
   render: () => {
     CheatMenu.appendCheatTitle();

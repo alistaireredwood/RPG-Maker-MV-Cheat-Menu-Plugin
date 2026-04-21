@@ -7,17 +7,16 @@ CheatMenu.giveWeapon = (weaponId, amount) => {
 };
 
 CheatMenu.scrollWeapon = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.weaponSelection--;
-    if (CheatMenu.weaponSelection < 0) {
-      CheatMenu.weaponSelection = $dataWeapons.length - 1;
-    }
-  } else {
-    CheatMenu.weaponSelection++;
-    if (CheatMenu.weaponSelection >= $dataWeapons.length) {
-      CheatMenu.weaponSelection = 0;
-    }
+  const step = direction === 'left' ? -1 : 1;
+  const len = $dataWeapons.length;
+  let idx = CheatMenu.weaponSelection;
+  for (let i = 0; i < len; i++) {
+    idx += step;
+    if (idx <= 0) idx = len - 1;
+    else if (idx >= len) idx = 1;
+    if ($dataWeapons[idx]?.name) break;
   }
+  CheatMenu.weaponSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -66,7 +65,7 @@ CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Weapons',
   render: () => {
     CheatMenu.appendCheatTitle();

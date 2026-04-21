@@ -82,7 +82,7 @@ CheatMenu.scrollStat = function (direction) {
   CheatMenu.updateMenu();
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Stats',
   render: () => {
     CheatMenu.appendCheatTitle();

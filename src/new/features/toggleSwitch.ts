@@ -67,7 +67,7 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Switches',
   render: () => {
     CheatMenu.appendCheatTitle();

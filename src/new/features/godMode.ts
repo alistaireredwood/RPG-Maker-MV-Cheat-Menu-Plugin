@@ -163,7 +163,7 @@ CheatMenu.appendGodmodeStatus = function () {
   CheatMenu.appendCheat('Status:', statusHtml, 6, CheatMenu.toggleGodMode);
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'God Mode',
   render: () => {
     CheatMenu.appendCheatTitle();

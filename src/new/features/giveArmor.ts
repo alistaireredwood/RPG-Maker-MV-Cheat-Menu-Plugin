@@ -7,17 +7,16 @@ CheatMenu.giveArmor = (armorId, amount) => {
 };
 
 CheatMenu.scrollArmor = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.armorSelection--;
-    if (CheatMenu.armorSelection < 0) {
-      CheatMenu.armorSelection = $dataArmors.length - 1;
-    }
-  } else {
-    CheatMenu.armorSelection++;
-    if (CheatMenu.armorSelection >= $dataArmors.length) {
-      CheatMenu.armorSelection = 0;
-    }
+  const step = direction === 'left' ? -1 : 1;
+  const len = $dataArmors.length;
+  let idx = CheatMenu.armorSelection;
+  for (let i = 0; i < len; i++) {
+    idx += step;
+    if (idx <= 0) idx = len - 1;
+    else if (idx >= len) idx = 1;
+    if ($dataArmors[idx]?.name) break;
   }
+  CheatMenu.armorSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -64,7 +63,7 @@ CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Armors',
   render: () => {
     CheatMenu.appendCheatTitle();

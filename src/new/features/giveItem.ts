@@ -7,17 +7,16 @@ CheatMenu.giveItem = (itemId, amount) => {
 };
 
 CheatMenu.scrollItem = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.itemSelection--;
-    if (CheatMenu.itemSelection < 0) {
-      CheatMenu.itemSelection = $dataItems.length - 1;
-    }
-  } else {
-    CheatMenu.itemSelection++;
-    if (CheatMenu.itemSelection >= $dataItems.length) {
-      CheatMenu.itemSelection = 0;
-    }
+  const step = direction === 'left' ? -1 : 1;
+  const len = $dataItems.length;
+  let idx = CheatMenu.itemSelection;
+  for (let i = 0; i < len; i++) {
+    idx += step;
+    if (idx <= 0) idx = len - 1;
+    else if (idx >= len) idx = 1;
+    if ($dataItems[idx]?.name) break;
   }
+  CheatMenu.itemSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -64,7 +63,7 @@ CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+CheatMenu.menus.push({
   name: 'Items',
   render: () => {
     CheatMenu.appendCheatTitle();

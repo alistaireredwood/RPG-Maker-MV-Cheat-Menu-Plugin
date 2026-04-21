@@ -181,7 +181,7 @@ CheatMenu.appendTpCheats = function (key1, key2, key3, key4, key5, key6) {
 CheatMenu.menus.splice(0, 0, {
   name: 'Party TP',
   render: () => {
-    CheatMenu.appendCheatTitle('Party TP');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendTpCheats(4, 5, 6, 7, 8, 9);
   },
 });
@@ -189,7 +189,7 @@ CheatMenu.menus.splice(0, 0, {
 CheatMenu.menus.splice(0, 0, {
   name: 'Party MP',
   render: () => {
-    CheatMenu.appendCheatTitle('Party MP');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendMpCheats(4, 5, 6, 7, 8, 9);
   },
 });
@@ -197,7 +197,7 @@ CheatMenu.menus.splice(0, 0, {
 CheatMenu.menus.splice(0, 0, {
   name: 'Party HP',
   render: () => {
-    CheatMenu.appendCheatTitle('Party HP');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendHpCheats(4, 5, 6, 7, 8, 9);
   },
 });

@@ -43,7 +43,7 @@ CheatMenu.appendEnemyCheats = function (key1, key2, key3, key4) {
 CheatMenu.menus.splice(0, 0, {
   name: 'Enemy HP',
   render: () => {
-    CheatMenu.appendCheatTitle('Enemy HP');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendEnemyCheats(4, 5, 6, 7);
   },
 });

@@ -166,7 +166,7 @@ CheatMenu.appendGodmodeStatus = function () {
 CheatMenu.menus.splice(0, 0, {
   name: 'God Mode',
   render: () => {
-    CheatMenu.appendCheatTitle('God Mode');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendActorSelection(4, 5);
     CheatMenu.appendGodmodeStatus();
   },

@@ -67,7 +67,7 @@ CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
 CheatMenu.menus.splice(0, 0, {
   name: 'Items',
   render: () => {
-    CheatMenu.appendCheatTitle('Items');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendItemSelection(6, 7, 8, 9);
   },

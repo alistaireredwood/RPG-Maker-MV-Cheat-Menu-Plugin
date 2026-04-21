@@ -85,7 +85,7 @@ CheatMenu.scrollStat = function (direction) {
 CheatMenu.menus.splice(0, 0, {
   name: 'Stats',
   render: () => {
-    CheatMenu.appendCheatTitle('Stats');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendActorSelection(4, 5);
     CheatMenu.appendAmountSelection(6, 7);
     CheatMenu.appendStatSelection(8, 9, 0, '-');

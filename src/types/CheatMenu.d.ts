@@ -134,7 +134,7 @@ export type CheatMenuT = {
   // --- Menu Page Setup Functions ---
 
   scrollCheat: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  appendCheatTitle: (cheatName: string) => void;
+  appendCheatTitle: () => void;
 
   scrollActor: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendActorSelection: (

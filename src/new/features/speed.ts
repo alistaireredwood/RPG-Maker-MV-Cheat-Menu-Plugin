@@ -109,7 +109,7 @@ CheatMenu.appendMoveAmountSelection = function (key1, key2) {
 CheatMenu.menus.splice(0, 0, {
   name: 'Speed',
   render: () => {
-    CheatMenu.appendCheatTitle('Speed');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendMoveAmountSelection(4, 5);
     CheatMenu.appendSpeedStatus(6, 7, 8);
   },

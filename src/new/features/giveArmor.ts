@@ -67,7 +67,7 @@ CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
 CheatMenu.menus.splice(0, 0, {
   name: 'Armors',
   render: () => {
-    CheatMenu.appendCheatTitle('Armors');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendArmorSelection(6, 7, 8, 9);
   },

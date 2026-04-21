@@ -130,18 +130,14 @@ CheatMenu.appendCheat = function (cheatText, statusText, key, clickHandler) {
 };
 
 CheatMenu.scrollCheat = function (direction) {
+  const len = CheatMenu.menus.length;
+  if (len === 0) return;
+  const current = CheatMenu.currentMenuIndex ?? 0;
   if (direction == 'left') {
-    CheatMenu.cheatSelected--;
-    if (CheatMenu.cheatSelected < 0) {
-      CheatMenu.cheatSelected = CheatMenu.menus.length - 1;
-    }
+    CheatMenu.currentMenuIndex = current <= 0 ? len - 1 : current - 1;
   } else {
-    CheatMenu.cheatSelected++;
-    if (CheatMenu.cheatSelected > CheatMenu.menus.length - 1) {
-      CheatMenu.cheatSelected = 0;
-    }
+    CheatMenu.currentMenuIndex = current >= len - 1 ? 0 : current + 1;
   }
-
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -224,9 +220,10 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
   );
 };
 
-CheatMenu.appendCheatTitle = function (cheatName) {
+CheatMenu.appendCheatTitle = function () {
+  const name = CheatMenu.menus[CheatMenu.currentMenuIndex as number]?.name ?? '';
   CheatMenu.appendTitle('Cheat');
-  CheatMenu.appendScrollSelector(cheatName, 2, 3, CheatMenu.scrollCheat);
+  CheatMenu.appendScrollSelector(name, 2, 3, CheatMenu.scrollCheat);
 };
 
 CheatMenu.appendBackButton = function () {

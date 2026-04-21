@@ -7,6 +7,7 @@ CheatMenu.giveWeapon = (weaponId, amount) => {
 };
 
 CheatMenu.scrollWeapon = function (direction) {
+  const keyword = (CheatMenu.searchKeywords?.['weapon'] || '').toLowerCase();
   const step = direction === 'left' ? -1 : 1;
   const len = $dataWeapons.length;
   let idx = CheatMenu.weaponSelection;
@@ -14,7 +15,8 @@ CheatMenu.scrollWeapon = function (direction) {
     idx += step;
     if (idx <= 0) idx = len - 1;
     else if (idx >= len) idx = 1;
-    if ($dataWeapons[idx]?.name) break;
+    const weapon = $dataWeapons[idx];
+    if (weapon?.name && weapon.name.toLowerCase().includes(keyword)) break;
   }
   CheatMenu.weaponSelection = idx;
   SoundManager.playSystemSound(0);
@@ -36,6 +38,10 @@ CheatMenu.applyCurrentWeapon = function (direction) {
 };
 
 CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendSearchInput('Search weapons...', 'weapon', (keyword) => {
+    const idx = $dataWeapons.findIndex((w, i) => i > 0 && w?.name?.toLowerCase().includes(keyword));
+    if (idx > 0) CheatMenu.weaponSelection = idx;
+  });
   CheatMenu.appendTitle('Weapon');
 
   const weaponData = $dataWeapons[CheatMenu.weaponSelection];

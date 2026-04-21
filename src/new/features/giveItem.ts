@@ -7,6 +7,7 @@ CheatMenu.giveItem = (itemId, amount) => {
 };
 
 CheatMenu.scrollItem = function (direction) {
+  const keyword = (CheatMenu.searchKeywords?.['item'] || '').toLowerCase();
   const step = direction === 'left' ? -1 : 1;
   const len = $dataItems.length;
   let idx = CheatMenu.itemSelection;
@@ -14,7 +15,8 @@ CheatMenu.scrollItem = function (direction) {
     idx += step;
     if (idx <= 0) idx = len - 1;
     else if (idx >= len) idx = 1;
-    if ($dataItems[idx]?.name) break;
+    const item = $dataItems[idx];
+    if (item?.name && item.name.toLowerCase().includes(keyword)) break;
   }
   CheatMenu.itemSelection = idx;
   SoundManager.playSystemSound(0);
@@ -34,6 +36,10 @@ CheatMenu.applyCurrentItem = function (direction) {
 };
 
 CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendSearchInput('Search items...', 'item', (keyword) => {
+    const idx = $dataItems.findIndex((item, i) => i > 0 && item?.name?.toLowerCase().includes(keyword));
+    if (idx > 0) CheatMenu.itemSelection = idx;
+  });
   CheatMenu.appendTitle('Item');
 
   const itemData = $dataItems[CheatMenu.itemSelection];

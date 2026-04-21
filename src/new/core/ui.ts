@@ -56,6 +56,43 @@ CheatMenu.positionMenu();
 // Menu item types
 /////////////////////////////////////////////////
 
+CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = placeholder;
+  input.value = CheatMenu.searchKeywords?.[stateKey] || '';
+  input.className = 'cheat-menu-search-input';
+
+  ['keydown', 'keyup', 'keypress'].forEach((evt) => {
+    input.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  input.addEventListener('input', () => {
+    const keyword = input.value.toLowerCase();
+    if (!CheatMenu.searchKeywords) CheatMenu.searchKeywords = {};
+    CheatMenu.searchKeywords[stateKey] = keyword;
+    onSearchChange?.(keyword);
+    CheatMenu._activeSearchKey = stateKey;
+    CheatMenu.updateMenu();
+  });
+
+  cell.appendChild(input);
+
+  if (CheatMenu._activeSearchKey === stateKey) {
+    requestAnimationFrame(() => {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    });
+  }
+};
+
 CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler) {
   const scrollSelector = CheatMenu.overlay.insertRow();
   scrollSelector.className = 'scroll-selector-row';

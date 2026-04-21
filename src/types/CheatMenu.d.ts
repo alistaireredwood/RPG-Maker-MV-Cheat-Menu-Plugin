@@ -64,6 +64,9 @@ export type CheatMenuT = {
   speedUnlocked: boolean;
   speedInitialized: boolean;
 
+  searchKeywords: Record<string, string>;
+  _activeSearchKey: string | null;
+
   initialValues: InitialValues;
 
   // DOM Elements
@@ -329,6 +332,12 @@ export type CheatMenuT = {
     key5: string | number,
     key6: string | number,
     key7: string | number,
+  ) => void;
+
+  appendSearchInput: (
+    placeholder: string,
+    stateKey: string,
+    onSearchChange?: (keyword: string) => void,
   ) => void;
 
   // --- Core Menu Logic & Input Handlers ---

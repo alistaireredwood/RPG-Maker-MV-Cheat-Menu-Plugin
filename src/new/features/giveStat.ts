@@ -82,7 +82,7 @@ CheatMenu.scrollStat = function (direction) {
   CheatMenu.updateMenu();
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Stats',
   render: () => {
     CheatMenu.appendCheatTitle();
@@ -90,4 +90,4 @@ CheatMenu.menus.push({
     CheatMenu.appendAmountSelection(6, 7);
     CheatMenu.appendStatSelection(8, 9, 0, '-');
   },
-});
+};

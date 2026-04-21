@@ -63,11 +63,11 @@ CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Items',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendItemSelection(6, 7, 8, 9);
   },
-});
+};

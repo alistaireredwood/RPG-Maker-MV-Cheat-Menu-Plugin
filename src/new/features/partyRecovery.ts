@@ -178,26 +178,26 @@ CheatMenu.appendTpCheats = function (key1, key2, key3, key4, key5, key6) {
   CheatMenu.appendCheat('Party Full TP', 'Activate', key6, CheatMenu.partyTpCheat6);
 };
 
-CheatMenu.menus.push({
-  name: 'Party HP',
-  render: () => {
-    CheatMenu.appendCheatTitle();
-    CheatMenu.appendHpCheats(4, 5, 6, 7, 8, 9);
+export const menus = [
+  {
+    name: 'Party HP',
+    render: () => {
+      CheatMenu.appendCheatTitle();
+      CheatMenu.appendHpCheats(4, 5, 6, 7, 8, 9);
+    },
   },
-});
-
-CheatMenu.menus.push({
-  name: 'Party MP',
-  render: () => {
-    CheatMenu.appendCheatTitle();
-    CheatMenu.appendMpCheats(4, 5, 6, 7, 8, 9);
+  {
+    name: 'Party MP',
+    render: () => {
+      CheatMenu.appendCheatTitle();
+      CheatMenu.appendMpCheats(4, 5, 6, 7, 8, 9);
+    },
   },
-});
-
-CheatMenu.menus.push({
-  name: 'Party TP',
-  render: () => {
-    CheatMenu.appendCheatTitle();
-    CheatMenu.appendTpCheats(4, 5, 6, 7, 8, 9);
+  {
+    name: 'Party TP',
+    render: () => {
+      CheatMenu.appendCheatTitle();
+      CheatMenu.appendTpCheats(4, 5, 6, 7, 8, 9);
+    },
   },
-});
+];

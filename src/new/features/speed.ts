@@ -106,11 +106,11 @@ CheatMenu.appendMoveAmountSelection = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Speed',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendMoveAmountSelection(4, 5);
     CheatMenu.appendSpeedStatus(6, 7, 8);
   },
-});
+};

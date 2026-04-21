@@ -67,10 +67,10 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Switches',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendSwitchSelection(4, 5, 6);
   },
-});
+};

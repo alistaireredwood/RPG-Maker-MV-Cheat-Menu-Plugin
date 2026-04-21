@@ -65,11 +65,11 @@ CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Weapons',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendWeaponSelection(6, 7, 8, 9);
   },
-});
+};

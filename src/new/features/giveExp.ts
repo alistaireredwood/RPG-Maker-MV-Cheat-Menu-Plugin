@@ -33,7 +33,7 @@ CheatMenu.appendExpCheat = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Give Exp',
   render: () => {
     CheatMenu.appendCheatTitle();
@@ -41,4 +41,4 @@ CheatMenu.menus.push({
     CheatMenu.appendAmountSelection(6, 7);
     CheatMenu.appendExpCheat(8, 9);
   },
-});
+};

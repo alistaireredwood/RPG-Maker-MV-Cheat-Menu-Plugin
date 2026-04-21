@@ -115,10 +115,10 @@ CheatMenu.appendTeleport = function (
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Teleport',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendTeleport(4, 5, 6, 7, 8, 9, 0);
   },
-});
+};

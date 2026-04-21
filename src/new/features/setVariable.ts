@@ -74,11 +74,11 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Variables',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendVariableSelection(6, 7, 8, 9);
   },
-});
+};

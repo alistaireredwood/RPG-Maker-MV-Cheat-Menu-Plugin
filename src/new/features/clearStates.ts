@@ -54,7 +54,7 @@ CheatMenu.appendCurrentState = function (key1) {
   );
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Clear States',
   render: () => {
     CheatMenu.appendCheatTitle();
@@ -62,4 +62,4 @@ CheatMenu.menus.push({
     CheatMenu.appendActorSelection(5, 6);
     CheatMenu.appendCurrentState(7);
   },
-});
+};

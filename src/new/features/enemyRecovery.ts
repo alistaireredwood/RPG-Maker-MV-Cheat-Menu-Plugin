@@ -40,10 +40,10 @@ CheatMenu.appendEnemyCheats = function (key1, key2, key3, key4) {
   CheatMenu.appendCheat('Enemy HP to 1', 'Activate', key4, CheatMenu.enemyHpCheat4);
 };
 
-CheatMenu.menus.push({
+export const menu = {
   name: 'Enemy HP',
   render: () => {
     CheatMenu.appendCheatTitle();
     CheatMenu.appendEnemyCheats(4, 5, 6, 7);
   },
-});
+};

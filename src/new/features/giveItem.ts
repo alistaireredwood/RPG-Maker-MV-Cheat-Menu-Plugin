@@ -7,17 +7,18 @@ CheatMenu.giveItem = (itemId, amount) => {
 };
 
 CheatMenu.scrollItem = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.itemSelection--;
-    if (CheatMenu.itemSelection < 0) {
-      CheatMenu.itemSelection = $dataItems.length - 1;
-    }
-  } else {
-    CheatMenu.itemSelection++;
-    if (CheatMenu.itemSelection >= $dataItems.length) {
-      CheatMenu.itemSelection = 0;
-    }
+  const keyword = (CheatMenu.searchKeywords?.['item'] || '').toLowerCase();
+  const step = direction === 'left' ? -1 : 1;
+  const len = $dataItems.length;
+  let idx = CheatMenu.itemSelection;
+  for (let i = 0; i < len; i++) {
+    idx += step;
+    if (idx <= 0) idx = len - 1;
+    else if (idx >= len) idx = 1;
+    const item = $dataItems[idx];
+    if (item?.name && item.name.toLowerCase().includes(keyword)) break;
   }
+  CheatMenu.itemSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -35,6 +36,10 @@ CheatMenu.applyCurrentItem = function (direction) {
 };
 
 CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendSearchInput('Search items...', 'item', (keyword) => {
+    const idx = $dataItems.findIndex((item, i) => i > 0 && item?.name?.toLowerCase().includes(keyword));
+    if (idx > 0) CheatMenu.itemSelection = idx;
+  });
   CheatMenu.appendTitle('Item');
 
   const itemData = $dataItems[CheatMenu.itemSelection];
@@ -64,11 +69,11 @@ CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Items',
   render: () => {
-    CheatMenu.appendCheatTitle('Items');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendItemSelection(6, 7, 8, 9);
   },
-});
+};

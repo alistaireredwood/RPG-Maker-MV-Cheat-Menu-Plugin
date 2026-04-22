@@ -15,10 +15,8 @@ CheatMenu.clearPartyStates = () => {
 };
 
 CheatMenu.clearCurrentActorStates = function () {
-  CheatMenu.clearActorStates(
-    $gameActors.actor(CheatMenu.cheatSelectedActor),
-  );
-
+  const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  if (actor) CheatMenu.clearActorStates(actor);
   SoundManager.playSystemSound(1);
   CheatMenu.updateMenu();
 };
@@ -42,7 +40,7 @@ CheatMenu.appendCurrentState = function (key1) {
   let numberStates = 0;
 
   const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
-  const activeStates = actorInstance.states();
+  const activeStates = actorInstance?.states();
 
   if (activeStates) {
     numberStates = activeStates.length;
@@ -56,12 +54,12 @@ CheatMenu.appendCurrentState = function (key1) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Clear States',
   render: () => {
-    CheatMenu.appendCheatTitle('Clear States');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendPartyState(4);
     CheatMenu.appendActorSelection(5, 6);
     CheatMenu.appendCurrentState(7);
   },
-});
+};

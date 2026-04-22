@@ -7,17 +7,18 @@ CheatMenu.giveWeapon = (weaponId, amount) => {
 };
 
 CheatMenu.scrollWeapon = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.weaponSelection--;
-    if (CheatMenu.weaponSelection < 0) {
-      CheatMenu.weaponSelection = $dataWeapons.length - 1;
-    }
-  } else {
-    CheatMenu.weaponSelection++;
-    if (CheatMenu.weaponSelection >= $dataWeapons.length) {
-      CheatMenu.weaponSelection = 0;
-    }
+  const keyword = (CheatMenu.searchKeywords?.['weapon'] || '').toLowerCase();
+  const step = direction === 'left' ? -1 : 1;
+  const len = $dataWeapons.length;
+  let idx = CheatMenu.weaponSelection;
+  for (let i = 0; i < len; i++) {
+    idx += step;
+    if (idx <= 0) idx = len - 1;
+    else if (idx >= len) idx = 1;
+    const weapon = $dataWeapons[idx];
+    if (weapon?.name && weapon.name.toLowerCase().includes(keyword)) break;
   }
+  CheatMenu.weaponSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -37,6 +38,10 @@ CheatMenu.applyCurrentWeapon = function (direction) {
 };
 
 CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
+  CheatMenu.appendSearchInput('Search weapons...', 'weapon', (keyword) => {
+    const idx = $dataWeapons.findIndex((w, i) => i > 0 && w?.name?.toLowerCase().includes(keyword));
+    if (idx > 0) CheatMenu.weaponSelection = idx;
+  });
   CheatMenu.appendTitle('Weapon');
 
   const weaponData = $dataWeapons[CheatMenu.weaponSelection];
@@ -66,11 +71,11 @@ CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Weapons',
   render: () => {
-    CheatMenu.appendCheatTitle('Weapons');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendWeaponSelection(6, 7, 8, 9);
   },
-});
+};

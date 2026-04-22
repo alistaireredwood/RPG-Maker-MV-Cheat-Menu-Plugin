@@ -27,6 +27,8 @@ const CheatMenu = {
   speed: null,
   speedUnlocked: true,
   speedInitialized: false,
+  searchKeywords: {} as Record<string, string>,
+  _activeSearchKey: null,
 } as CheatMenuT;
 
 // Check if already defined (allows game specific extensions to be loaded in any order)

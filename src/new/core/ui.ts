@@ -1,5 +1,8 @@
 import CheatMenu from '../CheatMenu';
 
+let _gridFocusIndex = 0;
+let _updatingMenu = false;
+
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
 
@@ -53,6 +56,52 @@ CheatMenu.positionMenu();
 /////////////////////////////////////////////////
 // Menu item types
 /////////////////////////////////////////////////
+
+CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = placeholder;
+  input.value = CheatMenu.searchKeywords?.[stateKey] || '';
+  input.className = 'cheat-menu-search-input';
+
+  ['keydown', 'keyup', 'keypress'].forEach((evt) => {
+    input.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  input.addEventListener('focus', () => {
+    CheatMenu._activeSearchKey = stateKey;
+  });
+
+  input.addEventListener('blur', () => {
+    if (!_updatingMenu && CheatMenu._activeSearchKey === stateKey) {
+      CheatMenu._activeSearchKey = null;
+    }
+  });
+
+  input.addEventListener('input', () => {
+    const keyword = input.value.toLowerCase();
+    if (!CheatMenu.searchKeywords) CheatMenu.searchKeywords = {};
+    CheatMenu.searchKeywords[stateKey] = keyword;
+    onSearchChange?.(keyword);
+    CheatMenu.updateMenu();
+  });
+
+  cell.appendChild(input);
+
+  if (CheatMenu._activeSearchKey === stateKey) {
+    requestAnimationFrame(() => {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    });
+  }
+};
 
 CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler) {
   const scrollSelector = CheatMenu.overlay.insertRow();
@@ -128,18 +177,14 @@ CheatMenu.appendCheat = function (cheatText, statusText, key, clickHandler) {
 };
 
 CheatMenu.scrollCheat = function (direction) {
+  const len = CheatMenu.menus.length;
+  if (len === 0) return;
+  const current = CheatMenu.currentMenuIndex ?? 0;
   if (direction == 'left') {
-    CheatMenu.cheatSelected--;
-    if (CheatMenu.cheatSelected < 0) {
-      CheatMenu.cheatSelected = CheatMenu.menus.length - 1;
-    }
+    CheatMenu.currentMenuIndex = current <= 0 ? len - 1 : current - 1;
   } else {
-    CheatMenu.cheatSelected++;
-    if (CheatMenu.cheatSelected > CheatMenu.menus.length - 1) {
-      CheatMenu.cheatSelected = 0;
-    }
+    CheatMenu.currentMenuIndex = current >= len - 1 ? 0 : current + 1;
   }
-
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -222,9 +267,10 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
   );
 };
 
-CheatMenu.appendCheatTitle = function (cheatName) {
+CheatMenu.appendCheatTitle = function () {
+  const name = CheatMenu.menus[CheatMenu.currentMenuIndex as number]?.name ?? '';
   CheatMenu.appendTitle('Cheat');
-  CheatMenu.appendScrollSelector(cheatName, 2, 3, CheatMenu.scrollCheat);
+  CheatMenu.appendScrollSelector(name, 2, 3, CheatMenu.scrollCheat);
 };
 
 CheatMenu.appendBackButton = function () {
@@ -244,7 +290,14 @@ CheatMenu.appendBackButton = function () {
 CheatMenu.renderMainMenuGrid = function () {
   const overlay = CheatMenu.overlay;
   overlay.innerHTML = '';
-  overlay.className = 'cheat-menu-grid';
+  overlay.className = '';
+
+  const cell = overlay.insertRow().insertCell();
+  cell.style.padding = '0';
+
+  const grid = document.createElement('div');
+  grid.className = 'cheat-menu-grid';
+  cell.appendChild(grid);
 
   CheatMenu.menus.forEach((menuEntry, index) => {
     const button = document.createElement('button');
@@ -257,7 +310,26 @@ CheatMenu.renderMainMenuGrid = function () {
       CheatMenu.updateMenu();
     };
 
-    overlay.appendChild(button);
+    grid.appendChild(button);
+  });
+
+  const buttons = Array.from(grid.querySelectorAll<HTMLElement>('.cheat-menu-grid-button'));
+  if (buttons.length) {
+    _gridFocusIndex = Math.min(_gridFocusIndex, buttons.length - 1);
+    buttons[_gridFocusIndex].focus();
+  }
+
+  grid.addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab') return;
+    event.preventDefault();
+    event.stopPropagation();
+    const idx = buttons.indexOf(document.activeElement as HTMLElement);
+    const current = idx >= 0 ? idx : _gridFocusIndex;
+    const next = event.shiftKey
+      ? (current <= 0 ? buttons.length - 1 : current - 1)
+      : (current >= buttons.length - 1 ? 0 : current + 1);
+    _gridFocusIndex = next;
+    buttons[next].focus();
   });
 };
 
@@ -266,9 +338,14 @@ if (typeof CheatMenu.menus == 'undefined') {
 }
 
 CheatMenu.updateMenu = function () {
+  _updatingMenu = true;
   CheatMenu.keyListeners = {};
 
+  const prev = CheatMenu._prevMenuIndex ?? null;
+  CheatMenu._prevMenuIndex = CheatMenu.currentMenuIndex;
+
   if (CheatMenu.currentMenuIndex === null) {
+    if (prev !== null) _gridFocusIndex = 0;
     CheatMenu.renderMainMenuGrid();
   } else {
     const menuToRender = CheatMenu.menus[CheatMenu.currentMenuIndex];
@@ -283,4 +360,5 @@ CheatMenu.updateMenu = function () {
   }
 
   CheatMenu.positionMenu();
+  _updatingMenu = false;
 };

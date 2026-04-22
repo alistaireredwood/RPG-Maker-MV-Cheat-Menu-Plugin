@@ -7,17 +7,19 @@ CheatMenu.toggleSwitch = (switchId) => {
 };
 
 CheatMenu.scrollSwitch = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.switchSelection--;
-    if (CheatMenu.switchSelection < 0) {
-      CheatMenu.switchSelection = $dataSystem.switches.length - 1;
-    }
-  } else {
-    CheatMenu.switchSelection++;
-    if (CheatMenu.switchSelection >= $dataSystem.switches.length) {
-      CheatMenu.switchSelection = 0;
-    }
+  const keyword = (CheatMenu.searchKeywords?.['switch'] || '').toLowerCase();
+  const step = direction === 'left' ? -1 : 1;
+  const switches = $dataSystem.switches;
+  const len = switches.length;
+  let idx = CheatMenu.switchSelection;
+  for (let i = 0; i < len; i++) {
+    idx += step;
+    if (idx < 0) idx = len - 1;
+    else if (idx >= len) idx = 0;
+    const name = switches[idx];
+    if (name && name.toLowerCase().includes(keyword)) break;
   }
+  CheatMenu.switchSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -33,6 +35,10 @@ CheatMenu.toggleCurrentSwitch = function () {
 };
 
 CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
+  CheatMenu.appendSearchInput('Search switches...', 'switch', (keyword) => {
+    const idx = $dataSystem.switches.findIndex((s, i) => i > 0 && s?.toLowerCase().includes(keyword));
+    if (idx > 0) CheatMenu.switchSelection = idx;
+  });
   CheatMenu.appendTitle('Switch');
   let currentSwitch;
 
@@ -67,10 +73,10 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Switches',
   render: () => {
-    CheatMenu.appendCheatTitle('Switches');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendSwitchSelection(4, 5, 6);
   },
-});
+};

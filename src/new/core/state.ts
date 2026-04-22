@@ -9,7 +9,7 @@ CheatMenu.initialize = () => {
 
   clearInterval(CheatMenu.menuUpdateTimer || undefined);
   CheatMenu.menuUpdateTimer = setInterval(function () {
-    if (CheatMenu.isCheatMenuOpen) {
+    if (CheatMenu.isCheatMenuOpen && CheatMenu.currentMenuIndex !== null) {
       CheatMenu.updateMenu();
     }
   }, 1000);

@@ -28,11 +28,11 @@ CheatMenu.appendGoldStatus = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Gold',
   render: () => {
-    CheatMenu.appendCheatTitle('Gold');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendGoldStatus(6, 7);
   },
-});
+};

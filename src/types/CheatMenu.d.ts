@@ -34,6 +34,7 @@ export type InitialValues = {
 };
 
 export type CheatMenuT = {
+  _prevMenuIndex: number | null;
   // --- Properties ---
 
   initialized: boolean;
@@ -62,6 +63,9 @@ export type CheatMenuT = {
   speed: number | null;
   speedUnlocked: boolean;
   speedInitialized: boolean;
+
+  searchKeywords: Record<string, string>;
+  _activeSearchKey: string | null;
 
   initialValues: InitialValues;
 
@@ -133,7 +137,7 @@ export type CheatMenuT = {
   // --- Menu Page Setup Functions ---
 
   scrollCheat: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  appendCheatTitle: (cheatName: string) => void;
+  appendCheatTitle: () => void;
 
   scrollActor: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendActorSelection: (
@@ -328,6 +332,12 @@ export type CheatMenuT = {
     key5: string | number,
     key6: string | number,
     key7: string | number,
+  ) => void;
+
+  appendSearchInput: (
+    placeholder: string,
+    stateKey: string,
+    onSearchChange?: (keyword: string) => void,
   ) => void;
 
   // --- Core Menu Logic & Input Handlers ---

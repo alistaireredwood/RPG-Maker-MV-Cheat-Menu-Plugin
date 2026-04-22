@@ -1,4 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
+import { makeScroll } from '../core/scrollable.ts';
 
 CheatMenu.toggleSwitch = (switchId) => {
   if ($dataSystem.switches[switchId] != undefined) {
@@ -6,24 +7,14 @@ CheatMenu.toggleSwitch = (switchId) => {
   }
 };
 
-CheatMenu.scrollSwitch = function (direction) {
-  const keyword = (CheatMenu.searchKeywords?.['switch'] || '').toLowerCase();
-  const step = direction === 'left' ? -1 : 1;
-  const switches = $dataSystem.switches;
-  const len = switches.length;
-  let idx = CheatMenu.switchSelection;
-  let found = false;
-  for (let i = 0; i < len; i++) {
-    idx += step;
-    if (idx < 0) idx = len - 1;
-    else if (idx >= len) idx = 0;
-    const name = switches[idx];
-    if (name && name.toLowerCase().includes(keyword)) { found = true; break; }
-  }
-  if (found) CheatMenu.switchSelection = idx;
-  SoundManager.playSystemSound(0);
-  CheatMenu.updateMenu();
-};
+CheatMenu.scrollSwitch = makeScroll({
+  stateKey: 'switch',
+  getData: () => $dataSystem.switches,
+  getIdx: () => CheatMenu.switchSelection,
+  setIdx: (idx) => { CheatMenu.switchSelection = idx; },
+  matches: (item: any, keyword) => typeof item === 'string' && item.toLowerCase().includes(keyword),
+  startIdx: 0,
+});
 
 CheatMenu.toggleCurrentSwitch = function () {
   CheatMenu.toggleSwitch(CheatMenu.switchSelection);
@@ -41,37 +32,20 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
     if (idx > 0) CheatMenu.switchSelection = idx;
   });
   CheatMenu.appendTitle('Switch');
-  let currentSwitch;
 
-  if (
-    $dataSystem.switches[CheatMenu.switchSelection] &&
-    $dataSystem.switches[CheatMenu.switchSelection].length > 0
-  ) {
-    currentSwitch = $dataSystem.switches[CheatMenu.switchSelection];
-  } else {
-    currentSwitch = 'NULL';
-  }
+  const currentSwitch =
+    $dataSystem.switches[CheatMenu.switchSelection]?.length > 0
+      ? $dataSystem.switches[CheatMenu.switchSelection]
+      : 'NULL';
 
-  CheatMenu.appendScrollSelector(
-    currentSwitch,
-    key1,
-    key2,
-    CheatMenu.scrollSwitch,
-  );
+  CheatMenu.appendScrollSelector(currentSwitch, key1, key2, CheatMenu.scrollSwitch);
 
-  let currentSwitchValue;
-  if ($gameSwitches.value(CheatMenu.switchSelection) != undefined) {
-    currentSwitchValue = $gameSwitches.value(CheatMenu.switchSelection);
-  } else {
-    currentSwitchValue = 'NULL';
-  }
+  const currentSwitchValue =
+    $gameSwitches.value(CheatMenu.switchSelection) != undefined
+      ? $gameSwitches.value(CheatMenu.switchSelection)
+      : 'NULL';
 
-  CheatMenu.appendCheat(
-    'Status:',
-    currentSwitchValue,
-    key3,
-    CheatMenu.toggleCurrentSwitch,
-  );
+  CheatMenu.appendCheat('Status:', currentSwitchValue, key3, CheatMenu.toggleCurrentSwitch);
 };
 
 export const menu = {

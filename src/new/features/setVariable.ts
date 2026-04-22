@@ -1,45 +1,26 @@
 import CheatMenu from '../CheatMenu.ts';
+import { makeScroll, makeApplyAmount } from '../core/scrollable.ts';
 
 CheatMenu.setVariable = (variableId, value) => {
   if ($dataSystem.variables[variableId] != undefined) {
     let newValue = $gameVariables.value(variableId) + value;
-
     $gameVariables.setValue(variableId, newValue);
   }
 };
 
-CheatMenu.scrollVariable = function (direction) {
-  const keyword = (CheatMenu.searchKeywords?.['variable'] || '').toLowerCase();
-  const step = direction === 'left' ? -1 : 1;
-  const vars = $dataSystem.variables;
-  const len = vars.length;
-  let idx = CheatMenu.variableSelection;
-  let found = false;
-  for (let i = 0; i < len; i++) {
-    idx += step;
-    if (idx < 0) idx = len - 1;
-    else if (idx >= len) idx = 0;
-    const name = vars[idx];
-    if (name && name.toLowerCase().includes(keyword)) { found = true; break; }
-  }
-  if (found) CheatMenu.variableSelection = idx;
-  SoundManager.playSystemSound(0);
-  CheatMenu.updateMenu();
-};
+CheatMenu.scrollVariable = makeScroll({
+  stateKey: 'variable',
+  getData: () => $dataSystem.variables,
+  getIdx: () => CheatMenu.variableSelection,
+  setIdx: (idx) => { CheatMenu.variableSelection = idx; },
+  matches: (item: any, keyword) => typeof item === 'string' && item.toLowerCase().includes(keyword),
+  startIdx: 0,
+});
 
-CheatMenu.applyCurrentVariable = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
-
-  if (direction == 'left') {
-    amount = -amount;
-    SoundManager.playSystemSound(2);
-  } else {
-    SoundManager.playSystemSound(1);
-  }
-
-  CheatMenu.setVariable(CheatMenu.variableSelection, amount);
-  CheatMenu.updateMenu();
-};
+CheatMenu.applyCurrentVariable = makeApplyAmount(
+  (id, amount) => CheatMenu.setVariable(id, amount),
+  () => CheatMenu.variableSelection,
+);
 
 CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
   CheatMenu.appendSearchInput('Search variables...', 'variable', (keyword) => {
@@ -48,37 +29,19 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
   });
   CheatMenu.appendTitle('Variable');
 
-  let currentVariable;
+  const currentVariable =
+    $dataSystem.variables[CheatMenu.variableSelection]?.length > 0
+      ? $dataSystem.variables[CheatMenu.variableSelection]
+      : 'NULL';
 
-  if (
-    $dataSystem.variables[CheatMenu.variableSelection] &&
-    $dataSystem.variables[CheatMenu.variableSelection].length > 0
-  ) {
-    currentVariable = $dataSystem.variables[CheatMenu.variableSelection];
-  } else {
-    currentVariable = 'NULL';
-  }
+  CheatMenu.appendScrollSelector(currentVariable, key1, key2, CheatMenu.scrollVariable);
 
-  CheatMenu.appendScrollSelector(
-    currentVariable,
-    key1,
-    key2,
-    CheatMenu.scrollVariable,
-  );
+  const currentVariableValue =
+    $gameVariables.value(CheatMenu.variableSelection) != undefined
+      ? $gameVariables.value(CheatMenu.variableSelection)
+      : 'NULL';
 
-  let currentVariableValue;
-  if ($gameVariables.value(CheatMenu.variableSelection) != undefined) {
-    currentVariableValue = $gameVariables.value(CheatMenu.variableSelection);
-  } else {
-    currentVariableValue = 'NULL';
-  }
-
-  CheatMenu.appendScrollSelector(
-    currentVariableValue,
-    key3,
-    key4,
-    CheatMenu.applyCurrentVariable,
-  );
+  CheatMenu.appendScrollSelector(currentVariableValue, key3, key4, CheatMenu.applyCurrentVariable);
 };
 
 export const menu = {

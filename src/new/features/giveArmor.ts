@@ -1,4 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
+import { makeScroll, makeApplyAmount, appendInventorySection } from '../core/scrollable.ts';
 
 CheatMenu.giveArmor = (armorId, amount) => {
   if ($dataArmors[armorId] != undefined) {
@@ -6,68 +7,31 @@ CheatMenu.giveArmor = (armorId, amount) => {
   }
 };
 
-CheatMenu.scrollArmor = function (direction) {
-  const keyword = (CheatMenu.searchKeywords?.['armor'] || '').toLowerCase();
-  const step = direction === 'left' ? -1 : 1;
-  const len = $dataArmors.length;
-  let idx = CheatMenu.armorSelection;
-  let found = false;
-  for (let i = 0; i < len; i++) {
-    idx += step;
-    if (idx <= 0) idx = len - 1;
-    else if (idx >= len) idx = 1;
-    const armor = $dataArmors[idx];
-    if (armor?.name && armor.name.toLowerCase().includes(keyword)) { found = true; break; }
-  }
-  if (found) CheatMenu.armorSelection = idx;
-  SoundManager.playSystemSound(0);
-  CheatMenu.updateMenu();
-};
+CheatMenu.scrollArmor = makeScroll({
+  stateKey: 'armor',
+  getData: () => $dataArmors,
+  getIdx: () => CheatMenu.armorSelection,
+  setIdx: (idx) => { CheatMenu.armorSelection = idx; },
+  matches: (item: any, keyword) => item?.name?.toLowerCase().includes(keyword),
+});
 
-CheatMenu.applyCurrentArmor = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
-  if (direction == 'left') {
-    amount = -amount;
-    SoundManager.playSystemSound(2);
-  } else {
-    SoundManager.playSystemSound(1);
-  }
-  CheatMenu.giveArmor(CheatMenu.armorSelection, amount);
-  CheatMenu.updateMenu();
-};
+CheatMenu.applyCurrentArmor = makeApplyAmount(
+  (id, amount) => CheatMenu.giveArmor(id, amount),
+  () => CheatMenu.armorSelection,
+);
 
 CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
-  CheatMenu.appendSearchInput('Search armors...', 'armor', (keyword) => {
-    const idx = $dataArmors.findIndex((a, i) => i > 0 && a?.name?.toLowerCase().includes(keyword));
-    if (idx > 0) CheatMenu.armorSelection = idx;
-  });
-  CheatMenu.appendTitle('Armor');
-
-  const armorData = $dataArmors[CheatMenu.armorSelection];
-
-  let currentArmorName = '';
-  if (armorData && armorData.name) {
-    currentArmorName = armorData.name;
-  }
-
-  CheatMenu.appendScrollSelector(
-    currentArmorName,
-    key1,
-    key2,
-    CheatMenu.scrollArmor,
-  );
-
-  let currentArmorAmount: number = 0;
-  if (armorData) {
-    currentArmorAmount = $gameParty.numItems(armorData);
-  }
-
-  CheatMenu.appendScrollSelector(
-    currentArmorAmount,
-    key3,
-    key4,
-    CheatMenu.applyCurrentArmor,
-  );
+  appendInventorySection({
+    searchPlaceholder: 'Search armors...',
+    stateKey: 'armor',
+    title: 'Armor',
+    getData: () => $dataArmors,
+    getIdx: () => CheatMenu.armorSelection,
+    setIdx: (idx) => { CheatMenu.armorSelection = idx; },
+    scrollFn: CheatMenu.scrollArmor,
+    applyFn: CheatMenu.applyCurrentArmor,
+    getCount: (item) => $gameParty.numItems(item as any),
+  }, key1, key2, key3, key4);
 };
 
 export const menu = {

@@ -16,7 +16,6 @@ export type KeyListeners = {
 
 export type InitialValues = {
   position: number;
-  cheatSelected: number;
   cheatSelectedActor: number;
   amountIndex: number;
   statSelection: number;
@@ -43,7 +42,6 @@ export type CheatMenuT = {
   position: number;
   menuUpdateTimer: NodeJS.Timeout | null;
 
-  cheatSelected: number;
   cheatSelectedActor: number;
   amounts: number[];
   amountIndex: number;

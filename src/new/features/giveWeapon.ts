@@ -11,14 +11,15 @@ CheatMenu.scrollWeapon = function (direction) {
   const step = direction === 'left' ? -1 : 1;
   const len = $dataWeapons.length;
   let idx = CheatMenu.weaponSelection;
+  let found = false;
   for (let i = 0; i < len; i++) {
     idx += step;
     if (idx <= 0) idx = len - 1;
     else if (idx >= len) idx = 1;
     const weapon = $dataWeapons[idx];
-    if (weapon?.name && weapon.name.toLowerCase().includes(keyword)) break;
+    if (weapon?.name && weapon.name.toLowerCase().includes(keyword)) { found = true; break; }
   }
-  CheatMenu.weaponSelection = idx;
+  if (found) CheatMenu.weaponSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };

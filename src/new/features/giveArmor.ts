@@ -11,14 +11,15 @@ CheatMenu.scrollArmor = function (direction) {
   const step = direction === 'left' ? -1 : 1;
   const len = $dataArmors.length;
   let idx = CheatMenu.armorSelection;
+  let found = false;
   for (let i = 0; i < len; i++) {
     idx += step;
     if (idx <= 0) idx = len - 1;
     else if (idx >= len) idx = 1;
     const armor = $dataArmors[idx];
-    if (armor?.name && armor.name.toLowerCase().includes(keyword)) break;
+    if (armor?.name && armor.name.toLowerCase().includes(keyword)) { found = true; break; }
   }
-  CheatMenu.armorSelection = idx;
+  if (found) CheatMenu.armorSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };

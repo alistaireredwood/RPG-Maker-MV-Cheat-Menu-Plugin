@@ -12,14 +12,15 @@ CheatMenu.scrollSwitch = function (direction) {
   const switches = $dataSystem.switches;
   const len = switches.length;
   let idx = CheatMenu.switchSelection;
+  let found = false;
   for (let i = 0; i < len; i++) {
     idx += step;
     if (idx < 0) idx = len - 1;
     else if (idx >= len) idx = 0;
     const name = switches[idx];
-    if (name && name.toLowerCase().includes(keyword)) break;
+    if (name && name.toLowerCase().includes(keyword)) { found = true; break; }
   }
-  CheatMenu.switchSelection = idx;
+  if (found) CheatMenu.switchSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };

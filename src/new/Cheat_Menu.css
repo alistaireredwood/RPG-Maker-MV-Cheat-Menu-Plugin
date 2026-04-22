@@ -138,10 +138,10 @@
 }
 
 /* --- SEARCH INPUT --- */
-.cheat-menu-search-cell {
-  padding: 3px 2px !important;
-  max-width: none !important;
-  width: auto !important;
+.cheat-menu-cell.cheat-menu-search-cell {
+  padding: 3px 2px;
+  max-width: none;
+  width: auto;
 }
 
 .cheat-menu-search-input {

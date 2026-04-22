@@ -11,14 +11,15 @@ CheatMenu.scrollItem = function (direction) {
   const step = direction === 'left' ? -1 : 1;
   const len = $dataItems.length;
   let idx = CheatMenu.itemSelection;
+  let found = false;
   for (let i = 0; i < len; i++) {
     idx += step;
     if (idx <= 0) idx = len - 1;
     else if (idx >= len) idx = 1;
     const item = $dataItems[idx];
-    if (item?.name && item.name.toLowerCase().includes(keyword)) break;
+    if (item?.name && item.name.toLowerCase().includes(keyword)) { found = true; break; }
   }
-  CheatMenu.itemSelection = idx;
+  if (found) CheatMenu.itemSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };

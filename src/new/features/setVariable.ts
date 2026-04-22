@@ -14,14 +14,15 @@ CheatMenu.scrollVariable = function (direction) {
   const vars = $dataSystem.variables;
   const len = vars.length;
   let idx = CheatMenu.variableSelection;
+  let found = false;
   for (let i = 0; i < len; i++) {
     idx += step;
     if (idx < 0) idx = len - 1;
     else if (idx >= len) idx = 0;
     const name = vars[idx];
-    if (name && name.toLowerCase().includes(keyword)) break;
+    if (name && name.toLowerCase().includes(keyword)) { found = true; break; }
   }
-  CheatMenu.variableSelection = idx;
+  if (found) CheatMenu.variableSelection = idx;
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };

@@ -24,7 +24,7 @@ This repo contains two independent plugin implementations plus a patcher CLI:
 
 ### Patcher (`patcher/`)
 
-Interactive CLI (promptui). Reads plugin names from `plugins_patch.go.txt` (one per line), prompts whether to back up `plugins.js`, then prompts for engine type. Engine detection is by `plugins.js` location: MV = `www/js/plugins.js`, MZ = `js/plugins.js`; **Auto** probes those paths and runs only the matching engine. `InjectPatchPlugin` parses `plugins.js` with the otto JS parser and splices a plugin entry into the `$plugins` array; an already-present plugin is a yellow "skipping" warning, not an error. `plugins.js.bak` is written at most once, before the first successful write. MZ additionally copies the plugin file from `www/js/plugins/` to `js/plugins/` (`PostPatch`). Build with `go build` in `patcher/` (or via `pnpm build:release`).
+Interactive CLI (promptui). Reads plugin names from `plugins_patch.go.txt` (one per line), prompts whether to back up `plugins.js`, then prompts for engine type. Engine detection is by `plugins.js` location: MV = `www/js/plugins.js`, MZ = `js/plugins.js`; **Auto** probes those paths and runs only the matching engine. `InjectPatchPlugin` parses `plugins.js` with the otto JS parser and splices a plugin entry into the `$plugins` array; an already-present plugin is a yellow "skipping" warning, not an error. `plugins.js.bak` is written at most once, before the first successful write. MZ additionally copies the plugin file from `www/js/plugins/` to `js/plugins/` (`PostPatch`) — this also runs when the plugin entry already exists, so re-running the patcher refreshes an updated plugin file. Build with `go build` in `patcher/` (or via `pnpm build:release`).
 
 ### `src/plus/` build
 

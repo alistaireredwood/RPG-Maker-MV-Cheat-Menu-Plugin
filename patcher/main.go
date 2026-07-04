@@ -77,11 +77,14 @@ func promptTypes() {
 		if trimmedPluginName == "" {
 			continue
 		}
-		if InjectPatchPlugin(pluginsJsPath, trimmedPluginName, shouldBackupPluginsJs && !backupDone) {
+		result := InjectPatchPlugin(pluginsJsPath, trimmedPluginName, shouldBackupPluginsJs && !backupDone)
+		if result == Patched {
 			backupDone = true
-			if engineType.PostPatch != nil {
-				engineType.PostPatch(pwd, trimmedPluginName)
-			}
+		}
+		// PostPatch also runs for already-patched plugins so re-running the
+		// patcher refreshes the copied plugin file (MZ)
+		if result != PatchFailed && engineType.PostPatch != nil {
+			engineType.PostPatch(pwd, trimmedPluginName)
 		}
 	}
 }

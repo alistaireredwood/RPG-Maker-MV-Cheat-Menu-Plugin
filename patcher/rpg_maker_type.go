@@ -20,9 +20,17 @@ type RPGMakerEngineType struct {
 	PostPatch func(pwd string, pluginName string)
 }
 
-func panicEngineType(str string) bool {
+type PatchResult int
+
+const (
+	PatchFailed PatchResult = iota
+	Patched
+	AlreadyPatched
+)
+
+func panicEngineType(str string) PatchResult {
 	_, _ = Red.Printf("Unable to patch this Game, %s\n", str)
-	return false
+	return PatchFailed
 }
 
 // ResolveEngineType returns the engine matching the user's selection, or
@@ -58,7 +66,7 @@ func ResolveEngineType(pwd string, selected string) *RPGMakerEngineType {
 	return nil
 }
 
-func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPluginJs bool) bool {
+func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPluginJs bool) PatchResult {
 	_, err := os.Stat(pluginsDotJs)
 	if err != nil {
 		return panicEngineType(fmt.Sprintf("%s does NOT exist", pluginsDotJs))
@@ -83,8 +91,8 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 									if property.Key == "name" {
 										if pluginName, ok := property.Value.(*ast.StringLiteral); ok {
 											if pluginName.Value == patcherName {
-												_, _ = Yellow.Printf("\"%s\" is already patched, skipping...\n", patcherName)
-												return false
+												_, _ = Yellow.Printf("\"%s\" is already patched, skipping injection...\n", patcherName)
+												return AlreadyPatched
 											}
 										}
 									}
@@ -168,7 +176,7 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 								return panicEngineType(fmt.Sprintf("failed to write into %s", pluginsDotJs))
 							}
 							_, _ = Cyan.Printf("\"%s\" successfully patched, enjoy!\n", patcherName)
-							return true
+							return Patched
 						} else {
 							return panicEngineType("unable to find a place to patch...")
 						}
@@ -207,6 +215,8 @@ var RPGMakerEngineTypes = []RPGMakerEngineType{
 					}()
 					if _, err = io.Copy(writer, reader); err != nil {
 						_, _ = RedUnderline.Printf("failed to copy \"%s\" to \"%s\"\n", pluginJsPath, targetPluginJsPath)
+					} else {
+						_, _ = Cyan.Printf("\"%s.js\" copied to js/plugins\n", pluginName)
 					}
 				} else {
 					_, _ = RedUnderline.Printf("failed to create \"%s\"\n", targetPluginJsPath)

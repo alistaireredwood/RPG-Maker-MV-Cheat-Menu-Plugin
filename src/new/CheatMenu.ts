@@ -26,6 +26,7 @@ const CheatMenu = {
   speed: null,
   speedUnlocked: true,
   speedInitialized: false,
+  godModeActors: [] as number[],
   searchKeywords: {} as Record<string, string>,
   _activeSearchKey: null,
   _prevMenuIndex: null,
@@ -52,6 +53,7 @@ if (!CheatMenu.initialValues) {
     teleportLocation: { m: 1, x: 0, y: 0 },
     speed: 5,
     speedUnlocked: true,
+    godModeActors: [],
     currentMenuIndex: null,
   };
 }

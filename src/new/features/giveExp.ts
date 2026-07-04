@@ -2,7 +2,9 @@ import CheatMenu from '../CheatMenu.ts';
 import { makeApplyAmount } from '../core/scrollable.ts';
 
 CheatMenu.giveExp = (actor, amount) => {
-  actor.gainExp(amount);
+  if (actor) {
+    actor.gainExp(amount);
+  }
 };
 
 CheatMenu.applyCurrentExp = makeApplyAmount((amount) =>

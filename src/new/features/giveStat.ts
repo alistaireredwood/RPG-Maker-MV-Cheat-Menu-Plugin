@@ -2,7 +2,7 @@ import CheatMenu from '../CheatMenu.ts';
 import { makeApplyAmount } from '../core/scrollable.ts';
 
 CheatMenu.giveStat = (actor, statIndex, amount) => {
-  if (actor.paramPlus(statIndex) != undefined) {
+  if (actor && actor.paramPlus(statIndex) != undefined) {
     actor.addParam(statIndex, amount);
   }
 };

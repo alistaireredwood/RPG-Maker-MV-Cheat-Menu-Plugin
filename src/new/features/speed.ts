@@ -17,10 +17,12 @@ CheatMenu.initializeSpeedLock = () => {
   }
 };
 
+const MIN_SPEED = 0.5;
+
 CheatMenu.changePlayerSpeed = (amount) => {
   CheatMenu.initializeSpeedLock();
-  if (CheatMenu.speed) {
-    CheatMenu.speed += amount;
+  if (CheatMenu.speed != null) {
+    CheatMenu.speed = Math.max(MIN_SPEED, CheatMenu.speed + amount);
   }
 };
 

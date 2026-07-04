@@ -29,6 +29,7 @@ export type InitialValues = {
   teleportLocation: PositionData;
   speed: number | null;
   speedUnlocked: boolean;
+  godModeActors: number[];
   currentMenuIndex: number | null;
 };
 
@@ -62,6 +63,8 @@ export type CheatMenuT = {
   speedUnlocked: boolean;
   speedInitialized: boolean;
 
+  godModeActors: number[];
+
   searchKeywords: Record<string, string>;
   _activeSearchKey: string | null;
 
@@ -86,6 +89,7 @@ export type CheatMenuT = {
 
   godMode: (actor: CheatMenu_Game_Actor) => void;
   godMode_off: (actor: CheatMenu_Game_Actor) => void;
+  reapplyGodMode: () => void;
   setPartyHp: (hp: number, alive: boolean) => void;
   setPartyMp: (mp: number, alive: boolean) => void;
   setPartyTp: (tp: number, alive: boolean) => void;
@@ -93,9 +97,9 @@ export type CheatMenuT = {
   recoverPartyMp: (alive: boolean) => void;
   recoverPartyTp: (alive: boolean) => void;
   setEnemyHp: (hp: number, alive: boolean) => void;
-  giveExp: (actor: CheatMenu_Game_Actor, amount: number) => void;
+  giveExp: (actor: CheatMenu_Game_Actor | null, amount: number) => void;
   giveStat: (
-    actor: CheatMenu_Game_Actor,
+    actor: CheatMenu_Game_Actor | null,
     statIndex: number,
     amount: number,
   ) => void;

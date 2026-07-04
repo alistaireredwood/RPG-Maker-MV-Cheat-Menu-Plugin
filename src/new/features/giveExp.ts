@@ -1,36 +1,18 @@
 import CheatMenu from '../CheatMenu.ts';
+import { makeApplyAmount } from '../core/scrollable.ts';
 
 CheatMenu.giveExp = (actor, amount) => {
   actor.gainExp(amount);
 };
 
-CheatMenu.applyCurrentExp = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
-  if (direction == 'left') {
-    amount = -amount;
-    SoundManager.playSystemSound(2);
-  } else {
-    SoundManager.playSystemSound(1);
-  }
-  CheatMenu.giveExp($gameActors.actor(CheatMenu.cheatSelectedActor), amount);
-  CheatMenu.updateMenu();
-};
+CheatMenu.applyCurrentExp = makeApplyAmount((amount) =>
+  CheatMenu.giveExp($gameActors.actor(CheatMenu.cheatSelectedActor), amount),
+);
 
 CheatMenu.appendExpCheat = function (key1, key2) {
-  let currentExp;
-
-  if ($gameActors.actor(CheatMenu.cheatSelectedActor)) {
-    currentExp = $gameActors
-      .actor(CheatMenu.cheatSelectedActor)
-      .currentExp();
-  }
+  const currentExp = $gameActors.actor(CheatMenu.cheatSelectedActor)?.currentExp() ?? 0;
   CheatMenu.appendTitle('EXP');
-  CheatMenu.appendScrollSelector(
-    currentExp || 0,
-    key1,
-    key2,
-    CheatMenu.applyCurrentExp,
-  );
+  CheatMenu.appendScrollSelector(currentExp, key1, key2, CheatMenu.applyCurrentExp);
 };
 
 export const menu = {

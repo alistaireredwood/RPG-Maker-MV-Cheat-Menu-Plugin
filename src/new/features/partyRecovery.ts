@@ -1,203 +1,59 @@
 import CheatMenu from '../CheatMenu.ts';
 
-CheatMenu.setPartyHp = (hp, alive) => {
-  let members = $gameParty.allMembers();
-
+function setPartyResource(alive: boolean, setter: (member: any) => void) {
+  const members = $gameParty.allMembers();
   for (let i = 0; i < members.length; i++) {
-    if ((alive && members[i].hp != 0) || !alive) {
-      members[i].setHp(hp);
+    if ((alive && members[i].hp !== 0) || !alive) {
+      setter(members[i]);
     }
   }
-};
+}
 
-CheatMenu.setPartyMp = (mp, alive) => {
-  let members = $gameParty.allMembers();
-  for (let i = 0; i < members.length; i++) {
-    if ((alive && members[i].hp != 0) || !alive) {
-      members[i].setMp(mp);
-    }
-  }
-};
+CheatMenu.setPartyHp = (hp, alive) => setPartyResource(alive, (m) => m.setHp(hp));
+CheatMenu.setPartyMp = (mp, alive) => setPartyResource(alive, (m) => m.setMp(mp));
+CheatMenu.setPartyTp = (tp, alive) => setPartyResource(alive, (m) => m.setTp(tp));
+CheatMenu.recoverPartyHp = (alive) => setPartyResource(alive, (m) => m.setHp(m.mhp));
+CheatMenu.recoverPartyMp = (alive) => setPartyResource(alive, (m) => m.setMp(m.mmp));
+CheatMenu.recoverPartyTp = (alive) => setPartyResource(alive, (m) => m.setTp(m.maxTp()));
 
-CheatMenu.setPartyTp = (tp, alive) => {
-  let members = $gameParty.allMembers();
-  for (let i = 0; i < members.length; i++) {
-    if ((alive && members[i].hp != 0) || !alive) {
-      members[i].setTp(tp);
-    }
-  }
-};
-
-CheatMenu.recoverPartyHp = (alive) => {
-  let members = $gameParty.allMembers();
-  for (let i = 0; i < members.length; i++) {
-    if ((alive && members[i].hp != 0) || !alive) {
-      members[i].setHp(members[i].mhp);
-    }
-  }
-};
-
-CheatMenu.recoverPartyMp = (alive) => {
-  let members = $gameParty.allMembers();
-  for (let i = 0; i < members.length; i++) {
-    if ((alive && members[i].hp != 0) || !alive) {
-      members[i].setMp(members[i].mmp);
-    }
-  }
-};
-
-CheatMenu.recoverPartyTp = (alive) => {
-  let members = $gameParty.allMembers();
-  for (let i = 0; i < members.length; i++) {
-    if ((alive && members[i].hp != 0) || !alive) {
-      members[i].setTp(members[i].maxTp());
-    }
-  }
-};
-
-CheatMenu.partyHpCheat1 = function () {
-  CheatMenu.setPartyHp(0, true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyHpCheat2 = function () {
-  CheatMenu.setPartyHp(1, true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyHpCheat3 = function () {
-  CheatMenu.recoverPartyHp(true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyHpCheat4 = function () {
-  CheatMenu.setPartyHp(0, false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyHpCheat5 = function () {
-  CheatMenu.setPartyHp(1, false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyHpCheat6 = function () {
-  CheatMenu.recoverPartyHp(false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.appendHpCheats = function (key1, key2, key3, key4, key5, key6) {
+function appendPartyCheats(
+  stat: string,
+  setFn: (val: number, alive: boolean) => void,
+  recoverFn: (alive: boolean) => void,
+  key1: string | number, key2: string | number, key3: string | number,
+  key4: string | number, key5: string | number, key6: string | number,
+) {
+  const sound = () => SoundManager.playSystemSound(1);
   CheatMenu.appendTitle('Alive');
-  CheatMenu.appendCheat('Party HP to 0', 'Activate', key1, CheatMenu.partyHpCheat1);
-  CheatMenu.appendCheat('Party HP to 1', 'Activate', key2, CheatMenu.partyHpCheat2);
-  CheatMenu.appendCheat('Party Full HP', 'Activate', key3, CheatMenu.partyHpCheat3);
+  CheatMenu.appendCheat(`Party ${stat} to 0`, 'Activate', key1, () => { setFn(0, true); sound(); });
+  CheatMenu.appendCheat(`Party ${stat} to 1`, 'Activate', key2, () => { setFn(1, true); sound(); });
+  CheatMenu.appendCheat(`Party Full ${stat}`, 'Activate', key3, () => { recoverFn(true); sound(); });
   CheatMenu.appendTitle('All');
-  CheatMenu.appendCheat('Party HP to 0', 'Activate', key4, CheatMenu.partyHpCheat4);
-  CheatMenu.appendCheat('Party HP to 1', 'Activate', key5, CheatMenu.partyHpCheat5);
-  CheatMenu.appendCheat('Party Full HP', 'Activate', key6, CheatMenu.partyHpCheat6);
-};
+  CheatMenu.appendCheat(`Party ${stat} to 0`, 'Activate', key4, () => { setFn(0, false); sound(); });
+  CheatMenu.appendCheat(`Party ${stat} to 1`, 'Activate', key5, () => { setFn(1, false); sound(); });
+  CheatMenu.appendCheat(`Party Full ${stat}`, 'Activate', key6, () => { recoverFn(false); sound(); });
+}
 
-CheatMenu.partyMpCheat1 = function () {
-  CheatMenu.setPartyMp(0, true);
-  SoundManager.playSystemSound(1);
-};
+CheatMenu.appendHpCheats = (key1, key2, key3, key4, key5, key6) =>
+  appendPartyCheats('HP', CheatMenu.setPartyHp, CheatMenu.recoverPartyHp, key1, key2, key3, key4, key5, key6);
 
-CheatMenu.partyMpCheat2 = function () {
-  CheatMenu.setPartyMp(1, true);
-  SoundManager.playSystemSound(1);
-};
+CheatMenu.appendMpCheats = (key1, key2, key3, key4, key5, key6) =>
+  appendPartyCheats('MP', CheatMenu.setPartyMp, CheatMenu.recoverPartyMp, key1, key2, key3, key4, key5, key6);
 
-CheatMenu.partyMpCheat3 = function () {
-  CheatMenu.recoverPartyMp(true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyMpCheat4 = function () {
-  CheatMenu.setPartyMp(0, false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyMpCheat5 = function () {
-  CheatMenu.setPartyMp(1, false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyMpCheat6 = function () {
-  CheatMenu.recoverPartyMp(false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.appendMpCheats = function (key1, key2, key3, key4, key5, key6) {
-  CheatMenu.appendTitle('Alive');
-  CheatMenu.appendCheat('Party MP to 0', 'Activate', key1, CheatMenu.partyMpCheat1);
-  CheatMenu.appendCheat('Party MP to 1', 'Activate', key2, CheatMenu.partyMpCheat2);
-  CheatMenu.appendCheat('Party Full MP', 'Activate', key3, CheatMenu.partyMpCheat3);
-  CheatMenu.appendTitle('All');
-  CheatMenu.appendCheat('Party MP to 0', 'Activate', key4, CheatMenu.partyMpCheat4);
-  CheatMenu.appendCheat('Party MP to 1', 'Activate', key5, CheatMenu.partyMpCheat5);
-  CheatMenu.appendCheat('Party Full MP', 'Activate', key6, CheatMenu.partyMpCheat6);
-};
-
-CheatMenu.partyTpCheat1 = function () {
-  CheatMenu.setPartyTp(0, true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyTpCheat2 = function () {
-  CheatMenu.setPartyTp(1, true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyTpCheat3 = function () {
-  CheatMenu.recoverPartyTp(true);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyTpCheat4 = function () {
-  CheatMenu.setPartyTp(0, false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyTpCheat5 = function () {
-  CheatMenu.setPartyTp(1, false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.partyTpCheat6 = function () {
-  CheatMenu.recoverPartyTp(false);
-  SoundManager.playSystemSound(1);
-};
-
-CheatMenu.appendTpCheats = function (key1, key2, key3, key4, key5, key6) {
-  CheatMenu.appendTitle('Alive');
-  CheatMenu.appendCheat('Party TP to 0', 'Activate', key1, CheatMenu.partyTpCheat1);
-  CheatMenu.appendCheat('Party TP to 1', 'Activate', key2, CheatMenu.partyTpCheat2);
-  CheatMenu.appendCheat('Party Full TP', 'Activate', key3, CheatMenu.partyTpCheat3);
-  CheatMenu.appendTitle('All');
-  CheatMenu.appendCheat('Party TP to 0', 'Activate', key4, CheatMenu.partyTpCheat4);
-  CheatMenu.appendCheat('Party TP to 1', 'Activate', key5, CheatMenu.partyTpCheat5);
-  CheatMenu.appendCheat('Party Full TP', 'Activate', key6, CheatMenu.partyTpCheat6);
-};
+CheatMenu.appendTpCheats = (key1, key2, key3, key4, key5, key6) =>
+  appendPartyCheats('TP', CheatMenu.setPartyTp, CheatMenu.recoverPartyTp, key1, key2, key3, key4, key5, key6);
 
 export const menus = [
   {
     name: 'Party HP',
-    render: () => {
-      CheatMenu.appendCheatTitle();
-      CheatMenu.appendHpCheats(4, 5, 6, 7, 8, 9);
-    },
+    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendHpCheats(4, 5, 6, 7, 8, 9); },
   },
   {
     name: 'Party MP',
-    render: () => {
-      CheatMenu.appendCheatTitle();
-      CheatMenu.appendMpCheats(4, 5, 6, 7, 8, 9);
-    },
+    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendMpCheats(4, 5, 6, 7, 8, 9); },
   },
   {
     name: 'Party TP',
-    render: () => {
-      CheatMenu.appendCheatTitle();
-      CheatMenu.appendTpCheats(4, 5, 6, 7, 8, 9);
-    },
+    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendTpCheats(4, 5, 6, 7, 8, 9); },
   },
 ];

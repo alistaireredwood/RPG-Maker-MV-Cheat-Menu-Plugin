@@ -17,9 +17,8 @@ CheatMenu.scrollVariable = makeScroll({
   startIdx: 0,
 });
 
-CheatMenu.applyCurrentVariable = makeApplyAmount(
-  (id, amount) => CheatMenu.setVariable(id, amount),
-  () => CheatMenu.variableSelection,
+CheatMenu.applyCurrentVariable = makeApplyAmount((amount) =>
+  CheatMenu.setVariable(CheatMenu.variableSelection, amount),
 );
 
 CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {

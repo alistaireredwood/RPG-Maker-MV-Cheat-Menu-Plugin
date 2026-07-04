@@ -146,10 +146,6 @@ export type CheatMenuT = {
   toggleGodMode: (event?: MouseEvent) => void;
   appendGodmodeStatus: () => void;
 
-  enemyHpCheat1: () => void;
-  enemyHpCheat2: () => void;
-  enemyHpCheat3: () => void;
-  enemyHpCheat4: () => void;
   appendEnemyCheats: (
     key1: string | number,
     key2: string | number,
@@ -157,12 +153,6 @@ export type CheatMenuT = {
     key4: string | number,
   ) => void;
 
-  partyHpCheat1: () => void;
-  partyHpCheat2: () => void;
-  partyHpCheat3: () => void;
-  partyHpCheat4: () => void;
-  partyHpCheat5: () => void;
-  partyHpCheat6: () => void;
   appendHpCheats: (
     key1: string | number,
     key2: string | number,
@@ -172,12 +162,6 @@ export type CheatMenuT = {
     key6: string | number,
   ) => void;
 
-  partyMpCheat1: () => void;
-  partyMpCheat2: () => void;
-  partyMpCheat3: () => void;
-  partyMpCheat4: () => void;
-  partyMpCheat5: () => void;
-  partyMpCheat6: () => void;
   appendMpCheats: (
     key1: string | number,
     key2: string | number,
@@ -187,12 +171,6 @@ export type CheatMenuT = {
     key6: string | number,
   ) => void;
 
-  partyTpCheat1: () => void;
-  partyTpCheat2: () => void;
-  partyTpCheat3: () => void;
-  partyTpCheat4: () => void;
-  partyTpCheat5: () => void;
-  partyTpCheat6: () => void;
   appendTpCheats: (
     key1: string | number,
     key2: string | number,

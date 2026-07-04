@@ -15,9 +15,8 @@ CheatMenu.scrollItem = makeScroll({
   matches: (item: any, keyword) => item?.name?.toLowerCase().includes(keyword),
 });
 
-CheatMenu.applyCurrentItem = makeApplyAmount(
-  (id, amount) => CheatMenu.giveItem(id, amount),
-  () => CheatMenu.itemSelection,
+CheatMenu.applyCurrentItem = makeApplyAmount((amount) =>
+  CheatMenu.giveItem(CheatMenu.itemSelection, amount),
 );
 
 CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {

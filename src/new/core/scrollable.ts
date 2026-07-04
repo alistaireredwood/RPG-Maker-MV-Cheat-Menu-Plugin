@@ -31,10 +31,7 @@ export function makeScroll(config: {
   };
 }
 
-export function makeApplyAmount(
-  applyFn: (id: number, amount: number) => void,
-  getIdx: () => number,
-): ScrollFn {
+export function makeApplyAmount(action: (amount: number) => void): ScrollFn {
   return function (direction) {
     let amount = CheatMenu.amounts[CheatMenu.amountIndex];
     if (direction === 'left') {
@@ -43,7 +40,7 @@ export function makeApplyAmount(
     } else {
       SoundManager.playSystemSound(1);
     }
-    applyFn(getIdx(), amount);
+    action(amount);
     CheatMenu.updateMenu();
   };
 }

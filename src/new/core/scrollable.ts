@@ -63,7 +63,9 @@ export function appendInventorySection(
   key4: string | number,
 ): void {
   CheatMenu.appendSearchInput(config.searchPlaceholder, config.stateKey, (keyword) => {
-    const idx = config.getData().findIndex((item, i) => i >= 1 && item?.name?.toLowerCase().includes(keyword));
+    const idx = config
+      .getData()
+      .findIndex((item, i) => i >= 1 && !!item?.name && item.name.toLowerCase().includes(keyword));
     if (idx > 0) config.setIdx(idx);
   });
   CheatMenu.appendTitle(config.title);

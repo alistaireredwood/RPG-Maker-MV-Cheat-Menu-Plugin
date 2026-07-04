@@ -6,15 +6,18 @@ CheatMenu.teleport = (mapId, xPos, yPos) => {
 };
 
 CheatMenu.scrollMapTeleportSelection = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.teleportLocation.m--;
-    if (CheatMenu.teleportLocation.m < 1) {
-      CheatMenu.teleportLocation.m = $dataMapInfos.length - 1;
-    }
-  } else {
-    CheatMenu.teleportLocation.m++;
-    if (CheatMenu.teleportLocation.m >= $dataMapInfos.length) {
-      CheatMenu.teleportLocation.m = 1;
+  // skip deleted (null) and unnamed map entries — teleporting to a deleted
+  // map would try to load a nonexistent map file
+  const step = direction == 'left' ? -1 : 1;
+  const len = $dataMapInfos.length;
+  let m = CheatMenu.teleportLocation.m;
+  for (let i = 0; i < len; i++) {
+    m += step;
+    if (m < 1) m = len - 1;
+    else if (m >= len) m = 1;
+    if ($dataMapInfos[m]?.name) {
+      CheatMenu.teleportLocation.m = m;
+      break;
     }
   }
 

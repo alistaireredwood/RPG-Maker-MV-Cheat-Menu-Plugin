@@ -12,7 +12,7 @@ CheatMenu.scrollWeapon = makeScroll({
   getData: () => $dataWeapons,
   getIdx: () => CheatMenu.weaponSelection,
   setIdx: (idx) => { CheatMenu.weaponSelection = idx; },
-  matches: (item: any, keyword) => item?.name?.toLowerCase().includes(keyword),
+  matches: (item: any, keyword) => !!item?.name && item.name.toLowerCase().includes(keyword),
 });
 
 CheatMenu.applyCurrentWeapon = makeApplyAmount((amount) =>

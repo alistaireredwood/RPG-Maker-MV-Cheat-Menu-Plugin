@@ -13,7 +13,8 @@ CheatMenu.scrollVariable = makeScroll({
   getData: () => $dataSystem.variables,
   getIdx: () => CheatMenu.variableSelection,
   setIdx: (idx) => { CheatMenu.variableSelection = idx; },
-  matches: (item: any, keyword) => typeof item === 'string' && item.toLowerCase().includes(keyword),
+  matches: (item: any, keyword) =>
+    typeof item === 'string' && item !== '' && item.toLowerCase().includes(keyword),
   startIdx: 0,
 });
 
@@ -23,7 +24,7 @@ CheatMenu.applyCurrentVariable = makeApplyAmount((amount) =>
 
 CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
   CheatMenu.appendSearchInput('Search variables...', 'variable', (keyword) => {
-    const idx = $dataSystem.variables.findIndex((v, i) => i > 0 && v?.toLowerCase().includes(keyword));
+    const idx = $dataSystem.variables.findIndex((v, i) => i > 0 && !!v && v.toLowerCase().includes(keyword));
     if (idx > 0) CheatMenu.variableSelection = idx;
   });
   CheatMenu.appendTitle('Variable');

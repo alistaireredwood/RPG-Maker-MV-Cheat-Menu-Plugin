@@ -12,7 +12,7 @@ CheatMenu.scrollItem = makeScroll({
   getData: () => $dataItems,
   getIdx: () => CheatMenu.itemSelection,
   setIdx: (idx) => { CheatMenu.itemSelection = idx; },
-  matches: (item: any, keyword) => item?.name?.toLowerCase().includes(keyword),
+  matches: (item: any, keyword) => !!item?.name && item.name.toLowerCase().includes(keyword),
 });
 
 CheatMenu.applyCurrentItem = makeApplyAmount((amount) =>

@@ -12,7 +12,8 @@ CheatMenu.scrollSwitch = makeScroll({
   getData: () => $dataSystem.switches,
   getIdx: () => CheatMenu.switchSelection,
   setIdx: (idx) => { CheatMenu.switchSelection = idx; },
-  matches: (item: any, keyword) => typeof item === 'string' && item.toLowerCase().includes(keyword),
+  matches: (item: any, keyword) =>
+    typeof item === 'string' && item !== '' && item.toLowerCase().includes(keyword),
   startIdx: 0,
 });
 
@@ -28,7 +29,7 @@ CheatMenu.toggleCurrentSwitch = function () {
 
 CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
   CheatMenu.appendSearchInput('Search switches...', 'switch', (keyword) => {
-    const idx = $dataSystem.switches.findIndex((s, i) => i > 0 && s?.toLowerCase().includes(keyword));
+    const idx = $dataSystem.switches.findIndex((s, i) => i > 0 && !!s && s.toLowerCase().includes(keyword));
     if (idx > 0) CheatMenu.switchSelection = idx;
   });
   CheatMenu.appendTitle('Switch');

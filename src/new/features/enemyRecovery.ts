@@ -7,6 +7,15 @@ CheatMenu.setEnemyHp = (hp, alive) => {
       members[i].setHp(hp);
     }
   }
+
+  // setHp() alone doesn't end the battle — the engine only checks for
+  // victory/defeat at specific points in the turn flow (e.g. after an
+  // action resolves), not every frame. Force that check now so killing
+  // enemies via the cheat menu (e.g. while an actor command window is
+  // still open) doesn't leave the battle stuck.
+  if ($gameParty.inBattle()) {
+    BattleManager.checkBattleEnd();
+  }
 };
 
 CheatMenu.appendEnemyCheats = function (key1, key2, key3, key4) {

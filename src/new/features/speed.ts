@@ -62,14 +62,11 @@ CheatMenu.appendSpeedStatus = function (key1, key2, key3) {
     CheatMenu.applySpeedChange,
   );
 
-  let statusHtml;
-  if (!CheatMenu.speedUnlocked) {
-    statusHtml = '<span class="status-on">false</span>';
-  } else {
-    statusHtml = '<span class="status-off">true</span>';
-  }
+  const isLocked = !CheatMenu.speedUnlocked;
+  const statusHtml = `<span class="${isLocked ? 'status-on' : 'status-off'}">${isLocked}</span>`;
+
   CheatMenu.appendCheat(
-    'Speed Unlocked',
+    'Speed Locked',
     statusHtml,
     key3,
     CheatMenu.applySpeedLockToggle,

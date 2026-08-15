@@ -52,9 +52,10 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
 
   CheatMenu.appendScrollSelector(currentSwitch, key1, key2, CheatMenu.scrollSwitch, true);
 
+  const switchValue = $gameSwitches.value(CheatMenu.switchSelection);
   const currentSwitchValue =
-    $gameSwitches.value(CheatMenu.switchSelection) != undefined
-      ? $gameSwitches.value(CheatMenu.switchSelection)
+    switchValue != undefined
+      ? `<span class="${switchValue ? 'status-on' : 'status-off'}">${switchValue}</span>`
       : 'NULL';
 
   CheatMenu.appendCheat('Status:', currentSwitchValue, key3, CheatMenu.toggleCurrentSwitch);

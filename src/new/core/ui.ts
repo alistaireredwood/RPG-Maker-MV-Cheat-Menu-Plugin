@@ -103,7 +103,7 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   }
 };
 
-CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler, selectable) {
+CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler, selectable, showArrows = true) {
   const scrollSelector = CheatMenu.overlay.insertRow();
   scrollSelector.className = 'scroll-selector-row';
 
@@ -118,8 +118,16 @@ CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler, sele
   const scrollRightButton = scrollSelector.insertCell();
   scrollRightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
-  scrollLeftButton.innerHTML = '←[' + key1 + ']';
   scrollText.innerHTML = text + '';
+
+  if (!showArrows) {
+    // non-numeric values (string/object) can't be incremented/decremented —
+    // leave the arrow cells blank instead of binding a handler that would
+    // corrupt the value
+    return;
+  }
+
+  scrollLeftButton.innerHTML = '←[' + key1 + ']';
   scrollRightButton.innerHTML = '[' + key2 + ']→';
 
   scrollLeftButton.addEventListener(

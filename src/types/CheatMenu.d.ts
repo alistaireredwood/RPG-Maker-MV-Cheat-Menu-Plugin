@@ -129,6 +129,7 @@ export type CheatMenuT = {
     key2: string | number,
     scrollHandler: (direction: 'left' | 'right', event?: MouseEvent) => void,
     selectable?: boolean,
+    showArrows?: boolean,
   ) => void;
 
   appendTitle: (title: string, sideText?: string) => void;

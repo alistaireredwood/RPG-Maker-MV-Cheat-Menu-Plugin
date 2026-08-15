@@ -47,12 +47,24 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
 
   CheatMenu.appendScrollSelector(currentVariable, key1, key2, CheatMenu.scrollVariable, true);
 
+  const rawValue = $gameVariables.value(CheatMenu.variableSelection);
+  const isNumeric = typeof rawValue === 'number';
+
   const currentVariableValue =
-    $gameVariables.value(CheatMenu.variableSelection) != undefined
-      ? $gameVariables.value(CheatMenu.variableSelection)
+    rawValue != undefined
+      ? isNumeric || typeof rawValue === 'string'
+        ? rawValue
+        : JSON.stringify(rawValue)
       : 'NULL';
 
-  CheatMenu.appendScrollSelector(currentVariableValue, key3, key4, CheatMenu.applyCurrentVariable);
+  CheatMenu.appendScrollSelector(
+    currentVariableValue,
+    key3,
+    key4,
+    CheatMenu.applyCurrentVariable,
+    false,
+    isNumeric,
+  );
 };
 
 export const menu = {

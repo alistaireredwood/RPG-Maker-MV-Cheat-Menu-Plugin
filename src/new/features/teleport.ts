@@ -113,6 +113,7 @@ CheatMenu.appendTeleport = function (
     key1,
     key2,
     CheatMenu.scrollMapTeleportSelection,
+    true,
   );
 
   CheatMenu.appendScrollSelector(

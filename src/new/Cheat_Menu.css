@@ -82,6 +82,23 @@
   border-bottom: 1px solid var(--cm-border);
 }
 
+/* RPG Maker MV disables text selection globally, so game-data text (item/
+   weapon/armor/variable/switch/actor/map/stat names) needs an explicit
+   override to be selectable/copyable (e.g. untranslated JP names) —
+   scoped away from the plugin's own labels/buttons */
+.cheat-menu-selectable {
+  user-select: text !important;
+  cursor: text;
+}
+
+.cheat-menu-title-side {
+  text-align: right;
+  color: var(--cm-dim);
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
 .status-on  { color: var(--cm-green); text-shadow: 0 0 4px rgba(0,232,136,0.5); }
 .status-off { color: var(--cm-red);   text-shadow: 0 0 4px rgba(255,61,90,0.4); }
 
@@ -163,6 +180,28 @@
 }
 
 .cheat-menu-search-input:focus {
+  border-bottom-color: var(--cm-cyan);
+  box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
+}
+
+/* --- AMOUNT INPUT --- */
+.cheat-menu-amount-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cm-border);
+  color: var(--cm-blue);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  padding: 2px 3px;
+  outline: none;
+  letter-spacing: 0.02em;
+}
+
+.cheat-menu-amount-input:focus {
   border-bottom-color: var(--cm-cyan);
   box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
 }

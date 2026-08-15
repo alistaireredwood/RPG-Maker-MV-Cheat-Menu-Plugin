@@ -46,6 +46,9 @@ export type CheatMenuT = {
   cheatSelectedActor: number;
   amounts: number[];
   amountIndex: number;
+  customAmount: number | null;
+  amountInputText: string | null;
+  _activeAmountInput: boolean;
   statSelection: number;
   itemSelection: number;
   weaponSelection: number;
@@ -125,9 +128,10 @@ export type CheatMenuT = {
     key1: string | number,
     key2: string | number,
     scrollHandler: (direction: 'left' | 'right', event?: MouseEvent) => void,
+    selectable?: boolean,
   ) => void;
 
-  appendTitle: (title: string) => void;
+  appendTitle: (title: string, sideText?: string) => void;
   appendDescription: (text: string) => void;
   appendCheat: (
     cheatText: string,

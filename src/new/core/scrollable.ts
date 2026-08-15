@@ -36,9 +36,28 @@ export function makeScroll(config: {
   };
 }
 
+export function getIndexInfo(
+  data: unknown[],
+  currentIdx: number,
+  matches: (item: unknown, keyword: string) => boolean,
+  keyword: string,
+  startIdx = 1,
+): { index: number; total: number } {
+  let total = 0;
+  let index = 0;
+  for (let i = startIdx; i < data.length; i++) {
+    const item = data[i];
+    if (item && matches(item, keyword)) {
+      total++;
+      if (i === currentIdx) index = total;
+    }
+  }
+  return { index, total };
+}
+
 export function makeApplyAmount(action: (amount: number) => void): ScrollFn {
   return function (direction) {
-    let amount = CheatMenu.amounts[CheatMenu.amountIndex];
+    let amount = CheatMenu.customAmount ?? CheatMenu.amounts[CheatMenu.amountIndex];
     if (direction === 'left') {
       amount = -amount;
       SoundManager.playSystemSound(2);
@@ -61,6 +80,7 @@ export function appendInventorySection(
     scrollFn: ScrollFn;
     applyFn: ScrollFn;
     getCount: (item: RPGDataItem) => number;
+    matches: (item: RPGDataItem, keyword: string) => boolean;
   },
   key1: string | number,
   key2: string | number,
@@ -80,20 +100,28 @@ export function appendInventorySection(
       if (idx > 0) config.setIdx(idx);
     },
   );
-  CheatMenu.appendTitle(config.title);
-  const data = config.getData()[config.getIdx()];
+  const items = config.getData();
+  const idx = config.getIdx();
+  const item = items[idx];
+
+  const keyword = (CheatMenu.searchKeywords?.[config.stateKey] || '').toLowerCase();
+  const { index, total } = getIndexInfo(items, idx, config.matches as (item: unknown, keyword: string) => boolean, keyword);
+
+  CheatMenu.appendTitle(config.title, `${index}/${total}`);
+
   let count: number | string = 0;
 
-  if (data) {
+  if (item) {
     // some games override inventory APIs ($gameParty.numItems etc.) in ways
     // that throw — degrade to '?' instead of breaking the whole menu
     try {
-      count = config.getCount(data);
+      count = config.getCount(item);
     } catch (e) {
       console.error(`[CheatMenu] getCount failed for "${config.title}":`, e);
       count = '?';
     }
   }
-  CheatMenu.appendScrollSelector(data?.name ?? '', key1, key2, config.scrollFn);
+
+  CheatMenu.appendScrollSelector(item?.name ?? '', key1, key2, config.scrollFn, true);
   CheatMenu.appendScrollSelector(count, key3, key4, config.applyFn);
 }

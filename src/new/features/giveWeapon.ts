@@ -7,12 +7,15 @@ CheatMenu.giveWeapon = (weaponId, amount) => {
   }
 };
 
+const weaponMatches = (item: any, keyword: string) =>
+  !!item?.name && item.name.toLowerCase().includes(keyword);
+
 CheatMenu.scrollWeapon = makeScroll({
   stateKey: 'weapon',
   getData: () => $dataWeapons,
   getIdx: () => CheatMenu.weaponSelection,
   setIdx: (idx) => { CheatMenu.weaponSelection = idx; },
-  matches: (item: any, keyword) => !!item?.name && item.name.toLowerCase().includes(keyword),
+  matches: weaponMatches,
 });
 
 CheatMenu.applyCurrentWeapon = makeApplyAmount((amount) =>
@@ -30,6 +33,7 @@ CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
     scrollFn: CheatMenu.scrollWeapon,
     applyFn: CheatMenu.applyCurrentWeapon,
     getCount: (item) => $gameParty.numItems(item as any),
+    matches: weaponMatches,
   }, key1, key2, key3, key4);
 };
 

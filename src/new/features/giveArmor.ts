@@ -7,12 +7,15 @@ CheatMenu.giveArmor = (armorId, amount) => {
   }
 };
 
+const armorMatches = (item: any, keyword: string) =>
+  !!item?.name && item.name.toLowerCase().includes(keyword);
+
 CheatMenu.scrollArmor = makeScroll({
   stateKey: 'armor',
   getData: () => $dataArmors,
   getIdx: () => CheatMenu.armorSelection,
   setIdx: (idx) => { CheatMenu.armorSelection = idx; },
-  matches: (item: any, keyword) => !!item?.name && item.name.toLowerCase().includes(keyword),
+  matches: armorMatches,
 });
 
 CheatMenu.applyCurrentArmor = makeApplyAmount((amount) =>
@@ -30,6 +33,7 @@ CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
     scrollFn: CheatMenu.scrollArmor,
     applyFn: CheatMenu.applyCurrentArmor,
     getCount: (item) => $gameParty.numItems(item as any),
+    matches: armorMatches,
   }, key1, key2, key3, key4);
 };
 

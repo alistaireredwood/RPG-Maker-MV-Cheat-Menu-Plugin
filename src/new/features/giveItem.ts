@@ -7,12 +7,15 @@ CheatMenu.giveItem = (itemId, amount) => {
   }
 };
 
+const itemMatches = (item: any, keyword: string) =>
+  !!item?.name && item.name.toLowerCase().includes(keyword);
+
 CheatMenu.scrollItem = makeScroll({
   stateKey: 'item',
   getData: () => $dataItems,
   getIdx: () => CheatMenu.itemSelection,
   setIdx: (idx) => { CheatMenu.itemSelection = idx; },
-  matches: (item: any, keyword) => !!item?.name && item.name.toLowerCase().includes(keyword),
+  matches: itemMatches,
 });
 
 CheatMenu.applyCurrentItem = makeApplyAmount((amount) =>
@@ -30,6 +33,7 @@ CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
     scrollFn: CheatMenu.scrollItem,
     applyFn: CheatMenu.applyCurrentItem,
     getCount: (item) => $gameParty.numItems(item as any),
+    matches: itemMatches,
   }, key1, key2, key3, key4);
 };
 

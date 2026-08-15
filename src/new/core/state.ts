@@ -10,6 +10,26 @@ CheatMenu.initialize = () => {
   clearInterval(CheatMenu.menuUpdateTimer || undefined);
   CheatMenu.menuUpdateTimer = setInterval(function () {
     if (CheatMenu.isCheatMenuOpen && CheatMenu.currentMenuIndex !== null) {
+      // a periodic rebuild would wipe out any text the user is mid-selecting
+      // (e.g. double-clicking a name to copy it) — skip this tick instead
+      const selection = window.getSelection();
+      const hasSelectionInMenu =
+        !!selection &&
+        !selection.isCollapsed &&
+        !!selection.anchorNode &&
+        CheatMenu.overlay.contains(selection.anchorNode);
+
+      // <input>/<textarea> selections (e.g. double-clicking the Amount
+      // field) live in selectionStart/End, not in window.getSelection()
+      const active = document.activeElement as HTMLInputElement | null;
+      const hasInputSelection =
+        !!active &&
+        (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') &&
+        CheatMenu.overlay.contains(active) &&
+        active.selectionStart !== active.selectionEnd;
+
+      if (hasSelectionInMenu || hasInputSelection) return;
+
       CheatMenu.updateMenu();
     }
   }, 1000);

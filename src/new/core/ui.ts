@@ -355,7 +355,17 @@ CheatMenu.updateMenu = function () {
 
       CheatMenu.appendBackButton();
 
-      menuToRender.render();
+      try {
+        menuToRender.render();
+      } catch (e) {
+        // a game can override engine APIs a feature relies on — show the
+        // failure inside the menu instead of leaving it half-rendered
+        console.error(`[CheatMenu] "${menuToRender.name}" render failed:`, e);
+        CheatMenu.appendTitle(menuToRender.name);
+        CheatMenu.appendDescription(
+          `<span class="error-text">Render failed: ${e instanceof Error ? e.message : e}<br>See console (F8) for details.</span>`,
+        );
+      }
     }
   }
 

@@ -13,7 +13,9 @@ export function makeScroll(config: {
 }): ScrollFn {
   const startIdx = config.startIdx ?? 1;
   return function (direction) {
-    const keyword = (CheatMenu.searchKeywords?.[config.stateKey] || '').toLowerCase();
+    const keyword = (
+      CheatMenu.searchKeywords?.[config.stateKey] || ''
+    ).toLowerCase();
     const step = direction === 'left' ? -1 : 1;
     const data = config.getData();
     const len = data.length;
@@ -23,7 +25,10 @@ export function makeScroll(config: {
       idx += step;
       if (idx < startIdx) idx = len - 1;
       else if (idx >= len) idx = startIdx;
-      if (data[idx] && config.matches(data[idx], keyword)) { found = true; break; }
+      if (data[idx] && config.matches(data[idx], keyword)) {
+        found = true;
+        break;
+      }
     }
     if (found) config.setIdx(idx);
     SoundManager.playSystemSound(0);
@@ -62,14 +67,33 @@ export function appendInventorySection(
   key3: string | number,
   key4: string | number,
 ): void {
-  CheatMenu.appendSearchInput(config.searchPlaceholder, config.stateKey, (keyword) => {
-    const idx = config
-      .getData()
-      .findIndex((item, i) => i >= 1 && !!item?.name && item.name.toLowerCase().includes(keyword));
-    if (idx > 0) config.setIdx(idx);
-  });
+  CheatMenu.appendSearchInput(
+    config.searchPlaceholder,
+    config.stateKey,
+    (keyword) => {
+      const idx = config
+        .getData()
+        .findIndex(
+          (item, i) =>
+            i >= 1 && !!item?.name && item.name.toLowerCase().includes(keyword),
+        );
+      if (idx > 0) config.setIdx(idx);
+    },
+  );
   CheatMenu.appendTitle(config.title);
   const data = config.getData()[config.getIdx()];
+  let count: number | string = 0;
+
+  if (data) {
+    // some games override inventory APIs ($gameParty.numItems etc.) in ways
+    // that throw — degrade to '?' instead of breaking the whole menu
+    try {
+      count = config.getCount(data);
+    } catch (e) {
+      console.error(`[CheatMenu] getCount failed for "${config.title}":`, e);
+      count = '?';
+    }
+  }
   CheatMenu.appendScrollSelector(data?.name ?? '', key1, key2, config.scrollFn);
-  CheatMenu.appendScrollSelector(data ? config.getCount(data) : 0, key3, key4, config.applyFn);
+  CheatMenu.appendScrollSelector(count, key3, key4, config.applyFn);
 }

@@ -1,4 +1,4 @@
-module pacther
+module patcher
 
 go 1.18
 

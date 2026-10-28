@@ -17,10 +17,12 @@ CheatMenu.initializeSpeedLock = () => {
   }
 };
 
+const MIN_SPEED = 0.5;
+
 CheatMenu.changePlayerSpeed = (amount) => {
   CheatMenu.initializeSpeedLock();
-  if (CheatMenu.speed) {
-    CheatMenu.speed += amount;
+  if (CheatMenu.speed != null) {
+    CheatMenu.speed = Math.max(MIN_SPEED, CheatMenu.speed + amount);
   }
 };
 
@@ -60,14 +62,11 @@ CheatMenu.appendSpeedStatus = function (key1, key2, key3) {
     CheatMenu.applySpeedChange,
   );
 
-  let statusHtml;
-  if (!CheatMenu.speedUnlocked) {
-    statusHtml = '<span class="status-on">false</span>';
-  } else {
-    statusHtml = '<span class="status-off">true</span>';
-  }
+  const isLocked = !CheatMenu.speedUnlocked;
+  const statusHtml = `<span class="${isLocked ? 'status-on' : 'status-off'}">${isLocked}</span>`;
+
   CheatMenu.appendCheat(
-    'Speed Unlocked',
+    'Speed Locked',
     statusHtml,
     key3,
     CheatMenu.applySpeedLockToggle,
@@ -106,11 +105,11 @@ CheatMenu.appendMoveAmountSelection = function (key1, key2) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Speed',
   render: () => {
-    CheatMenu.appendCheatTitle('Speed');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendMoveAmountSelection(4, 5);
     CheatMenu.appendSpeedStatus(6, 7, 8);
   },
-});
+};

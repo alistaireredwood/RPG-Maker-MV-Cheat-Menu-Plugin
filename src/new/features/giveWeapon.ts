@@ -1,4 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
+import { makeScroll, makeApplyAmount, appendInventorySection } from '../core/scrollable.ts';
 
 CheatMenu.giveWeapon = (weaponId, amount) => {
   if ($dataWeapons[weaponId] != undefined) {
@@ -6,71 +7,41 @@ CheatMenu.giveWeapon = (weaponId, amount) => {
   }
 };
 
-CheatMenu.scrollWeapon = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.weaponSelection--;
-    if (CheatMenu.weaponSelection < 0) {
-      CheatMenu.weaponSelection = $dataWeapons.length - 1;
-    }
-  } else {
-    CheatMenu.weaponSelection++;
-    if (CheatMenu.weaponSelection >= $dataWeapons.length) {
-      CheatMenu.weaponSelection = 0;
-    }
-  }
-  SoundManager.playSystemSound(0);
-  CheatMenu.updateMenu();
-};
+const weaponMatches = (item: any, keyword: string) =>
+  !!item?.name && item.name.toLowerCase().includes(keyword);
 
-CheatMenu.applyCurrentWeapon = function (direction) {
-  let amount = CheatMenu.amounts[CheatMenu.amountIndex];
+CheatMenu.scrollWeapon = makeScroll({
+  stateKey: 'weapon',
+  getData: () => $dataWeapons,
+  getIdx: () => CheatMenu.weaponSelection,
+  setIdx: (idx) => { CheatMenu.weaponSelection = idx; },
+  matches: weaponMatches,
+});
 
-  if (direction == 'left') {
-    amount = -amount;
-    SoundManager.playSystemSound(2);
-  } else {
-    SoundManager.playSystemSound(1);
-  }
-
-  CheatMenu.giveWeapon(CheatMenu.weaponSelection, amount);
-  CheatMenu.updateMenu();
-};
+CheatMenu.applyCurrentWeapon = makeApplyAmount((amount) =>
+  CheatMenu.giveWeapon(CheatMenu.weaponSelection, amount),
+);
 
 CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
-  CheatMenu.appendTitle('Weapon');
-
-  const weaponData = $dataWeapons[CheatMenu.weaponSelection];
-
-  let currentWeaponName = '';
-  if (weaponData && weaponData.name) {
-    currentWeaponName = weaponData.name;
-  }
-
-  CheatMenu.appendScrollSelector(
-    currentWeaponName,
-    key1,
-    key2,
-    CheatMenu.scrollWeapon,
-  );
-
-  let currentWeaponAmount = 0;
-  if (weaponData) {
-    currentWeaponAmount = $gameParty.numItems(weaponData);
-  }
-
-  CheatMenu.appendScrollSelector(
-    currentWeaponAmount,
-    key3,
-    key4,
-    CheatMenu.applyCurrentWeapon,
-  );
+  appendInventorySection({
+    searchPlaceholder: 'Search weapons...',
+    stateKey: 'weapon',
+    title: 'Weapon',
+    getData: () => $dataWeapons,
+    getIdx: () => CheatMenu.weaponSelection,
+    setIdx: (idx) => { CheatMenu.weaponSelection = idx; },
+    scrollFn: CheatMenu.scrollWeapon,
+    applyFn: CheatMenu.applyCurrentWeapon,
+    getCount: (item) => $gameParty.numItems(item as any),
+    matches: weaponMatches,
+  }, key1, key2, key3, key4);
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Weapons',
   render: () => {
-    CheatMenu.appendCheatTitle('Weapons');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendAmountSelection(4, 5);
     CheatMenu.appendWeaponSelection(6, 7, 8, 9);
   },
-});
+};

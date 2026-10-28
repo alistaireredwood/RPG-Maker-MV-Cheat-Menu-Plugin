@@ -56,17 +56,35 @@ func promptTypes() {
 
 	println()
 
-	// Skip Auto
-	for i := 1; i < typeCount; i++ {
-		engineType := RPGMakerEngineTypes[i]
-		if engineType.Name == result || result == Auto {
-			userSelectedShouldBackupPluginsJs := shouldBackupPluginsJs
-			for i := 0; i < len(pluginNames); i++ {
-				trimmedPluginName := strings.TrimSpace(pluginNames[i])
-				if trimmedPluginName != "" {
-					userSelectedShouldBackupPluginsJs = !engineType.Handler(trimmedPluginName, userSelectedShouldBackupPluginsJs)
-				}
-			}
+	pwd, err := os.Getwd()
+	if err != nil {
+		_, _ = RedUnderline.Printf("can NOT read current running folder\n")
+		return
+	}
+
+	engineType := ResolveEngineType(pwd, result)
+	if engineType == nil {
+		return
+	}
+
+	pluginsJsPath := path.Join(pwd, engineType.PluginsJsRel)
+
+	// only back up plugins.js once, before the first successful write,
+	// so the backup keeps the original unpatched content
+	backupDone := false
+	for i := 0; i < len(pluginNames); i++ {
+		trimmedPluginName := strings.TrimSpace(pluginNames[i])
+		if trimmedPluginName == "" {
+			continue
+		}
+		result := InjectPatchPlugin(pluginsJsPath, trimmedPluginName, shouldBackupPluginsJs && !backupDone)
+		if result == Patched {
+			backupDone = true
+		}
+		// PostPatch also runs for already-patched plugins so re-running the
+		// patcher refreshes the copied plugin file (MZ)
+		if result != PatchFailed && engineType.PostPatch != nil {
+			engineType.PostPatch(pwd, trimmedPluginName)
 		}
 	}
 }

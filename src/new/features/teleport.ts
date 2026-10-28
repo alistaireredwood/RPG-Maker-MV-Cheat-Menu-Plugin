@@ -6,31 +6,52 @@ CheatMenu.teleport = (mapId, xPos, yPos) => {
 };
 
 CheatMenu.scrollMapTeleportSelection = function (direction) {
-  if (direction == 'left') {
-    CheatMenu.teleportLocation.m--;
-    if (CheatMenu.teleportLocation.m < 1) {
-      CheatMenu.teleportLocation.m = $dataMapInfos.length - 1;
-    }
-  } else {
-    CheatMenu.teleportLocation.m++;
-    if (CheatMenu.teleportLocation.m >= $dataMapInfos.length) {
-      CheatMenu.teleportLocation.m = 1;
+  // skip deleted (null) and unnamed map entries — teleporting to a deleted
+  // map would try to load a nonexistent map file
+  const step = direction == 'left' ? -1 : 1;
+  const len = $dataMapInfos.length;
+  let m = CheatMenu.teleportLocation.m;
+  for (let i = 0; i < len; i++) {
+    m += step;
+    if (m < 1) m = len - 1;
+    else if (m >= len) m = 1;
+    if ($dataMapInfos[m]?.name) {
+      CheatMenu.teleportLocation.m = m;
+      break;
     }
   }
+
+  CheatMenu.teleportLocation.x = Math.min(CheatMenu.teleportLocation.x, teleportMaxX());
+  CheatMenu.teleportLocation.y = Math.min(CheatMenu.teleportLocation.y, teleportMaxY());
 
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
 
+// map dimensions are only known for the currently loaded map —
+// $dataMapInfos has no size data, so other maps fall back to 255
+function isCurrentMapSelected(): boolean {
+  return CheatMenu.teleportLocation.m === $gameMap.mapId();
+}
+
+function teleportMaxX(): number {
+  return isCurrentMapSelected() ? $gameMap.width() - 1 : 255;
+}
+
+function teleportMaxY(): number {
+  return isCurrentMapSelected() ? $gameMap.height() - 1 : 255;
+}
+
 CheatMenu.scrollXTeleportSelection = function (direction) {
+  const max = teleportMaxX();
   if (direction == 'left') {
     CheatMenu.teleportLocation.x--;
     if (CheatMenu.teleportLocation.x < 0) {
-      CheatMenu.teleportLocation.x = 255;
+      CheatMenu.teleportLocation.x = max;
     }
   } else {
     CheatMenu.teleportLocation.x++;
-    if (CheatMenu.teleportLocation.x > 255) {
+    if (CheatMenu.teleportLocation.x > max) {
       CheatMenu.teleportLocation.x = 0;
     }
   }
@@ -40,14 +61,15 @@ CheatMenu.scrollXTeleportSelection = function (direction) {
 };
 
 CheatMenu.scrollYTeleportSelection = function (direction) {
+  const max = teleportMaxY();
   if (direction == 'left') {
     CheatMenu.teleportLocation.y--;
     if (CheatMenu.teleportLocation.y < 0) {
-      CheatMenu.teleportLocation.y = 255;
+      CheatMenu.teleportLocation.y = max;
     }
   } else {
     CheatMenu.teleportLocation.y++;
-    if (CheatMenu.teleportLocation.y > 255) {
+    if (CheatMenu.teleportLocation.y > max) {
       CheatMenu.teleportLocation.y = 0;
     }
   }
@@ -91,6 +113,7 @@ CheatMenu.appendTeleport = function (
     key1,
     key2,
     CheatMenu.scrollMapTeleportSelection,
+    true,
   );
 
   CheatMenu.appendScrollSelector(
@@ -115,10 +138,10 @@ CheatMenu.appendTeleport = function (
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'Teleport',
   render: () => {
-    CheatMenu.appendCheatTitle('Teleport');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendTeleport(4, 5, 6, 7, 8, 9, 0);
   },
-});
+};

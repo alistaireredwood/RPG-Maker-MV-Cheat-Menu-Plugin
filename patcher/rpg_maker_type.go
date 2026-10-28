@@ -12,16 +12,61 @@ import (
 )
 
 type RPGMakerEngineType struct {
-	Name    string `json:"name"`
-	Handler func(pluginName string, shouldBackupPluginJs bool) bool
+	Name string `json:"name"`
+	// PluginsJsRel is the path to plugins.js relative to the game root;
+	// its existence is what identifies the engine.
+	PluginsJsRel string
+	// PostPatch runs after a plugin was successfully injected (optional).
+	PostPatch func(pwd string, pluginName string)
 }
 
-func panicEngineType(str string) bool {
+type PatchResult int
+
+const (
+	PatchFailed PatchResult = iota
+	Patched
+	AlreadyPatched
+)
+
+func panicEngineType(str string) PatchResult {
 	_, _ = Red.Printf("Unable to patch this Game, %s\n", str)
-	return false
+	return PatchFailed
 }
 
-func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPluginJs bool) bool {
+// ResolveEngineType returns the engine matching the user's selection, or
+// auto-detects it by probing each engine's plugins.js path. Returns nil
+// (after printing an error) if no engine matches.
+func ResolveEngineType(pwd string, selected string) *RPGMakerEngineType {
+	if selected == Auto {
+		for i := range RPGMakerEngineTypes {
+			engineType := &RPGMakerEngineTypes[i]
+			if engineType.PluginsJsRel == "" {
+				continue
+			}
+			if _, err := os.Stat(path.Join(pwd, engineType.PluginsJsRel)); err == nil {
+				_, _ = Cyan.Printf("Detected a RPG Maker %s game\n", engineType.Name)
+				return engineType
+			}
+		}
+		panicEngineType("unable to detect the RPG Maker engine (no plugins.js found)")
+		return nil
+	}
+	for i := range RPGMakerEngineTypes {
+		engineType := &RPGMakerEngineTypes[i]
+		if engineType.Name != selected || engineType.PluginsJsRel == "" {
+			continue
+		}
+		if _, err := os.Stat(path.Join(pwd, engineType.PluginsJsRel)); err != nil {
+			panicEngineType(fmt.Sprintf("this is NOT a RPG Maker %s game", engineType.Name))
+			return nil
+		}
+		return engineType
+	}
+	panicEngineType(fmt.Sprintf("unknown engine type %q", selected))
+	return nil
+}
+
+func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPluginJs bool) PatchResult {
 	_, err := os.Stat(pluginsDotJs)
 	if err != nil {
 		return panicEngineType(fmt.Sprintf("%s does NOT exist", pluginsDotJs))
@@ -46,7 +91,8 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 									if property.Key == "name" {
 										if pluginName, ok := property.Value.(*ast.StringLiteral); ok {
 											if pluginName.Value == patcherName {
-												return panicEngineType("because this Game has been patched")
+												_, _ = Yellow.Printf("\"%s\" is already patched, skipping injection...\n", patcherName)
+												return AlreadyPatched
 											}
 										}
 									}
@@ -130,7 +176,7 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 								return panicEngineType(fmt.Sprintf("failed to write into %s", pluginsDotJs))
 							}
 							_, _ = Cyan.Printf("\"%s\" successfully patched, enjoy!\n", patcherName)
-							return true
+							return Patched
 						} else {
 							return panicEngineType("unable to find a place to patch...")
 						}
@@ -147,61 +193,37 @@ const Auto = "Auto"
 var RPGMakerEngineTypes = []RPGMakerEngineType{
 	{
 		Name: Auto,
-		Handler: func(pluginName string, shouldBackupPluginJs bool) bool {
-			return false
-		},
 	},
 	{
-		Name: "MV",
-		Handler: func(pluginName string, shouldBackupPluginJs bool) bool {
-			pwd, err := os.Getwd()
-			if err != nil {
-				return panicEngineType("can NOT read current running folder")
-			}
-			pluginsJsPath := path.Join(pwd, "www/js/plugins.js")
-			_, err = os.Stat(pluginsJsPath)
-			if err != nil {
-				return panicEngineType("this is NOT a RPG Maker MV game")
-			}
-			return InjectPatchPlugin(pluginsJsPath, pluginName, shouldBackupPluginJs)
-		},
+		Name:         "MV",
+		PluginsJsRel: "www/js/plugins.js",
 	},
 	{
-		Name: "MZ",
-		Handler: func(pluginName string, shouldBackupPluginJs bool) bool {
-			pwd, err := os.Getwd()
-			if err != nil {
-				return panicEngineType("can NOT read current running folder")
-			}
-			pluginsJsPath := path.Join(pwd, "js/plugins.js")
-			_, err = os.Stat(pluginsJsPath)
-			if err != nil {
-				return panicEngineType("this is NOT a RPG Maker MZ game")
-			}
-			injected := InjectPatchPlugin(pluginsJsPath, pluginName, shouldBackupPluginJs)
-			if injected {
-				// copy plugin cheat file, because in default, cheat plugin is inside www/js/plugins
-				pluginJsPath := path.Join(pwd, "www/js/plugins", pluginName+".js")
-				targetPluginJsPath := path.Join(pwd, "js/plugins", pluginName+".js")
-				if reader, err := os.Open(pluginJsPath); err == nil {
+		Name:         "MZ",
+		PluginsJsRel: "js/plugins.js",
+		PostPatch: func(pwd string, pluginName string) {
+			// copy plugin cheat file, because in default, cheat plugin is inside www/js/plugins
+			pluginJsPath := path.Join(pwd, "www/js/plugins", pluginName+".js")
+			targetPluginJsPath := path.Join(pwd, "js/plugins", pluginName+".js")
+			if reader, err := os.Open(pluginJsPath); err == nil {
+				defer func() {
+					_ = reader.Close()
+				}()
+				if writer, err := os.Create(targetPluginJsPath); err == nil {
 					defer func() {
-						_ = reader.Close()
+						_ = writer.Close()
 					}()
-					if writer, err := os.Create(targetPluginJsPath); err == nil {
-						defer func() {
-							_ = writer.Close()
-						}()
-						if _, err = io.Copy(writer, reader); err != nil {
-							_, _ = RedUnderline.Printf("failed to copy \"%s\" to \"%s\"\n", pluginJsPath, targetPluginJsPath)
-						}
+					if _, err = io.Copy(writer, reader); err != nil {
+						_, _ = RedUnderline.Printf("failed to copy \"%s\" to \"%s\"\n", pluginJsPath, targetPluginJsPath)
 					} else {
-						_, _ = RedUnderline.Printf("failed to create \"%s\"\n", targetPluginJsPath)
+						_, _ = Cyan.Printf("\"%s.js\" copied to js/plugins\n", pluginName)
 					}
 				} else {
-					_, _ = RedUnderline.Printf("failed to open \"%s\"\n", pluginJsPath)
+					_, _ = RedUnderline.Printf("failed to create \"%s\"\n", targetPluginJsPath)
 				}
+			} else {
+				_, _ = RedUnderline.Printf("failed to open \"%s\"\n", pluginJsPath)
 			}
-			return injected
 		},
 	},
 }

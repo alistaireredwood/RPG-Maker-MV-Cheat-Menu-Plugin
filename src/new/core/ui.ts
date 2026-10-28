@@ -1,5 +1,8 @@
 import CheatMenu from '../CheatMenu';
 
+let _gridFocusIndex = 0;
+let _updatingMenu = false;
+
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
 
@@ -54,7 +57,53 @@ CheatMenu.positionMenu();
 // Menu item types
 /////////////////////////////////////////////////
 
-CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler) {
+CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = placeholder;
+  input.value = CheatMenu.searchKeywords?.[stateKey] || '';
+  input.className = 'cheat-menu-search-input';
+
+  ['keydown', 'keyup', 'keypress'].forEach((evt) => {
+    input.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  input.addEventListener('focus', () => {
+    CheatMenu._activeSearchKey = stateKey;
+  });
+
+  input.addEventListener('blur', () => {
+    if (!_updatingMenu && CheatMenu._activeSearchKey === stateKey) {
+      CheatMenu._activeSearchKey = null;
+    }
+  });
+
+  input.addEventListener('input', () => {
+    const keyword = input.value.toLowerCase();
+    if (!CheatMenu.searchKeywords) CheatMenu.searchKeywords = {};
+    CheatMenu.searchKeywords[stateKey] = keyword;
+    onSearchChange?.(keyword);
+    CheatMenu.updateMenu();
+  });
+
+  cell.appendChild(input);
+
+  if (CheatMenu._activeSearchKey === stateKey) {
+    requestAnimationFrame(() => {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    });
+  }
+};
+
+CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler, selectable, showArrows = true) {
   const scrollSelector = CheatMenu.overlay.insertRow();
   scrollSelector.className = 'scroll-selector-row';
 
@@ -62,13 +111,23 @@ CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler) {
   scrollLeftButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
   const scrollText = scrollSelector.insertCell();
-  scrollText.className = 'cheat-menu-cell';
+  scrollText.className = selectable
+    ? 'cheat-menu-cell cheat-menu-selectable'
+    : 'cheat-menu-cell';
 
   const scrollRightButton = scrollSelector.insertCell();
   scrollRightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
-  scrollLeftButton.innerHTML = '←[' + key1 + ']';
   scrollText.innerHTML = text + '';
+
+  if (!showArrows) {
+    // non-numeric values (string/object) can't be incremented/decremented —
+    // leave the arrow cells blank instead of binding a handler that would
+    // corrupt the value
+    return;
+  }
+
+  scrollLeftButton.innerHTML = '←[' + key1 + ']';
   scrollRightButton.innerHTML = '[' + key2 + ']→';
 
   scrollLeftButton.addEventListener(
@@ -86,15 +145,16 @@ CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler) {
   CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
 };
 
-CheatMenu.appendTitle = function (title) {
+CheatMenu.appendTitle = function (title, sideText) {
   let titleRow = CheatMenu.overlay.insertRow();
   let temp = titleRow.insertCell();
   temp.className = 'cheat-menu-cell-title';
   let titleText = titleRow.insertCell();
   titleText.className = 'cheat-menu-cell-title';
-  temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell-title';
+  let sideCell = titleRow.insertCell();
+  sideCell.className = 'cheat-menu-cell-title cheat-menu-title-side';
   titleText.innerHTML = title;
+  if (sideText) sideCell.innerHTML = sideText;
 };
 
 CheatMenu.appendDescription = function (text) {
@@ -128,18 +188,14 @@ CheatMenu.appendCheat = function (cheatText, statusText, key, clickHandler) {
 };
 
 CheatMenu.scrollCheat = function (direction) {
+  const len = CheatMenu.menus.length;
+  if (len === 0) return;
+  const current = CheatMenu.currentMenuIndex ?? 0;
   if (direction == 'left') {
-    CheatMenu.cheatSelected--;
-    if (CheatMenu.cheatSelected < 0) {
-      CheatMenu.cheatSelected = CheatMenu.menus.length - 1;
-    }
+    CheatMenu.currentMenuIndex = current <= 0 ? len - 1 : current - 1;
   } else {
-    CheatMenu.cheatSelected++;
-    if (CheatMenu.cheatSelected > CheatMenu.menus.length - 1) {
-      CheatMenu.cheatSelected = 0;
-    }
+    CheatMenu.currentMenuIndex = current >= len - 1 ? 0 : current + 1;
   }
-
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
 };
@@ -187,10 +243,41 @@ CheatMenu.appendActorSelection = function (key1, key2) {
     key1,
     key2,
     CheatMenu.scrollActor,
+    true,
   );
 };
 
 CheatMenu.scrollAmount = function (direction) {
+  // typed amount takes over from here; clear it so the display reverts to
+  // the hardcoded amounts list on this and future renders
+  CheatMenu.amountInputText = null;
+
+  if (CheatMenu.customAmount !== null) {
+    // arrows snap a typed value to the nearest hardcoded amount *in that
+    // direction* — right goes to the next higher value, left to the next
+    // lower one — rather than the closest value overall
+    const current = CheatMenu.customAmount;
+    let targetIdx: number;
+    if (direction === 'right') {
+      targetIdx = CheatMenu.amounts.findIndex((value) => value > current);
+      if (targetIdx === -1) targetIdx = CheatMenu.amounts.length - 1;
+    } else {
+      targetIdx = 0;
+      for (let i = 0; i < CheatMenu.amounts.length; i++) {
+        if (CheatMenu.amounts[i] < current) {
+          targetIdx = i;
+        } else {
+          break;
+        }
+      }
+    }
+    CheatMenu.amountIndex = targetIdx;
+    CheatMenu.customAmount = null;
+    SoundManager.playSystemSound(direction === 'left' ? 2 : 1);
+    CheatMenu.updateMenu();
+    return;
+  }
+
   if (direction == 'left') {
     CheatMenu.amountIndex--;
     if (CheatMenu.amountIndex < 0) {
@@ -211,20 +298,109 @@ CheatMenu.scrollAmount = function (direction) {
 CheatMenu.appendAmountSelection = function (key1, key2) {
   CheatMenu.appendTitle('Amount');
 
-  const currentAmount = CheatMenu.amounts[CheatMenu.amountIndex];
-  const currentAmountHtml = `<span class='actor-name-highlight'>${currentAmount}</span>`;
+  const row = CheatMenu.overlay.insertRow();
+  row.className = 'scroll-selector-row';
 
-  CheatMenu.appendScrollSelector(
-    currentAmountHtml,
-    key1,
-    key2,
-    CheatMenu.scrollAmount,
-  );
+  const leftButton = row.insertCell();
+  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
+  leftButton.innerHTML = '←[' + key1 + ']';
+
+  const cell = row.insertCell();
+  cell.className = 'cheat-menu-cell';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.inputMode = 'numeric';
+  input.autocomplete = 'off';
+  input.className = 'cheat-menu-amount-input actor-name-highlight';
+  input.value =
+    CheatMenu.amountInputText ?? String(CheatMenu.amounts[CheatMenu.amountIndex]);
+
+  const allowedKeys = [
+    'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End',
+  ];
+
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      input.blur();
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey || allowedKeys.includes(e.key)) return;
+    // only whole digits — blocks commas, dots, minus signs, letters, etc.
+    if (!/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+    }
+  });
+  ['keyup', 'keypress'].forEach((evt) => {
+    input.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  input.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData?.getData('text') ?? '').replace(/[^0-9]/g, '');
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    input.value = input.value.slice(0, start) + text + input.value.slice(end);
+    input.setSelectionRange(start + text.length, start + text.length);
+    input.dispatchEvent(new Event('input'));
+  });
+
+  input.addEventListener('focus', () => {
+    CheatMenu._activeAmountInput = true;
+  });
+
+  input.addEventListener('blur', () => {
+    if (!_updatingMenu) {
+      CheatMenu._activeAmountInput = false;
+      // an empty/cleared field with no valid typed amount reverts to the
+      // hardcoded value once the user clicks away
+      if (CheatMenu.customAmount === null) {
+        CheatMenu.amountInputText = null;
+      }
+    }
+  });
+
+  input.addEventListener('input', () => {
+    const digitsOnly = input.value.replace(/[^0-9]/g, '');
+    if (digitsOnly !== input.value) {
+      const pos = input.selectionStart ?? digitsOnly.length;
+      input.value = digitsOnly;
+      input.setSelectionRange(pos, pos);
+    }
+    CheatMenu.amountInputText = digitsOnly;
+    CheatMenu.customAmount = digitsOnly === '' ? null : parseInt(digitsOnly, 10);
+    CheatMenu.updateMenu();
+  });
+
+  cell.appendChild(input);
+
+  if (CheatMenu._activeAmountInput) {
+    requestAnimationFrame(() => {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    });
+  }
+
+  const rightButton = row.insertCell();
+  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
+  rightButton.innerHTML = '[' + key2 + ']→';
+
+  leftButton.addEventListener('mousedown', CheatMenu.scrollAmount.bind(null, 'left'));
+  rightButton.addEventListener('mousedown', CheatMenu.scrollAmount.bind(null, 'right'));
+
+  // @ts-ignore
+  CheatMenu.keyListeners[key1] = CheatMenu.scrollAmount.bind(null, 'left');
+  // @ts-ignore
+  CheatMenu.keyListeners[key2] = CheatMenu.scrollAmount.bind(null, 'right');
 };
 
-CheatMenu.appendCheatTitle = function (cheatName) {
+CheatMenu.appendCheatTitle = function () {
+  const name = CheatMenu.menus[CheatMenu.currentMenuIndex as number]?.name ?? '';
   CheatMenu.appendTitle('Cheat');
-  CheatMenu.appendScrollSelector(cheatName, 2, 3, CheatMenu.scrollCheat);
+  CheatMenu.appendScrollSelector(name, 2, 3, CheatMenu.scrollCheat);
 };
 
 CheatMenu.appendBackButton = function () {
@@ -244,7 +420,14 @@ CheatMenu.appendBackButton = function () {
 CheatMenu.renderMainMenuGrid = function () {
   const overlay = CheatMenu.overlay;
   overlay.innerHTML = '';
-  overlay.className = 'cheat-menu-grid';
+  overlay.className = '';
+
+  const cell = overlay.insertRow().insertCell();
+  cell.style.padding = '0';
+
+  const grid = document.createElement('div');
+  grid.className = 'cheat-menu-grid';
+  cell.appendChild(grid);
 
   CheatMenu.menus.forEach((menuEntry, index) => {
     const button = document.createElement('button');
@@ -257,7 +440,26 @@ CheatMenu.renderMainMenuGrid = function () {
       CheatMenu.updateMenu();
     };
 
-    overlay.appendChild(button);
+    grid.appendChild(button);
+  });
+
+  const buttons = Array.from(grid.querySelectorAll<HTMLElement>('.cheat-menu-grid-button'));
+  if (buttons.length) {
+    _gridFocusIndex = Math.min(_gridFocusIndex, buttons.length - 1);
+    buttons[_gridFocusIndex].focus();
+  }
+
+  grid.addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab') return;
+    event.preventDefault();
+    event.stopPropagation();
+    const idx = buttons.indexOf(document.activeElement as HTMLElement);
+    const current = idx >= 0 ? idx : _gridFocusIndex;
+    const next = event.shiftKey
+      ? (current <= 0 ? buttons.length - 1 : current - 1)
+      : (current >= buttons.length - 1 ? 0 : current + 1);
+    _gridFocusIndex = next;
+    buttons[next].focus();
   });
 };
 
@@ -266,9 +468,14 @@ if (typeof CheatMenu.menus == 'undefined') {
 }
 
 CheatMenu.updateMenu = function () {
+  _updatingMenu = true;
   CheatMenu.keyListeners = {};
 
+  const prev = CheatMenu._prevMenuIndex ?? null;
+  CheatMenu._prevMenuIndex = CheatMenu.currentMenuIndex;
+
   if (CheatMenu.currentMenuIndex === null) {
+    if (prev !== null) _gridFocusIndex = 0;
     CheatMenu.renderMainMenuGrid();
   } else {
     const menuToRender = CheatMenu.menus[CheatMenu.currentMenuIndex];
@@ -278,9 +485,20 @@ CheatMenu.updateMenu = function () {
 
       CheatMenu.appendBackButton();
 
-      menuToRender.render();
+      try {
+        menuToRender.render();
+      } catch (e) {
+        // a game can override engine APIs a feature relies on — show the
+        // failure inside the menu instead of leaving it half-rendered
+        console.error(`[CheatMenu] "${menuToRender.name}" render failed:`, e);
+        CheatMenu.appendTitle(menuToRender.name);
+        CheatMenu.appendDescription(
+          `<span class="error-text">Render failed: ${e instanceof Error ? e.message : e}<br>See console (F8) for details.</span>`,
+        );
+      }
     }
   }
 
   CheatMenu.positionMenu();
+  _updatingMenu = false;
 };

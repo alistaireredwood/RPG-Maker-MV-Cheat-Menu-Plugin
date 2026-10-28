@@ -16,7 +16,6 @@ export type KeyListeners = {
 
 export type InitialValues = {
   position: number;
-  cheatSelected: number;
   cheatSelectedActor: number;
   amountIndex: number;
   statSelection: number;
@@ -30,10 +29,12 @@ export type InitialValues = {
   teleportLocation: PositionData;
   speed: number | null;
   speedUnlocked: boolean;
+  godModeActors: number[];
   currentMenuIndex: number | null;
 };
 
 export type CheatMenuT = {
+  _prevMenuIndex: number | null;
   // --- Properties ---
 
   initialized: boolean;
@@ -42,10 +43,12 @@ export type CheatMenuT = {
   position: number;
   menuUpdateTimer: NodeJS.Timeout | null;
 
-  cheatSelected: number;
   cheatSelectedActor: number;
   amounts: number[];
   amountIndex: number;
+  customAmount: number | null;
+  amountInputText: string | null;
+  _activeAmountInput: boolean;
   statSelection: number;
   itemSelection: number;
   weaponSelection: number;
@@ -62,6 +65,11 @@ export type CheatMenuT = {
   speed: number | null;
   speedUnlocked: boolean;
   speedInitialized: boolean;
+
+  godModeActors: number[];
+
+  searchKeywords: Record<string, string>;
+  _activeSearchKey: string | null;
 
   initialValues: InitialValues;
 
@@ -84,6 +92,7 @@ export type CheatMenuT = {
 
   godMode: (actor: CheatMenu_Game_Actor) => void;
   godMode_off: (actor: CheatMenu_Game_Actor) => void;
+  reapplyGodMode: () => void;
   setPartyHp: (hp: number, alive: boolean) => void;
   setPartyMp: (mp: number, alive: boolean) => void;
   setPartyTp: (tp: number, alive: boolean) => void;
@@ -91,9 +100,9 @@ export type CheatMenuT = {
   recoverPartyMp: (alive: boolean) => void;
   recoverPartyTp: (alive: boolean) => void;
   setEnemyHp: (hp: number, alive: boolean) => void;
-  giveExp: (actor: CheatMenu_Game_Actor, amount: number) => void;
+  giveExp: (actor: CheatMenu_Game_Actor | null, amount: number) => void;
   giveStat: (
-    actor: CheatMenu_Game_Actor,
+    actor: CheatMenu_Game_Actor | null,
     statIndex: number,
     amount: number,
   ) => void;
@@ -119,9 +128,11 @@ export type CheatMenuT = {
     key1: string | number,
     key2: string | number,
     scrollHandler: (direction: 'left' | 'right', event?: MouseEvent) => void,
+    selectable?: boolean,
+    showArrows?: boolean,
   ) => void;
 
-  appendTitle: (title: string) => void;
+  appendTitle: (title: string, sideText?: string) => void;
   appendDescription: (text: string) => void;
   appendCheat: (
     cheatText: string,
@@ -133,7 +144,7 @@ export type CheatMenuT = {
   // --- Menu Page Setup Functions ---
 
   scrollCheat: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  appendCheatTitle: (cheatName: string) => void;
+  appendCheatTitle: () => void;
 
   scrollActor: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendActorSelection: (
@@ -144,10 +155,6 @@ export type CheatMenuT = {
   toggleGodMode: (event?: MouseEvent) => void;
   appendGodmodeStatus: () => void;
 
-  enemyHpCheat1: () => void;
-  enemyHpCheat2: () => void;
-  enemyHpCheat3: () => void;
-  enemyHpCheat4: () => void;
   appendEnemyCheats: (
     key1: string | number,
     key2: string | number,
@@ -155,12 +162,6 @@ export type CheatMenuT = {
     key4: string | number,
   ) => void;
 
-  partyHpCheat1: () => void;
-  partyHpCheat2: () => void;
-  partyHpCheat3: () => void;
-  partyHpCheat4: () => void;
-  partyHpCheat5: () => void;
-  partyHpCheat6: () => void;
   appendHpCheats: (
     key1: string | number,
     key2: string | number,
@@ -170,12 +171,6 @@ export type CheatMenuT = {
     key6: string | number,
   ) => void;
 
-  partyMpCheat1: () => void;
-  partyMpCheat2: () => void;
-  partyMpCheat3: () => void;
-  partyMpCheat4: () => void;
-  partyMpCheat5: () => void;
-  partyMpCheat6: () => void;
   appendMpCheats: (
     key1: string | number,
     key2: string | number,
@@ -185,12 +180,6 @@ export type CheatMenuT = {
     key6: string | number,
   ) => void;
 
-  partyTpCheat1: () => void;
-  partyTpCheat2: () => void;
-  partyTpCheat3: () => void;
-  partyTpCheat4: () => void;
-  partyTpCheat5: () => void;
-  partyTpCheat6: () => void;
   appendTpCheats: (
     key1: string | number,
     key2: string | number,
@@ -328,6 +317,12 @@ export type CheatMenuT = {
     key5: string | number,
     key6: string | number,
     key7: string | number,
+  ) => void;
+
+  appendSearchInput: (
+    placeholder: string,
+    stateKey: string,
+    onSearchChange?: (keyword: string) => void,
   ) => void;
 
   // --- Core Menu Logic & Input Handlers ---

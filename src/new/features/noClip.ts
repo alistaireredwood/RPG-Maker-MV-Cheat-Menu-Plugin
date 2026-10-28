@@ -28,10 +28,10 @@ CheatMenu.appendNoClipStatus = function (key1) {
   );
 };
 
-CheatMenu.menus.splice(0, 0, {
+export const menu = {
   name: 'No Clip',
   render: () => {
-    CheatMenu.appendCheatTitle('No Clip');
+    CheatMenu.appendCheatTitle();
     CheatMenu.appendNoClipStatus(4);
   },
-});
+};

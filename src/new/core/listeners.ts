@@ -55,7 +55,7 @@ CheatMenu.handleShowRpgMakerDebug = (event) => {
     ($gameTemp as any)._isPlaytest = true;
 
     setTimeout(function () {
-      ($gameTemp as any) = false;
+      ($gameTemp as any)._isPlaytest = false;
     }, 100);
   }
 };
@@ -69,38 +69,34 @@ CheatMenu.handleToggleCheatMenu = (event) => {
   ) {
     if (event.key === CheatMenu.keyMappings.KEY_1) {
       if (!CheatMenu.initialized) {
-        const gameActorsData = ($gameActors as any)._data as Game_Actor[];
-
-        for (let i = 0; i < gameActorsData.length; i++) {
-          const actorInstance = $gameActors.actor(i) as CheatMenu_Game_Actor;
-
-          if (actorInstance) {
-            actorInstance.godMode = false;
-
-            if (actorInstance.godModeInterval) {
-              clearInterval(actorInstance.godModeInterval);
-            }
-          }
-        }
+        // clone objects/arrays so later mutations of CheatMenu state can't
+        // corrupt initialValues or the data held by $gameSystem.CheatMenu
+        const clone = <T>(value: T): T =>
+          value !== null && typeof value === 'object'
+            ? JSON.parse(JSON.stringify(value))
+            : value;
 
         for (let name in CheatMenu.initialValues) {
           // @ts-ignore
-          CheatMenu[name] =
+          CheatMenu[name] = clone(
             CheatMenu.initialValues[
               name as keyof typeof CheatMenu.initialValues
-            ];
+            ],
+          );
         }
 
         if ($gameSystem.CheatMenu) {
           for (let name in $gameSystem.CheatMenu) {
             // @ts-ignore
-            CheatMenu[name] = $gameSystem.CheatMenu[name];
+            CheatMenu[name] = clone($gameSystem.CheatMenu[name]);
           }
         }
 
         if (!CheatMenu.speedUnlocked) {
           CheatMenu.initializeSpeedLock();
         }
+
+        CheatMenu.reapplyGodMode();
 
         CheatMenu.initialized = true;
       }

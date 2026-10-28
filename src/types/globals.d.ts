@@ -23,9 +23,6 @@ declare interface ICheatMenu {
 }
 
 declare class CheatMenu_Game_Actor extends Game_Actor {
-  godMode?: boolean;
-  godModeInterval?: NodeJS.Timeout;
-
   gainHpBackup?: (value: number) => void;
   setHpBackup?: (hp: number) => void;
 

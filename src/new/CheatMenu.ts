@@ -30,6 +30,8 @@ const CheatMenu = {
   speedUnlocked: true,
   speedInitialized: false,
   godModeActors: [] as number[],
+  forceMouseMovement: false,
+  forceCtrlSkip: false,
   searchKeywords: {} as Record<string, string>,
   _activeSearchKey: null,
   _prevMenuIndex: null,
@@ -58,6 +60,8 @@ if (!CheatMenu.initialValues) {
     speedUnlocked: true,
     godModeActors: [],
     currentMenuIndex: null,
+    forceMouseMovement: false,
+    forceCtrlSkip: false,
   };
 }
 

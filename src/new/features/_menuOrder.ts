@@ -18,6 +18,7 @@ import { menu as clearStates } from './clearStates.ts';
 import { menu as giveStat } from './giveStat.ts';
 import { menu as unlockControls } from './unlockControls.ts';
 import { menu as saveGame } from './saveGame.ts';
+import { menu as evaluate } from './evaluate.ts';
 
 CheatMenu.menus.push(
   teleport,
@@ -39,4 +40,5 @@ CheatMenu.menus.push(
   giveStat,
   unlockControls,
   saveGame,
+  evaluate,
 );

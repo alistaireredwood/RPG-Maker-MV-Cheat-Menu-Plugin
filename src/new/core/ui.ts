@@ -288,6 +288,74 @@ CheatMenu.appendValueInput = function (
   CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
 };
 
+// Multi-line text area spanning the whole row (e.g. a script editor).
+// onChange fires on every keystroke — the caller owns the text. Ctrl+Enter
+// calls onSubmit. While it has focus the 1 s re-render timer is skipped
+// (core/state.ts) so typing/undo history isn't wiped; after a re-render caused
+// by onSubmit, focus, caret and scroll position are restored.
+CheatMenu.appendCodeInput = function (inputKey, value, onChange, onSubmit, rows = 6) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'cheat-menu-search-input cheat-menu-code-input';
+  textarea.rows = rows;
+  textarea.spellcheck = false;
+  textarea.autocomplete = 'off';
+  textarea.value = value;
+  textarea.placeholder = 'Ctrl+Enter: run';
+
+  const remember = () => {
+    CheatMenu._activeCodeInput = {
+      key: inputKey,
+      caret: textarea.selectionStart ?? textarea.value.length,
+      scroll: textarea.scrollTop,
+    };
+  };
+
+  textarea.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      remember();
+      onSubmit(textarea.value);
+    } else if (e.key === 'Tab') {
+      // insert indentation instead of moving focus out of the editor
+      e.preventDefault();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.setRangeText('  ', start, end, 'end');
+      onChange(textarea.value);
+    }
+  });
+  ['keyup', 'keypress'].forEach((evt) => {
+    textarea.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  textarea.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  textarea.addEventListener('focus', remember);
+  textarea.addEventListener('blur', () => {
+    if (!_updatingMenu && CheatMenu._activeCodeInput?.key === inputKey) {
+      CheatMenu._activeCodeInput = null;
+    }
+  });
+  textarea.addEventListener('input', () => onChange(textarea.value));
+
+  cell.appendChild(textarea);
+
+  const active = CheatMenu._activeCodeInput;
+  if (active?.key === inputKey) {
+    menuWindow().requestAnimationFrame(() => {
+      textarea.focus();
+      const pos = Math.min(active.caret, textarea.value.length);
+      textarea.setSelectionRange(pos, pos);
+      textarea.scrollTop = active.scroll;
+    });
+  }
+};
+
 CheatMenu.appendTitle = function (title, sideText) {
   let titleRow = CheatMenu.overlay.insertRow();
   let temp = titleRow.insertCell();
@@ -309,6 +377,15 @@ CheatMenu.appendDescription = function (text) {
   temp = titleRow.insertCell();
   temp.className = 'cheat-menu-cell';
   titleText.innerHTML = text;
+};
+
+// full-width variant of appendDescription (spans all three columns)
+CheatMenu.appendWideDescription = function (html) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+  cell.innerHTML = html;
 };
 
 CheatMenu.appendCheat = function (cheatText, statusText, key, clickHandler) {

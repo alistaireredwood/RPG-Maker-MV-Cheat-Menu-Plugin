@@ -245,6 +245,25 @@
   box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
 }
 
+/* --- CODE INPUT (Evaluate) --- */
+.cheat-menu-code-input {
+  display: block;
+  resize: vertical;
+  font-family: Consolas, 'Courier New', monospace;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.cheat-menu-eval-result {
+  display: block;
+  max-height: 160px;
+  overflow: auto;
+  font-family: Consolas, 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: left;
+}
+
 /* typed but not yet applied (Enter) */
 .cheat-menu-value-input.is-dirty {
   font-style: italic;

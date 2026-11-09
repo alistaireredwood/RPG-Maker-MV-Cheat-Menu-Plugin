@@ -47,6 +47,7 @@ Features with large lists (Items, Weapons, Armors, Variables, Switches) use `app
 - `CheatMenu.searchKeywords` — `Record<string, string>`, per-feature search terms (not persisted to save)
 - `CheatMenu._activeSearchKey` — which search input currently owns focus; managed by `focus`/`blur` events and the `_updatingMenu` flag in `ui.ts`
 - `CheatMenu._valueInputDrafts` / `_activeValueInputKey` — typed-but-not-applied text and focus owner for `appendValueInput` (editable value cell, Enter commits / Esc or blur discards; used by Variables); scope the `inputKey` to the edited entity (e.g. `variable:12`)
+- `CheatMenu._activeCodeInput` — focus/caret/scroll of the `appendCodeInput` textarea (Evaluate); while a textarea in the overlay is focused, the 1 s re-render timer in `state.ts` is skipped
 - `CheatMenu.initialValues` — keys listed here are persisted to `$gameSystem.CheatMenu` on save/load; do **not** add `searchKeywords` or `_activeSearchKey` here
 
 ### Adding a new feature (`src/new/`)

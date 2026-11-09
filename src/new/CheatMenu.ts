@@ -15,6 +15,7 @@ const CheatMenu = {
   _activeAmountInput: false,
   _valueInputDrafts: {},
   _activeValueInputKey: null,
+  _activeCodeInput: null,
   statSelection: 0,
   itemSelection: 1,
   weaponSelection: 1,

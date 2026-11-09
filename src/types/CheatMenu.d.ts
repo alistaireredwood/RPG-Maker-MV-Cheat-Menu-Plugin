@@ -55,6 +55,8 @@ export type CheatMenuT = {
   /** appendValueInput drafts (typed, not yet applied) — not persisted to save */
   _valueInputDrafts: Record<string, { text: string; caret: number }>;
   _activeValueInputKey: string | null;
+  /** focus/caret of the appendCodeInput textarea, restored across re-renders */
+  _activeCodeInput: { key: string; caret: number; scroll: number } | null;
   statSelection: number;
   itemSelection: number;
   weaponSelection: number;
@@ -169,8 +171,17 @@ export type CheatMenuT = {
     showArrows?: boolean,
   ) => void;
 
+  appendCodeInput: (
+    inputKey: string,
+    value: string,
+    onChange: (text: string) => void,
+    onSubmit: (text: string) => void,
+    rows?: number,
+  ) => void;
+
   appendTitle: (title: string, sideText?: string) => void;
   appendDescription: (text: string) => void;
+  appendWideDescription: (html: string) => void;
   appendCheat: (
     cheatText: string,
     statusText: string | number | boolean | null,
@@ -244,6 +255,9 @@ export type CheatMenuT = {
 
   scrollSaveSlot: (direction: 'left' | 'right', event?: MouseEvent) => void;
   saveToSelectedSlot: (event?: MouseEvent) => void;
+  runEvaluate: (event?: MouseEvent) => void;
+  appendEvaluate: (key1: string | number, key2: string | number) => void;
+
   appendSaveGame: (
     key1: string | number,
     key2: string | number,

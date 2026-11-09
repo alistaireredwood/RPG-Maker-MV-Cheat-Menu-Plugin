@@ -15,7 +15,7 @@ function describeSlot(slot: number): string {
     loadSavefileInfo?: (id: number) => SavefileInfo | null;
     savefileInfo?: (id: number) => SavefileInfo | null;
   };
-  let info: SavefileInfo | null | undefined = null;
+  let info: SavefileInfo | null | undefined;
   try {
     info = dm.loadSavefileInfo?.(slot) ?? dm.savefileInfo?.(slot);
   } catch {
@@ -65,9 +65,13 @@ CheatMenu.saveToSelectedSlot = function () {
   $gameSystem.onBeforeSave();
   try {
     // MV returns a boolean, MZ returns a Promise
-    const result = DataManager.saveGame?.(slot) as boolean | Promise<unknown> | undefined;
+    const result = DataManager.saveGame?.(slot) as
+      boolean | Promise<unknown> | undefined;
     if (result instanceof Promise) {
-      result.then(() => onDone(true), () => onDone(false));
+      result.then(
+        () => onDone(true),
+        () => onDone(false),
+      );
     } else {
       onDone(result === true);
     }
@@ -85,7 +89,13 @@ CheatMenu.appendSaveGame = function (key1, key2, key3) {
   const slot = CheatMenu.saveSlotSelection;
 
   CheatMenu.appendTitle('Slot');
-  CheatMenu.appendScrollSelector(`${slot} / ${max}`, key1, key2, CheatMenu.scrollSaveSlot, true);
+  CheatMenu.appendScrollSelector(
+    `${slot} / ${max}`,
+    key1,
+    key2,
+    CheatMenu.scrollSaveSlot,
+    true,
+  );
   CheatMenu.appendDescription(describeSlot(slot));
   CheatMenu.appendCheat('Save', 'Activate', key3, CheatMenu.saveToSelectedSlot);
   if (lastResult) {

@@ -49,7 +49,10 @@ CheatMenu.scrollGameSpeed = function (direction) {
     CheatMenu.gameSpeedIndex = Math.max(0, CheatMenu.gameSpeedIndex - 1);
     SoundManager.playSystemSound(2);
   } else {
-    CheatMenu.gameSpeedIndex = Math.min(GAME_SPEEDS.length - 1, CheatMenu.gameSpeedIndex + 1);
+    CheatMenu.gameSpeedIndex = Math.min(
+      GAME_SPEEDS.length - 1,
+      CheatMenu.gameSpeedIndex + 1,
+    );
     SoundManager.playSystemSound(1);
   }
   CheatMenu.updateMenu();
@@ -70,7 +73,12 @@ CheatMenu.appendGameSpeed = function (key1, key2, key3) {
     key2,
     CheatMenu.scrollGameSpeed,
   );
-  CheatMenu.appendCheat('Reset to x1', 'Activate', key3, CheatMenu.resetGameSpeed);
+  CheatMenu.appendCheat(
+    'Reset to x1',
+    'Activate',
+    key3,
+    CheatMenu.resetGameSpeed,
+  );
   CheatMenu.appendDescription('High values may cause frame drops.');
 };
 

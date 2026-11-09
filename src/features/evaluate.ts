@@ -39,7 +39,8 @@ function escapeHtml(text: string): string {
 function formatValue(value: unknown): string {
   if (value === undefined) return 'undefined';
   if (typeof value === 'string') return JSON.stringify(value);
-  if (typeof value === 'function') return `[Function ${value.name || 'anonymous'}]`;
+  if (typeof value === 'function')
+    return `[Function ${value.name || 'anonymous'}]`;
   if (value !== null && typeof value === 'object') {
     try {
       // game objects can be circular or huge — fall back to their type name
@@ -90,8 +91,10 @@ CheatMenu.runEvaluate = function () {
   if (value instanceof Promise) {
     setResult({ ok: true, text: 'Promise (pending)…' });
     value.then(
-      (resolved) => setResult({ ok: true, text: `Promise → ${formatValue(resolved)}` }),
-      (e) => setResult({ ok: false, text: `Promise rejected → ${formatError(e)}` }),
+      (resolved) =>
+        setResult({ ok: true, text: `Promise → ${formatValue(resolved)}` }),
+      (e) =>
+        setResult({ ok: false, text: `Promise rejected → ${formatError(e)}` }),
     );
     return;
   }
@@ -116,13 +119,22 @@ CheatMenu.appendEvaluate = function (key1, key2) {
     },
     () => CheatMenu.runEvaluate(),
   );
-  CheatMenu.appendCheat('Run (Ctrl+Enter in editor)', 'Activate', key1, CheatMenu.runEvaluate);
+  CheatMenu.appendCheat(
+    'Run (Ctrl+Enter in editor)',
+    'Activate',
+    key1,
+    CheatMenu.runEvaluate,
+  );
 
   if (lastResult) {
     CheatMenu.appendTitle('Result');
     CheatMenu.appendCheat('Clear result', 'Activate', key2, clearResult);
-    const cls = lastResult.ok ? 'cheat-menu-eval-result' : 'cheat-menu-eval-result error-text';
-    CheatMenu.appendWideDescription(`<span class="${cls}">${escapeHtml(truncate(lastResult.text))}</span>`);
+    const cls = lastResult.ok
+      ? 'cheat-menu-eval-result'
+      : 'cheat-menu-eval-result error-text';
+    CheatMenu.appendWideDescription(
+      `<span class="${cls}">${escapeHtml(truncate(lastResult.text))}</span>`,
+    );
   }
 };
 

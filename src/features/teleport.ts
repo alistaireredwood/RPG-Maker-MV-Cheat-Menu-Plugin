@@ -21,8 +21,14 @@ CheatMenu.scrollMapTeleportSelection = function (direction) {
     }
   }
 
-  CheatMenu.teleportLocation.x = Math.min(CheatMenu.teleportLocation.x, teleportMaxX());
-  CheatMenu.teleportLocation.y = Math.min(CheatMenu.teleportLocation.y, teleportMaxY());
+  CheatMenu.teleportLocation.x = Math.min(
+    CheatMenu.teleportLocation.x,
+    teleportMaxX(),
+  );
+  CheatMenu.teleportLocation.y = Math.min(
+    CheatMenu.teleportLocation.y,
+    teleportMaxY(),
+  );
 
   SoundManager.playSystemSound(0);
   CheatMenu.updateMenu();
@@ -88,15 +94,7 @@ CheatMenu.teleportCurrentLocation = function () {
   CheatMenu.updateMenu();
 };
 
-CheatMenu.appendTeleport = function (
-  key1,
-  key2,
-  key3,
-  key4,
-  key5,
-  key6,
-  key7,
-) {
+CheatMenu.appendTeleport = function (key1, key2, key3, key4, key5, key6, key7) {
   let currentMap = '' + CheatMenu.teleportLocation.m + ': ';
 
   if (

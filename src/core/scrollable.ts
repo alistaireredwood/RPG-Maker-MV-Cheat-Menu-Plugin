@@ -79,7 +79,8 @@ export function makeSetExact(
 
 export function makeApplyAmount(action: (amount: number) => void): ScrollFn {
   return function (direction) {
-    let amount = CheatMenu.customAmount ?? CheatMenu.amounts[CheatMenu.amountIndex];
+    let amount =
+      CheatMenu.customAmount ?? CheatMenu.amounts[CheatMenu.amountIndex];
     if (direction === 'left') {
       amount = -amount;
       SoundManager.playSystemSound(2);
@@ -128,8 +129,15 @@ export function appendInventorySection(
   const idx = config.getIdx();
   const item = items[idx];
 
-  const keyword = (CheatMenu.searchKeywords?.[config.stateKey] || '').toLowerCase();
-  const { index, total } = getIndexInfo(items, idx, config.matches as (item: unknown, keyword: string) => boolean, keyword);
+  const keyword = (
+    CheatMenu.searchKeywords?.[config.stateKey] || ''
+  ).toLowerCase();
+  const { index, total } = getIndexInfo(
+    items,
+    idx,
+    config.matches as (item: unknown, keyword: string) => boolean,
+    keyword,
+  );
 
   CheatMenu.appendTitle(config.title, `${index}/${total}`);
 
@@ -146,7 +154,13 @@ export function appendInventorySection(
     }
   }
 
-  CheatMenu.appendScrollSelector(item?.name ?? '', key1, key2, config.scrollFn, true);
+  CheatMenu.appendScrollSelector(
+    item?.name ?? '',
+    key1,
+    key2,
+    config.scrollFn,
+    true,
+  );
 
   if (item && typeof count === 'number') {
     CheatMenu.appendValueInput(

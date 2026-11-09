@@ -404,22 +404,22 @@ CheatMenu.appendCodeInput = function (
 };
 
 CheatMenu.appendTitle = function (title, sideText) {
-  let titleRow = CheatMenu.overlay.insertRow();
-  let temp = titleRow.insertCell();
+  const titleRow = CheatMenu.overlay.insertRow();
+  const temp = titleRow.insertCell();
   temp.className = 'cheat-menu-cell-title';
-  let titleText = titleRow.insertCell();
+  const titleText = titleRow.insertCell();
   titleText.className = 'cheat-menu-cell-title';
-  let sideCell = titleRow.insertCell();
+  const sideCell = titleRow.insertCell();
   sideCell.className = 'cheat-menu-cell-title cheat-menu-title-side';
   titleText.innerHTML = title;
   if (sideText) sideCell.innerHTML = sideText;
 };
 
 CheatMenu.appendDescription = function (text) {
-  let titleRow = CheatMenu.overlay.insertRow();
+  const titleRow = CheatMenu.overlay.insertRow();
   let temp = titleRow.insertCell();
   temp.className = 'cheat-menu-cell';
-  let titleText = titleRow.insertCell();
+  const titleText = titleRow.insertCell();
   titleText.className = 'cheat-menu-cell';
   temp = titleRow.insertCell();
   temp.className = 'cheat-menu-cell';

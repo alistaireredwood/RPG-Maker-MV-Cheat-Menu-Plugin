@@ -1,4 +1,4 @@
-import type { CheatMenuT } from '../types/CheatMenu';
+import type { CheatMenuT } from './types/CheatMenu';
 
 const CheatMenu = {
   initialized: false,

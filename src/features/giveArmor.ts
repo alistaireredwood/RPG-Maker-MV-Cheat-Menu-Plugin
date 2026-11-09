@@ -1,5 +1,9 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeScroll, makeApplyAmount, appendInventorySection } from '../core/scrollable.ts';
+import {
+  makeScroll,
+  makeApplyAmount,
+  appendInventorySection,
+} from '../core/scrollable.ts';
 
 CheatMenu.giveArmor = (armorId, amount) => {
   if ($dataArmors[armorId] != undefined) {
@@ -14,7 +18,9 @@ CheatMenu.scrollArmor = makeScroll({
   stateKey: 'armor',
   getData: () => $dataArmors,
   getIdx: () => CheatMenu.armorSelection,
-  setIdx: (idx) => { CheatMenu.armorSelection = idx; },
+  setIdx: (idx) => {
+    CheatMenu.armorSelection = idx;
+  },
   matches: armorMatches,
 });
 
@@ -23,19 +29,28 @@ CheatMenu.applyCurrentArmor = makeApplyAmount((amount) =>
 );
 
 CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
-  appendInventorySection({
-    searchPlaceholder: 'Search armors...',
-    stateKey: 'armor',
-    title: 'Armor',
-    getData: () => $dataArmors,
-    getIdx: () => CheatMenu.armorSelection,
-    setIdx: (idx) => { CheatMenu.armorSelection = idx; },
-    scrollFn: CheatMenu.scrollArmor,
-    applyFn: CheatMenu.applyCurrentArmor,
-    getCount: (item) => $gameParty.numItems(item as any),
-    gainCount: (item, delta) => $gameParty.gainItem(item as any, delta, false),
-    matches: armorMatches,
-  }, key1, key2, key3, key4);
+  appendInventorySection(
+    {
+      searchPlaceholder: 'Search armors...',
+      stateKey: 'armor',
+      title: 'Armor',
+      getData: () => $dataArmors,
+      getIdx: () => CheatMenu.armorSelection,
+      setIdx: (idx) => {
+        CheatMenu.armorSelection = idx;
+      },
+      scrollFn: CheatMenu.scrollArmor,
+      applyFn: CheatMenu.applyCurrentArmor,
+      getCount: (item) => $gameParty.numItems(item as any),
+      gainCount: (item, delta) =>
+        $gameParty.gainItem(item as any, delta, false),
+      matches: armorMatches,
+    },
+    key1,
+    key2,
+    key3,
+    key4,
+  );
 };
 
 export const menu = {

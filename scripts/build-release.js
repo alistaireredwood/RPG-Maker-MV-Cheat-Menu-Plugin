@@ -9,7 +9,10 @@ const releasePluginsDir = resolve(root, 'release/www/js/plugins');
 mkdirSync(releasePluginsDir, { recursive: true });
 
 for (const file of ['Cheat_Menu.js', 'Cheat_Menu.css']) {
-  cpSync(resolve(root, 'www/js/plugins', file), resolve(releasePluginsDir, file));
+  cpSync(
+    resolve(root, 'www/js/plugins', file),
+    resolve(releasePluginsDir, file),
+  );
   console.log(`✓ ${file}`);
 }
 

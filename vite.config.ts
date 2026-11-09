@@ -6,8 +6,8 @@ export default defineConfig({
     outDir: './www/js/plugins',
     rolldownOptions: {
       input: {
-        Cheat_Menu: 'src/new/Cheat_Menu.ts',
-        Cheat_Menu_style: 'src/new/Cheat_Menu.css',
+        Cheat_Menu: 'src/Cheat_Menu.ts',
+        Cheat_Menu_style: 'src/Cheat_Menu.css',
       },
       output: {
         assetFileNames: (assetInfo) => {

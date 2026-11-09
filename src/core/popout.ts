@@ -78,10 +78,14 @@ const setupPopoutDocument = (popupWindow: Window, doc: Document) => {
 
   // the game's own keydown listener only sees the game window; route the
   // popup's key presses through the same handlers
-  popupWindow.addEventListener('keydown', (event) => CheatMenu.onKeyDown(event));
+  popupWindow.addEventListener('keydown', (event) =>
+    CheatMenu.onKeyDown(event),
+  );
 
   (doc as any)[SETUP_MARK] = true;
-  console.log(`[CheatMenu] Pop-out document ready (${doc.URL}, ${doc.readyState})`);
+  console.log(
+    `[CheatMenu] Pop-out document ready (${doc.URL}, ${doc.readyState})`,
+  );
 };
 
 /**
@@ -120,7 +124,9 @@ CheatMenu.openPopout = () => {
     return;
   }
   if (!isNwjs()) {
-    console.warn('[CheatMenu] Pop-out window requires NW.js — staying in overlay mode.');
+    console.warn(
+      '[CheatMenu] Pop-out window requires NW.js — staying in overlay mode.',
+    );
     return;
   }
 
@@ -146,7 +152,9 @@ CheatMenu.openPopout = () => {
       if (ensureAttached()) {
         attachedOnce = true;
       } else if (!attachedOnce && Date.now() - startedAt > ATTACH_TIMEOUT_MS) {
-        console.error('[CheatMenu] Pop-out window never became ready — docking back.');
+        console.error(
+          '[CheatMenu] Pop-out window never became ready — docking back.',
+        );
         CheatMenu.closePopout(true);
       }
     }, WATCH_INTERVAL_MS);

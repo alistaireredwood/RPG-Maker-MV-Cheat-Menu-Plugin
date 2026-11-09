@@ -12,9 +12,15 @@ CheatMenu.applyCurrentExp = makeApplyAmount((amount) =>
 );
 
 CheatMenu.appendExpCheat = function (key1, key2) {
-  const currentExp = $gameActors.actor(CheatMenu.cheatSelectedActor)?.currentExp() ?? 0;
+  const currentExp =
+    $gameActors.actor(CheatMenu.cheatSelectedActor)?.currentExp() ?? 0;
   CheatMenu.appendTitle('EXP');
-  CheatMenu.appendScrollSelector(currentExp, key1, key2, CheatMenu.applyCurrentExp);
+  CheatMenu.appendScrollSelector(
+    currentExp,
+    key1,
+    key2,
+    CheatMenu.applyCurrentExp,
+  );
 };
 
 export const menu = {

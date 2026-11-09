@@ -8,13 +8,17 @@ CheatMenu.toggleSwitch = (switchId) => {
 };
 
 const switchMatches = (item: any, keyword: string) =>
-  typeof item === 'string' && item !== '' && item.toLowerCase().includes(keyword);
+  typeof item === 'string' &&
+  item !== '' &&
+  item.toLowerCase().includes(keyword);
 
 CheatMenu.scrollSwitch = makeScroll({
   stateKey: 'switch',
   getData: () => $dataSystem.switches,
   getIdx: () => CheatMenu.switchSelection,
-  setIdx: (idx) => { CheatMenu.switchSelection = idx; },
+  setIdx: (idx) => {
+    CheatMenu.switchSelection = idx;
+  },
   matches: switchMatches,
   startIdx: 0,
 });
@@ -31,7 +35,9 @@ CheatMenu.toggleCurrentSwitch = function () {
 
 CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
   CheatMenu.appendSearchInput('Search switches...', 'switch', (keyword) => {
-    const idx = $dataSystem.switches.findIndex((s, i) => i > 0 && !!s && s.toLowerCase().includes(keyword));
+    const idx = $dataSystem.switches.findIndex(
+      (s, i) => i > 0 && !!s && s.toLowerCase().includes(keyword),
+    );
     if (idx > 0) CheatMenu.switchSelection = idx;
   });
   const currentSwitch =
@@ -50,7 +56,13 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
 
   CheatMenu.appendTitle('Switch', `${index}/${total}`);
 
-  CheatMenu.appendScrollSelector(currentSwitch, key1, key2, CheatMenu.scrollSwitch, true);
+  CheatMenu.appendScrollSelector(
+    currentSwitch,
+    key1,
+    key2,
+    CheatMenu.scrollSwitch,
+    true,
+  );
 
   const switchValue = $gameSwitches.value(CheatMenu.switchSelection);
   const currentSwitchValue =
@@ -58,7 +70,12 @@ CheatMenu.appendSwitchSelection = function (key1, key2, key3) {
       ? `<span class="${switchValue ? 'status-on' : 'status-off'}">${switchValue}</span>`
       : 'NULL';
 
-  CheatMenu.appendCheat('Status:', currentSwitchValue, key3, CheatMenu.toggleCurrentSwitch);
+  CheatMenu.appendCheat(
+    'Status:',
+    currentSwitchValue,
+    key3,
+    CheatMenu.toggleCurrentSwitch,
+  );
 };
 
 export const menu = {

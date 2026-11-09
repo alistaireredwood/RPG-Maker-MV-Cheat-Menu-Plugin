@@ -35,6 +35,8 @@ CheatMenu.handleShowDevTools = (event) => {
     event.stopPropagation();
     event.preventDefault();
     try {
+      // NW.js runtime module, not bundled
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const gui = require('nw.gui');
 
       gui.Window.get().showDevTools();
@@ -77,7 +79,7 @@ CheatMenu.handleToggleCheatMenu = (event) => {
             ? JSON.parse(JSON.stringify(value))
             : value;
 
-        for (let name in CheatMenu.initialValues) {
+        for (const name in CheatMenu.initialValues) {
           // @ts-ignore
           CheatMenu[name] = clone(
             CheatMenu.initialValues[
@@ -89,7 +91,7 @@ CheatMenu.handleToggleCheatMenu = (event) => {
         if ($gameSystem.CheatMenu) {
           // only restore known keys: a save written by an older/other version
           // of the plugin may carry fields that would clobber runtime state
-          for (let name in CheatMenu.initialValues) {
+          for (const name in CheatMenu.initialValues) {
             if (!(name in $gameSystem.CheatMenu)) continue;
             // @ts-ignore
             CheatMenu[name] = clone($gameSystem.CheatMenu[name]);

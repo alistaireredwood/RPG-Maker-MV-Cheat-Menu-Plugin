@@ -33,7 +33,9 @@ CheatMenu.initialize = () => {
       // rebuilding a focused <textarea> (appendCodeInput) would reset its
       // undo history and scroll position every second
       const isEditingTextarea =
-        !!active && active.tagName === 'TEXTAREA' && CheatMenu.overlay.contains(active);
+        !!active &&
+        active.tagName === 'TEXTAREA' &&
+        CheatMenu.overlay.contains(active);
 
       if (hasSelectionInMenu || hasInputSelection || isEditingTextarea) return;
 
@@ -65,7 +67,7 @@ DataManager.setupNewGame = function () {
 DataManager.default_saveGame = DataManager.saveGame;
 DataManager.saveGame = function (saveFileId) {
   $gameSystem.CheatMenu = {};
-  for (let name in CheatMenu.initialValues) {
+  for (const name in CheatMenu.initialValues) {
     // @ts-ignore
     $gameSystem.CheatMenu[name] = CheatMenu[name];
   }

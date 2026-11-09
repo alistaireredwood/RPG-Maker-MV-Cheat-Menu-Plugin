@@ -2,7 +2,10 @@ import CheatMenu from '../CheatMenu.ts';
 
 // Interval ids live here (module scope) instead of on the actor, so they are
 // never serialized into save files.
-const godModeIntervals: Record<number, ReturnType<typeof setInterval> | undefined> = {};
+const godModeIntervals: Record<
+  number,
+  ReturnType<typeof setInterval> | undefined
+> = {};
 
 function isGodModeActive(actor: Game_Actor): boolean {
   return CheatMenu.godModeActors.includes(actor.actorId());
@@ -69,12 +72,20 @@ function applyGodModeOverrides(actor: CheatMenu_Game_Actor): void {
   };
 
   // skills are free: also usable when they cost more than max MP/TP
-  actor.canPaySkillCost = function (this: CheatMenu_Game_Actor, skill: DataSkill): boolean {
+  actor.canPaySkillCost = function (
+    this: CheatMenu_Game_Actor,
+    skill: DataSkill,
+  ): boolean {
     if (isGodModeActive(this)) return true;
-    return this.canPaySkillCostBackup ? this.canPaySkillCostBackup.call(this, skill) : true;
+    return this.canPaySkillCostBackup
+      ? this.canPaySkillCostBackup.call(this, skill)
+      : true;
   };
 
-  actor.paySkillCost = function (this: CheatMenu_Game_Actor, skill: number): void {
+  actor.paySkillCost = function (
+    this: CheatMenu_Game_Actor,
+    skill: number,
+  ): void {
     if (isGodModeActive(this)) return;
     if (this.paySkillCostBackup) {
       this.paySkillCostBackup.call(this, skill);
@@ -153,7 +164,9 @@ CheatMenu.godMode = (actor) => {
 
 CheatMenu.godMode_off = (actor) => {
   const actorId = actor.actorId();
-  CheatMenu.godModeActors = CheatMenu.godModeActors.filter((id) => id !== actorId);
+  CheatMenu.godModeActors = CheatMenu.godModeActors.filter(
+    (id) => id !== actorId,
+  );
   removeGodModeOverrides(actor);
 
   const interval = godModeIntervals[actorId];

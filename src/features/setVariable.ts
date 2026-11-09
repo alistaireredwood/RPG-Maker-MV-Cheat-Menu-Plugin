@@ -1,9 +1,13 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeScroll, makeApplyAmount, getIndexInfo } from '../core/scrollable.ts';
+import {
+  makeScroll,
+  makeApplyAmount,
+  getIndexInfo,
+} from '../core/scrollable.ts';
 
 CheatMenu.setVariable = (variableId, value) => {
   if ($dataSystem.variables[variableId] != undefined) {
-    let newValue = $gameVariables.value(variableId) + value;
+    const newValue = $gameVariables.value(variableId) + value;
     $gameVariables.setValue(variableId, newValue);
   }
 };
@@ -29,13 +33,17 @@ CheatMenu.setVariableValue = (variableId, text) => {
 };
 
 const variableMatches = (item: any, keyword: string) =>
-  typeof item === 'string' && item !== '' && item.toLowerCase().includes(keyword);
+  typeof item === 'string' &&
+  item !== '' &&
+  item.toLowerCase().includes(keyword);
 
 CheatMenu.scrollVariable = makeScroll({
   stateKey: 'variable',
   getData: () => $dataSystem.variables,
   getIdx: () => CheatMenu.variableSelection,
-  setIdx: (idx) => { CheatMenu.variableSelection = idx; },
+  setIdx: (idx) => {
+    CheatMenu.variableSelection = idx;
+  },
   matches: variableMatches,
   startIdx: 0,
 });
@@ -46,7 +54,9 @@ CheatMenu.applyCurrentVariable = makeApplyAmount((amount) =>
 
 CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
   CheatMenu.appendSearchInput('Search variables...', 'variable', (keyword) => {
-    const idx = $dataSystem.variables.findIndex((v, i) => i > 0 && !!v && v.toLowerCase().includes(keyword));
+    const idx = $dataSystem.variables.findIndex(
+      (v, i) => i > 0 && !!v && v.toLowerCase().includes(keyword),
+    );
     if (idx > 0) CheatMenu.variableSelection = idx;
   });
   const currentVariable =
@@ -65,7 +75,13 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
 
   CheatMenu.appendTitle('Variable', `${index}/${total}`);
 
-  CheatMenu.appendScrollSelector(currentVariable, key1, key2, CheatMenu.scrollVariable, true);
+  CheatMenu.appendScrollSelector(
+    currentVariable,
+    key1,
+    key2,
+    CheatMenu.scrollVariable,
+    true,
+  );
 
   const variableId = CheatMenu.variableSelection;
   const rawValue: unknown = $gameVariables.value(variableId);
@@ -93,7 +109,14 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
       ? `<span class="error-text">[${Array.isArray(rawValue) ? 'Array' : 'Object'}]</span>`
       : 'NULL';
 
-  CheatMenu.appendScrollSelector(currentVariableValue, key3, key4, CheatMenu.applyCurrentVariable, false, false);
+  CheatMenu.appendScrollSelector(
+    currentVariableValue,
+    key3,
+    key4,
+    CheatMenu.applyCurrentVariable,
+    false,
+    false,
+  );
 };
 
 export const menu = {

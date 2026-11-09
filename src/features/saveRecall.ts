@@ -27,10 +27,10 @@ CheatMenu.appendSaveRecall = function (...keys: (string | number)[]) {
   CheatMenu.appendTitle('Current Position: ');
 
   if ($dataMapInfos[$gameMap.mapId()]?.name) {
-    let currentMap = `${$gameMap.mapId()}: ${$dataMapInfos[$gameMap.mapId()].name}`;
+    const currentMap = `${$gameMap.mapId()}: ${$dataMapInfos[$gameMap.mapId()].name}`;
     CheatMenu.appendDescription(currentMap);
 
-    let mapPos = `(${$gamePlayer.x}, ${$gamePlayer.y})`;
+    const mapPos = `(${$gamePlayer.x}, ${$gamePlayer.y})`;
     CheatMenu.appendDescription(mapPos);
   } else {
     CheatMenu.appendDescription('NULL');

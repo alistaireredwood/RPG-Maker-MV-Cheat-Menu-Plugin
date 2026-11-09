@@ -1,5 +1,9 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeScroll, makeApplyAmount, appendInventorySection } from '../core/scrollable.ts';
+import {
+  makeScroll,
+  makeApplyAmount,
+  appendInventorySection,
+} from '../core/scrollable.ts';
 
 CheatMenu.giveWeapon = (weaponId, amount) => {
   if ($dataWeapons[weaponId] != undefined) {
@@ -14,7 +18,9 @@ CheatMenu.scrollWeapon = makeScroll({
   stateKey: 'weapon',
   getData: () => $dataWeapons,
   getIdx: () => CheatMenu.weaponSelection,
-  setIdx: (idx) => { CheatMenu.weaponSelection = idx; },
+  setIdx: (idx) => {
+    CheatMenu.weaponSelection = idx;
+  },
   matches: weaponMatches,
 });
 
@@ -23,19 +29,28 @@ CheatMenu.applyCurrentWeapon = makeApplyAmount((amount) =>
 );
 
 CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
-  appendInventorySection({
-    searchPlaceholder: 'Search weapons...',
-    stateKey: 'weapon',
-    title: 'Weapon',
-    getData: () => $dataWeapons,
-    getIdx: () => CheatMenu.weaponSelection,
-    setIdx: (idx) => { CheatMenu.weaponSelection = idx; },
-    scrollFn: CheatMenu.scrollWeapon,
-    applyFn: CheatMenu.applyCurrentWeapon,
-    getCount: (item) => $gameParty.numItems(item as any),
-    gainCount: (item, delta) => $gameParty.gainItem(item as any, delta, false),
-    matches: weaponMatches,
-  }, key1, key2, key3, key4);
+  appendInventorySection(
+    {
+      searchPlaceholder: 'Search weapons...',
+      stateKey: 'weapon',
+      title: 'Weapon',
+      getData: () => $dataWeapons,
+      getIdx: () => CheatMenu.weaponSelection,
+      setIdx: (idx) => {
+        CheatMenu.weaponSelection = idx;
+      },
+      scrollFn: CheatMenu.scrollWeapon,
+      applyFn: CheatMenu.applyCurrentWeapon,
+      getCount: (item) => $gameParty.numItems(item as any),
+      gainCount: (item, delta) =>
+        $gameParty.gainItem(item as any, delta, false),
+      matches: weaponMatches,
+    },
+    key1,
+    key2,
+    key3,
+    key4,
+  );
 };
 
 export const menu = {

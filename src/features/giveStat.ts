@@ -55,11 +55,21 @@ CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
     statString += $dataSystem.terms.params[CheatMenu.statSelection];
   }
 
-  CheatMenu.appendScrollSelector(statString, key1, key2, CheatMenu.scrollStat, true);
+  CheatMenu.appendScrollSelector(
+    statString,
+    key1,
+    key2,
+    CheatMenu.scrollStat,
+    true,
+  );
 
   const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
   const statIndex = CheatMenu.statSelection;
-  if (actor && actorParamPlus && typeof actorParamPlus[statIndex] === 'number') {
+  if (
+    actor &&
+    actorParamPlus &&
+    typeof actorParamPlus[statIndex] === 'number'
+  ) {
     CheatMenu.appendValueInput(
       String(actorParamPlus[statIndex]),
       `stat:${CheatMenu.cheatSelectedActor}:${statIndex}`,
@@ -72,7 +82,12 @@ CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
       CheatMenu.applyCurrentStat,
     );
   } else {
-    CheatMenu.appendScrollSelector('NULL', key3, key4, CheatMenu.applyCurrentStat);
+    CheatMenu.appendScrollSelector(
+      'NULL',
+      key3,
+      key4,
+      CheatMenu.applyCurrentStat,
+    );
   }
 };
 

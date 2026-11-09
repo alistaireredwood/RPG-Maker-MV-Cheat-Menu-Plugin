@@ -13,7 +13,6 @@ This repo contains two independent plugin implementations plus a patcher CLI:
 - **`src/new/`** — active development, TypeScript + Vite (root `package.json` / `pnpm`)
 - **`src/plus/`** — separate, more feature-rich implementation, TypeScript + Webpack (its own `package.json` / `npm`, plus its own copy of the patcher) — see `src/plus/CLAUDE.md`
 - **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
-- **`src/old/`** — legacy JS plugin and C++ MVPluginPatcher, kept for reference only
 
 ### Module loading pattern
 

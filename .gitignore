@@ -24,7 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
-src/old
 src/plus
 
 release/

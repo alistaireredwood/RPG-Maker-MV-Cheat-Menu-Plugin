@@ -1,13 +1,8 @@
-import { getOverlay } from '../dom.ts';
-import { getMenuWindow } from '../popout.ts';
-import { isUpdatingMenu, updateMenu } from '../render.ts';
-import { widgetState } from '../widgetState.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
+import { getMenuWindow } from '@src/core/ui/popout.ts';
+import { isUpdatingMenu, updateMenu } from '@src/core/ui/render.ts';
+import { widgetState } from '@src/core/ui/widgetState.ts';
 
-/**
- * Search box for a list. Typing stores the lower-cased keyword in
- * `widgetState.searchKeywords[stateKey]` and re-renders; key presses don't
- * reach the game or the menu's key bindings. Focus survives re-renders.
- */
 export function appendSearchInput(
   placeholder: string,
   stateKey: string,

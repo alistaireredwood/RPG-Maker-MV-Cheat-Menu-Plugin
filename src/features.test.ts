@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { features, V1_MENU_ORDER } from './features.ts';
-import { migrateV1 } from './core/persistence.ts';
+import { features, V1_MENU_ORDER } from '@src/features.ts';
+import { migrateV1 } from '@src/core/persistence.ts';
 
 const ctx = { features, v1MenuOrder: V1_MENU_ORDER };
 

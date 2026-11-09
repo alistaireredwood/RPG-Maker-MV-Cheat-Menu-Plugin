@@ -1,12 +1,11 @@
-import { KEYS } from '../../input/keymap.ts';
-import { findMenu, getMenus } from '../../registry.ts';
-import { store } from '../../store.ts';
-import { updateMenu } from '../render.ts';
+import { KEYS } from '@src/core/input/keymap.ts';
+import { findMenu, getMenus } from '@src/core/registry.ts';
+import { store } from '@src/core/store.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
 import type { Direction } from './scrollSelector.ts';
 import { appendScrollSelector } from './scrollSelector.ts';
 import { appendTitle } from './text.ts';
 
-/** Switches to the previous / next sub-menu (wraps around). */
 export function scrollCheat(direction: Direction): void {
   const menus = getMenus();
   const len = menus.length;
@@ -26,7 +25,6 @@ export function scrollCheat(direction: Direction): void {
   updateMenu();
 }
 
-/** "Cheat" title with the current sub-menu name, ←[2] / [3]→ switch menus. */
 export function appendCheatTitle(): void {
   const name = findMenu(store.currentMenuId)?.entry.name ?? '';
   appendTitle('Cheat');

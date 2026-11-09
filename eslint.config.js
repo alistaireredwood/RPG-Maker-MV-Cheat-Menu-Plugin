@@ -3,20 +3,9 @@ import tseslint from 'typescript-eslint';
 import boundaries from 'eslint-plugin-boundaries';
 import prettier from 'eslint-config-prettier';
 
-// Architecture boundaries (see eslint-plugin-boundaries, `boundaries/dependencies`):
-//
-//   app (main.ts, features.ts)  →  feature (index.ts only)  →  shared  →  core
-//
-//   - core     → core
-//   - shared   → core, shared
-//   - feature  → core, shared, its own folder
-//   - app      → core, shared, feature entry points (features/<name>/index.ts)
-//                (main.ts, features.ts, legacyBridge.ts, legacyFeature.ts)
-//
-// `legacy` covers the pre-refactor singleton and is reachable from everywhere
-// until the migration removes it.
-const BOUNDARIES_SEVERITY = 'warn';
-
+// Dependencies only point towards core, and a feature never reaches into
+// another one, so removing a feature folder (plus its line in features.ts)
+// can't break anything else.
 export default tseslint.config(
   {
     ignores: [
@@ -30,16 +19,6 @@ export default tseslint.config(
 
   js.configs.recommended,
   ...tseslint.configs.recommended,
-
-  {
-    rules: {
-      // remaining `any` / `@ts-ignore` mostly come from the CheatMenu singleton
-      // (dynamic `CheatMenu[name]` access over initialValues); raise to error
-      // once the singleton is gone
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/ban-ts-comment': 'warn',
-    },
-  },
 
   {
     files: ['scripts/**/*.js', 'eslint.config.js', '.pnpmfile.cjs'],
@@ -62,23 +41,9 @@ export default tseslint.config(
       },
       'boundaries/include': ['src/**/*.ts'],
       'boundaries/ignore': ['src/types/**', 'src/**/*.test.ts'],
-      // single files: classified by category
       'boundaries/files': [
-        {
-          category: 'app',
-          pattern: [
-            'src/main.ts',
-            'src/features.ts',
-            'src/legacyBridge.ts',
-            'src/legacyFeature.ts',
-          ],
-        },
-        {
-          category: 'legacy',
-          pattern: ['src/CheatMenu.ts'],
-        },
+        { category: 'app', pattern: ['src/main.ts', 'src/features.ts'] },
       ],
-      // folders: classified by element type
       'boundaries/elements': [
         { type: 'core', pattern: 'src/core' },
         { type: 'shared', pattern: 'src/shared' },
@@ -90,10 +55,10 @@ export default tseslint.config(
       ],
     },
     rules: {
-      'boundaries/no-unknown-files': BOUNDARIES_SEVERITY,
-      'boundaries/no-unknown-dependencies': BOUNDARIES_SEVERITY,
+      'boundaries/no-unknown-files': 'error',
+      'boundaries/no-unknown-dependencies': 'error',
       'boundaries/dependencies': [
-        BOUNDARIES_SEVERITY,
+        'error',
         {
           default: 'disallow',
           policies: [
@@ -101,8 +66,8 @@ export default tseslint.config(
               from: { file: { categories: 'app' } },
               allow: [
                 { to: { element: { types: ['core', 'shared'] } } },
-                { to: { file: { categories: ['app', 'legacy'] } } },
-                // features only through their entry point
+                { to: { file: { categories: 'app' } } },
+                // a feature's other files are private to it
                 {
                   to: {
                     element: { type: 'feature', fileInternalPath: 'index.ts' },
@@ -112,24 +77,16 @@ export default tseslint.config(
             },
             {
               from: { element: { type: 'core' } },
-              allow: [
-                { to: { element: { type: 'core' } } },
-                { to: { file: { categories: 'legacy' } } },
-              ],
+              allow: { to: { element: { type: 'core' } } },
             },
             {
               from: { element: { type: 'shared' } },
-              allow: [
-                { to: { element: { types: ['core', 'shared'] } } },
-                { to: { file: { categories: 'legacy' } } },
-              ],
+              allow: { to: { element: { types: ['core', 'shared'] } } },
             },
             {
               from: { element: { type: 'feature' } },
               allow: [
                 { to: { element: { types: ['core', 'shared'] } } },
-                { to: { file: { categories: 'legacy' } } },
-                // own folder only
                 {
                   to: {
                     element: {
@@ -141,10 +98,6 @@ export default tseslint.config(
                   },
                 },
               ],
-            },
-            {
-              from: { file: { categories: 'legacy' } },
-              allow: { to: { file: { categories: 'legacy' } } },
             },
           ],
         },

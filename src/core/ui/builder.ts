@@ -1,4 +1,4 @@
-import type { ActionKey } from '../input/keymap.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
 import { createKeyAllocator } from './keyAllocator.ts';
 import { appendCheat } from './widgets/cheat.ts';
 import { appendCheatTitle } from './widgets/cheatTitle.ts';
@@ -20,7 +20,6 @@ import { appendValueInput } from './widgets/valueInput.ts';
  * next free action key (4, 5, 6, …) — `render` never hard-codes key numbers.
  */
 export type MenuBuilder = {
-  /** Next free action key, for custom widgets. */
   nextKey: () => ActionKey;
   /** Leaves keys unused, e.g. so later rows keep their key when one is hidden. */
   skipKeys: (count?: number) => void;

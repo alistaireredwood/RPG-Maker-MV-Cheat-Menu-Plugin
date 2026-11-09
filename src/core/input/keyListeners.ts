@@ -14,7 +14,6 @@ export function clearKeyBindings(): void {
   listeners = {};
 }
 
-/** Runs the handler bound to `event.key`. Returns whether one was found. */
 export function dispatchBoundKey(event: KeyboardEvent): boolean {
   if (!isMappedKey(event.key)) return false;
   const handler = listeners[event.key];

@@ -1,8 +1,7 @@
-import { bindKey } from '../../input/keyListeners.ts';
-import type { ActionKey } from '../../input/keymap.ts';
-import { getOverlay } from '../dom.ts';
+import { bindKey } from '@src/core/input/keyListeners.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
 
-/** Row with a label and a clickable `status[key]` button. */
 export function appendCheat(
   cheatText: string,
   statusText: string | number | boolean | null,

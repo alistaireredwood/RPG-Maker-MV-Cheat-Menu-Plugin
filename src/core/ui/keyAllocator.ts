@@ -1,4 +1,4 @@
-import type { ActionKey } from '../input/keymap.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
 
 /**
  * Keys handed out to a sub-menu's actions, in order. 1 toggles the menu and

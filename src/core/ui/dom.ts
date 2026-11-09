@@ -4,7 +4,6 @@ const INDICATOR_ID = 'cheat-menu-indicator';
 let overlay: HTMLTableElement | null = null;
 let stylesheet: HTMLLinkElement | null = null;
 
-/** The menu's root element. It moves between the game and pop-out documents. */
 export function getOverlay(): HTMLTableElement {
   if (!overlay) {
     overlay = document.createElement('table');

@@ -1,20 +1,17 @@
-import { updateMenu } from '../../core/ui/render.ts';
-import { getSearchKeyword } from '../../core/ui/widgetState.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { getSearchKeyword } from '@src/core/ui/widgetState.ts';
 import type {
   Direction,
   ScrollHandler,
-} from '../../core/ui/widgets/scrollSelector.ts';
+} from '@src/core/ui/widgets/scrollSelector.ts';
 
 export type Matcher<T = unknown> = (item: T, keyword: string) => boolean;
 
-/** Default matcher for RPG Maker data entries: case-insensitive name search. */
 export const nameMatches: Matcher<{ name?: string } | null> = (item, keyword) =>
   !!item?.name && item.name.toLowerCase().includes(keyword);
 
 /**
- * Index of the next entry in `direction` that exists and matches `keyword`,
- * wrapping around; `null` when nothing matches. Entries before `startIdx` are
- * skipped (RPG Maker data arrays start with a `null` at 0).
+ * `startIdx` defaults to 1: RPG Maker data arrays start with a `null` at 0.
  */
 export function findNextIndex<T>(
   data: readonly (T | null | undefined)[],
@@ -37,7 +34,6 @@ export function findNextIndex<T>(
   return null;
 }
 
-/** Position of `currentIdx` among the matching entries (1-based) and their count. */
 export function getIndexInfo<T>(
   data: readonly (T | null | undefined)[],
   currentIdx: number,
@@ -57,10 +53,6 @@ export function getIndexInfo<T>(
   return { index, total };
 }
 
-/**
- * ←/→ handler that moves the selection to the previous / next entry matching
- * the search keyword of `stateKey` (see appendSearchInput).
- */
 export function makeScroll<T>(config: {
   stateKey: string;
   getData: () => readonly (T | null | undefined)[];

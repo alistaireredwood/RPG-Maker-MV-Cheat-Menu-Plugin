@@ -12,6 +12,8 @@ Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build
 
 `@src/*` → `src/*` (e.g. `import { defineFeature } from '@src/core/feature.ts'`). Defined only in `tsconfig.json` `paths`; tsc, the ESLint import resolver (so boundaries classify aliased imports too) and Vite / Vitest (`resolve.tsconfigPaths`) all read it from there.
 
+Convention: imports leaving the file's directory use `@src/...`, never `../`. Imports of the file's own directory (and its subdirectories) stay relative (`./godMode.ts`), so a feature folder can be moved or renamed without editing its files.
+
 ### TypeScript versions
 
 The project compiles with TypeScript 7 (native). typescript-eslint still needs the classic `require('typescript')` JS API, which TS 7 no longer ships, so `.pnpmfile.cjs` swaps the `typescript` peer of `typescript-eslint` / `@typescript-eslint/*` / `ts-api-utils` for a pinned TS 6 dependency. Drop that hook once typescript-eslint supports TS 7.
@@ -23,10 +25,9 @@ The project compiles with TypeScript 7 (native). typescript-eslint still needs t
 - `core` (`src/core/`) → `core` only
 - `shared` (`src/shared/`) → `core`, `shared`
 - `feature` (`src/features/<name>/`) → `core`, `shared` and its own folder — never another feature
-- `app` (`src/main.ts`, `src/features.ts`, `src/legacyBridge.ts`, `src/legacyFeature.ts`) → anything, but features only through `features/<name>/index.ts`
-- `legacy` (`src/CheatMenu.ts`) — the pre-refactor singleton, reachable from everywhere until it is removed
+- `app` (`src/main.ts`, `src/features.ts`) → anything, but features only through `features/<name>/index.ts`
 
-Boundary rules are still at `warn` (`BOUNDARIES_SEVERITY`); the code base has no violations, switching to `error` is part of the cleanup step.
+Violations are errors (and fail `pnpm build`). Any other file directly in `src/` is rejected by `no-unknown-files` — new code belongs in `core/`, `shared/` or a feature folder.
 
 ## Architecture
 
@@ -37,8 +38,8 @@ This repo contains the plugin and a patcher CLI:
 
 ### Entry and feature list
 
-- `src/main.ts` — entry: imports `legacyBridge.ts` first, then calls `bootstrap(features, { v1MenuOrder })` and exposes `window.Cheat_Menu`.
-- `src/features.ts` — **the single list of features**; array order = main grid order. Removing a feature = deleting its file/folder + its entry here. Also holds `V1_MENU_ORDER` (frozen menu order of the pre-v2 save format — never edit).
+- `src/main.ts` — entry: `bootstrap(features, { v1MenuOrder })`. The plugin exposes no `window` global; a public API for game-specific extensions is a planned feature — see `docs/game-specific-extensions.md`.
+- `src/features.ts` — **the single list of features**; array order = main grid order. Removing a feature = deleting its folder + its import / entry here. Also holds `V1_MENU_ORDER` (frozen menu order of the pre-v2 save format — never edit).
 - `src/core/bootstrap.ts` — registers features, installs UI / pop-out / keyboard / DataManager hooks, emits `onInit`. Core modules have **no import side effects**; everything is installed from here.
 
 ### Feature contract (`src/core/feature.ts`)
@@ -53,10 +54,6 @@ This repo contains the plugin and a patcher CLI:
 - Feature `id` and menu `id`s are persisted — don't rename them.
 
 `render(ui)` receives a `MenuBuilder` (`core/ui/builder.ts`): `ui.cheat()`, `ui.scrollSelector()`, `ui.valueInput()` take the next free action key (4, 5, 6, … `0`, `-`, `=`) — no hard-coded key numbers. `ui.cheatTitle()` draws the sub-menu switcher (keys 2/3).
-
-### Legacy leftovers
-
-Every feature is migrated to `src/features/<name>/`. `src/CheatMenu.ts`, `types/CheatMenu.d.ts`, `legacyBridge.ts` and `legacyFeature.ts` are no longer used by any feature and are removed in the cleanup step; `window.Cheat_Menu` still points at the (now empty) singleton until then. Don't add anything to them.
 
 ### Persistence (`src/core/persistence.ts`, `session.ts`)
 
@@ -76,7 +73,7 @@ Save format v2: `{ version: 2, core: { position, currentMenuId }, <featureId>: {
 
 ### Shared (`src/shared/`)
 
-Building blocks for several features; may import `core/`, never `features/` or the singleton.
+Building blocks for several features; may import `core/`, never `features/`.
 
 - `state.ts` — `sharedState` (`selectedActor`, `amountIndex`; persisted via the menu-less `sharedFeature` registered in `features.ts`), `AMOUNTS`, `amountInput` (typed amount, runtime only), `currentAmount()`, `getSelectedActor()`
 - `controls/actorSelector.ts` — `appendActorSelection(k1, k2)` / `actorSelector(ui)`
@@ -89,7 +86,7 @@ Building blocks for several features; may import `core/`, never `features/` or t
 - `game/numbers.ts` — `parseIntegerInput`, `makeSetExact` (integer `onCommit` for value inputs)
 - `game/teleport.ts` — `teleport(mapId, x, y)`
 
-The `append*(…keys)` forms are for legacy feature files; new features use the `MenuBuilder` forms (`actorSelector(ui)` etc.), which take their keys from the builder.
+Features use the `MenuBuilder` forms (`actorSelector(ui)` etc.), which take their keys from the builder; the `append*(…keys)` forms with explicit keys are their building blocks.
 
 ### Re-render behaviour
 
@@ -105,6 +102,6 @@ The `append*(…keys)` forms are for legacy feature files; new features use the 
 
 1. Create `src/features/<name>/index.ts` with `export default defineFeature({...})`; private logic goes in other files of the same folder (import only `core/`, `shared/` and the own folder — ESLint boundaries enforce it).
 2. Add it to the `features` array in `src/features.ts` (array position = grid position).
-3. Keep persisted state in a module-level object passed as `state` (and `migrateV1` if it replaces old singleton fields), engine patches in `onInit` / per-object patches via `patchMethod`, re-installation after a load in `onStateRestored`, and draw with the `MenuBuilder` + `shared/controls` (`actorSelector(ui)`, `amountSelector(ui)`, `inventorySection(ui, …)`, `onOffLabel`).
+3. Keep persisted state in a module-level object passed as `state`, engine patches in `onInit` / per-object patches via `patchMethod`, re-installation after a load in `onStateRestored`, and draw with the `MenuBuilder` + `shared/controls` (`actorSelector(ui)`, `amountSelector(ui)`, `inventorySection(ui, …)`, `onOffLabel`).
 
 Reference implementations: `features/noClip/` (stateless toggle), `features/godMode/` (persisted state, per-actor `patchMethod` overrides, `onStateRestored`, unit tests with a fake actor), `features/unlockControls/` / `features/gameSpeed/` (prototype patches in `onInit`), `features/speed/` (`onLoad` / `onNewGame` resetting per-game state), `features/variables/` (search list + editable value). `src/features.test.ts` pins the v1 save migration of every feature — extend it when a feature gets persisted state.

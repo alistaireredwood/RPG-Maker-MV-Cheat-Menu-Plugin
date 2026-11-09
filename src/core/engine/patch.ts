@@ -5,10 +5,7 @@ type MethodKeys<T> = {
 }[keyof T];
 
 /**
- * Replaces `target[name]` with `wrap(original)`. The wrapper receives the
- * original method (call it with `.apply(this, args)` / `.call(this, ...)`).
- *
- * Returns `restore()`, which puts the original back — unless someone patched
+ * `restore()` puts the original back — unless someone patched
  * the method again on top of ours, in which case restoring would drop their
  * patch, so it is left alone. Patching an inherited method (e.g. on a single
  * game object) adds an own property; restoring removes it again.

@@ -1,5 +1,5 @@
-import type { MenuBuilder } from '../../core/ui/builder.ts';
-import type { Resource, ResourceChange } from '../game/resources.ts';
+import type { MenuBuilder } from '@src/core/ui/builder.ts';
+import type { Resource, ResourceChange } from '@src/shared/game/resources.ts';
 
 const LABELS: [ResourceChange, (who: string, stat: Resource) => string][] = [
   ['zero', (who, stat) => `${who} ${stat} to 0`],

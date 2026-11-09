@@ -26,7 +26,6 @@ const migrationContext = (): MigrationContext => ({
   v1MenuOrder,
 });
 
-/** What the current `$gameSystem` holds, as v2 (null = nothing / unknown format). */
 const loadSaved = () =>
   migrate(
     typeof $gameSystem !== 'undefined' ? $gameSystem?.CheatMenu : undefined,
@@ -34,9 +33,8 @@ const loadSaved = () =>
   );
 
 /**
- * Restores core + feature state from the current `$gameSystem` (defaults when
- * it holds nothing). Called lazily on the first menu open after a load / new
- * game, when the game objects already exist.
+ * Called lazily on the first menu open after a load / new game, when the
+ * game objects already exist.
  */
 export function restoreSession(): void {
   const saved = loadSaved();
@@ -49,7 +47,6 @@ export function restoreSession(): void {
   store.restored = true;
 }
 
-/** Writes core + feature state into `$gameSystem` right before the engine saves. */
 export function saveSession(): void {
   // never opened since the last load: live state still belongs to the previous
   // session — keep what the loaded save holds instead of overwriting it

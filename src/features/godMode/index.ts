@@ -1,7 +1,7 @@
-import { defineFeature } from '../../core/feature.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import { actorSelector } from '../../shared/controls/actorSelector.ts';
-import { onOffLabel, playToggleSound } from '../../shared/controls/status.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { actorSelector } from '@src/shared/controls/actorSelector.ts';
+import { onOffLabel, playToggleSound } from '@src/shared/controls/status.ts';
 import {
   disableGodMode,
   enableGodMode,

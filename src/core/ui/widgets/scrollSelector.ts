@@ -1,6 +1,6 @@
-import { bindKey } from '../../input/keyListeners.ts';
-import type { ActionKey } from '../../input/keymap.ts';
-import { getOverlay } from '../dom.ts';
+import { bindKey } from '@src/core/input/keyListeners.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
 
 export type Direction = 'left' | 'right';
 export type ScrollHandler = (direction: Direction, event?: MouseEvent) => void;
@@ -31,7 +31,6 @@ function wrapWords(el: HTMLElement): void {
   }
 }
 
-/** Binds ←/→ buttons and their keys to `scrollHandler('left' | 'right')`. */
 export function bindArrows(
   leftButton: HTMLElement,
   rightButton: HTMLElement,
@@ -47,7 +46,6 @@ export function bindArrows(
   bindKey(key2, scrollHandler.bind(null, 'right'));
 }
 
-/** `←[key1]  text  [key2]→` row. */
 export function appendScrollSelector(
   text: string | number,
   key1: ActionKey,

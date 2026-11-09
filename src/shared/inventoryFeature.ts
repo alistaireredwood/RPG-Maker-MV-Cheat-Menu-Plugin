@@ -1,5 +1,5 @@
-import { defineFeature } from '../core/feature.ts';
-import { renameV1Keys } from '../core/persistence.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
 import { amountSelector, makeApplyAmount } from './controls/amountSelector.ts';
 import { inventorySection } from './controls/inventorySection.ts';
 import { makeScroll, nameMatches } from './controls/listSelector.ts';

@@ -1,14 +1,14 @@
-import type { ActionKey } from '../../core/input/keymap.ts';
-import type { MenuBuilder } from '../../core/ui/builder.ts';
-import { getSearchKeyword } from '../../core/ui/widgetState.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
+import type { MenuBuilder } from '@src/core/ui/builder.ts';
+import { getSearchKeyword } from '@src/core/ui/widgetState.ts';
 import {
   appendScrollSelector,
   type ScrollHandler,
-} from '../../core/ui/widgets/scrollSelector.ts';
-import { appendSearchInput } from '../../core/ui/widgets/searchInput.ts';
-import { appendTitle } from '../../core/ui/widgets/text.ts';
-import { appendValueInput } from '../../core/ui/widgets/valueInput.ts';
-import { makeSetExact } from '../game/numbers.ts';
+} from '@src/core/ui/widgets/scrollSelector.ts';
+import { appendSearchInput } from '@src/core/ui/widgets/searchInput.ts';
+import { appendTitle } from '@src/core/ui/widgets/text.ts';
+import { appendValueInput } from '@src/core/ui/widgets/valueInput.ts';
+import { makeSetExact } from '@src/shared/game/numbers.ts';
 import { getIndexInfo, type Matcher } from './listSelector.ts';
 
 type RPGDataItem = { name?: string };
@@ -28,10 +28,6 @@ export type InventorySectionConfig = {
   matches: Matcher<RPGDataItem>;
 };
 
-/**
- * Search box + "Title  i/n" + ←item→ + ←count→ (count is editable). Used by
- * the Items / Weapons / Armors menus.
- */
 export function appendInventorySection(
   config: InventorySectionConfig,
   key1: ActionKey,
@@ -93,7 +89,7 @@ export function appendInventorySection(
   }
 }
 
-/** MenuBuilder variant: takes 4 keys (item ←/→, count ←/→). */
+/** Takes 4 keys. */
 export function inventorySection(
   ui: MenuBuilder,
   config: InventorySectionConfig,

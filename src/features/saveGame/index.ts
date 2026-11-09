@@ -1,7 +1,7 @@
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import type { Direction } from '../../core/ui/widgets/scrollSelector.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import type { Direction } from '@src/core/ui/widgets/scrollSelector.ts';
 
 // Saves to any slot at any time — even where the game disables saving.
 

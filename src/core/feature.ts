@@ -1,6 +1,5 @@
 import type { MenuBuilder } from './ui/builder.ts';
 
-/** One entry of the main menu grid. */
 export type MenuEntry<S extends object = object> = {
   /** Stable id — persisted as the currently open menu, so never reuse/rename it lightly. */
   id: string;

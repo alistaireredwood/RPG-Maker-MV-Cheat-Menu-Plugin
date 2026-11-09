@@ -1,7 +1,7 @@
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import { teleport } from '../../shared/game/teleport.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { teleport } from '@src/shared/game/teleport.ts';
 
 const EMPTY = -1;
 

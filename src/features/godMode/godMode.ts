@@ -1,6 +1,5 @@
-import { patchMethod } from '../../core/engine/patch.ts';
+import { patchMethod } from '@src/core/engine/patch.ts';
 
-/** Persisted: ids of actors with god mode on. */
 export const godModeState = {
   actors: [] as number[],
 };

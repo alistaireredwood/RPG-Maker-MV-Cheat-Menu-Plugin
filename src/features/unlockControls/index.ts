@@ -1,8 +1,8 @@
-import { patchMethod } from '../../core/engine/patch.ts';
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import { onOffLabel, playToggleSound } from '../../shared/controls/status.ts';
+import { patchMethod } from '@src/core/engine/patch.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { onOffLabel, playToggleSound } from '@src/shared/controls/status.ts';
 
 const state = {
   forceMouseMovement: false,

@@ -1,9 +1,9 @@
-import { defineFeature } from '../../core/feature.ts';
+import { defineFeature } from '@src/core/feature.ts';
 import {
   amountSelector,
   makeApplyAmount,
-} from '../../shared/controls/amountSelector.ts';
-import { makeSetExact } from '../../shared/game/numbers.ts';
+} from '@src/shared/controls/amountSelector.ts';
+import { makeSetExact } from '@src/shared/game/numbers.ts';
 
 const giveGold = (amount: number) => $gameParty.gainGold(amount);
 const applyAmount = makeApplyAmount(giveGold);

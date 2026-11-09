@@ -1,10 +1,9 @@
-import { store } from '../store.ts';
+import { store } from '@src/core/store.ts';
 import { getOverlay } from './dom.ts';
 import { ICON_POP_IN, ICON_POP_OUT } from './icons.ts';
 import { canPopout, togglePopout } from './popout.ts';
 import { updateMenu } from './render.ts';
 
-/** Title bar with the pop-out / pop-in button (hidden without NW.js). */
 export function appendTopBar(): void {
   const row = getOverlay().insertRow(0);
   const cell = row.insertCell();

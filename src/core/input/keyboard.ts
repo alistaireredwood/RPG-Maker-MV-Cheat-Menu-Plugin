@@ -1,9 +1,9 @@
-import { restoreSession } from '../session.ts';
-import { store } from '../store.ts';
-import { closeMenu, openMenu } from '../ui/overlay.ts';
-import { togglePopout } from '../ui/popout.ts';
-import { cyclePosition } from '../ui/position.ts';
-import { updateMenu } from '../ui/render.ts';
+import { restoreSession } from '@src/core/session.ts';
+import { store } from '@src/core/store.ts';
+import { closeMenu, openMenu } from '@src/core/ui/overlay.ts';
+import { togglePopout } from '@src/core/ui/popout.ts';
+import { cyclePosition } from '@src/core/ui/position.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
 import { dispatchBoundKey } from './keyListeners.ts';
 import { KEYS } from './keymap.ts';
 

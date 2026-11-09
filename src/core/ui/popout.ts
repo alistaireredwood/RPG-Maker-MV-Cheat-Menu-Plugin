@@ -1,5 +1,8 @@
-import { forceGameActive, releaseGameActive } from '../engine/gameActive.ts';
-import { store } from '../store.ts';
+import {
+  forceGameActive,
+  releaseGameActive,
+} from '@src/core/engine/gameActive.ts';
+import { store } from '@src/core/store.ts';
 import { getOverlay, getStylesheetHref } from './dom.ts';
 import { positionMenu } from './position.ts';
 import { updateMenu } from './render.ts';

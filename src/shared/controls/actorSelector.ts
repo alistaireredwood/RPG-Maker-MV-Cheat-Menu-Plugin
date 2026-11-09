@@ -1,12 +1,12 @@
-import type { ActionKey } from '../../core/input/keymap.ts';
-import type { MenuBuilder } from '../../core/ui/builder.ts';
-import { updateMenu } from '../../core/ui/render.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
+import type { MenuBuilder } from '@src/core/ui/builder.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
 import {
   appendScrollSelector,
   type Direction,
-} from '../../core/ui/widgets/scrollSelector.ts';
-import { appendTitle } from '../../core/ui/widgets/text.ts';
-import { getSelectedActor, sharedState } from '../state.ts';
+} from '@src/core/ui/widgets/scrollSelector.ts';
+import { appendTitle } from '@src/core/ui/widgets/text.ts';
+import { getSelectedActor, sharedState } from '@src/shared/state.ts';
 
 export function scrollActor(direction: Direction): void {
   const gameActorsData = ($gameActors as unknown as { _data: Game_Actor[] })
@@ -47,7 +47,7 @@ export function appendActorSelection(key1: ActionKey, key2: ActionKey): void {
   appendScrollSelector(actorNameDisplay, key1, key2, scrollActor, true);
 }
 
-/** MenuBuilder variant: takes 2 keys (←/→). Returns the selected actor. */
+/** Takes 2 keys. */
 export function actorSelector(ui: MenuBuilder): Game_Actor | null {
   appendActorSelection(ui.nextKey(), ui.nextKey());
   return getSelectedActor();

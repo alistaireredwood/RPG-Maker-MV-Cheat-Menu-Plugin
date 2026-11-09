@@ -1,8 +1,8 @@
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import type { Direction } from '../../core/ui/widgets/scrollSelector.ts';
-import { playToggleSound } from '../../shared/controls/status.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import type { Direction } from '@src/core/ui/widgets/scrollSelector.ts';
+import { playToggleSound } from '@src/shared/controls/status.ts';
 
 const MOVE_AMOUNTS = [0.5, 1, 1.5, 2];
 const MIN_SPEED = 0.5;

@@ -1,26 +1,26 @@
-import type { Feature } from './core/feature.ts';
-import { sharedFeature } from './shared/state.ts';
+import type { Feature } from '@src/core/feature.ts';
+import { sharedFeature } from '@src/shared/state.ts';
 
-import armors from './features/armors/index.ts';
-import clearStates from './features/clearStates/index.ts';
-import enemyRecovery from './features/enemyRecovery/index.ts';
-import evaluate from './features/evaluate/index.ts';
-import exp from './features/exp/index.ts';
-import gameSpeed from './features/gameSpeed/index.ts';
-import godMode from './features/godMode/index.ts';
-import gold from './features/gold/index.ts';
-import items from './features/items/index.ts';
-import noClip from './features/noClip/index.ts';
-import partyRecovery from './features/partyRecovery/index.ts';
-import saveGame from './features/saveGame/index.ts';
-import saveRecall from './features/saveRecall/index.ts';
-import speed from './features/speed/index.ts';
-import stats from './features/stats/index.ts';
-import switches from './features/switches/index.ts';
-import teleport from './features/teleport/index.ts';
-import unlockControls from './features/unlockControls/index.ts';
-import variables from './features/variables/index.ts';
-import weapons from './features/weapons/index.ts';
+import armors from '@src/features/armors/index.ts';
+import clearStates from '@src/features/clearStates/index.ts';
+import enemyRecovery from '@src/features/enemyRecovery/index.ts';
+import evaluate from '@src/features/evaluate/index.ts';
+import exp from '@src/features/exp/index.ts';
+import gameSpeed from '@src/features/gameSpeed/index.ts';
+import godMode from '@src/features/godMode/index.ts';
+import gold from '@src/features/gold/index.ts';
+import items from '@src/features/items/index.ts';
+import noClip from '@src/features/noClip/index.ts';
+import partyRecovery from '@src/features/partyRecovery/index.ts';
+import saveGame from '@src/features/saveGame/index.ts';
+import saveRecall from '@src/features/saveRecall/index.ts';
+import speed from '@src/features/speed/index.ts';
+import stats from '@src/features/stats/index.ts';
+import switches from '@src/features/switches/index.ts';
+import teleport from '@src/features/teleport/index.ts';
+import unlockControls from '@src/features/unlockControls/index.ts';
+import variables from '@src/features/variables/index.ts';
+import weapons from '@src/features/weapons/index.ts';
 
 export const features: Feature<object>[] = [
   sharedFeature,

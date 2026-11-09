@@ -1,12 +1,8 @@
-import { getOverlay } from '../dom.ts';
-import { getMenuWindow } from '../popout.ts';
-import { isUpdatingMenu } from '../render.ts';
-import { widgetState } from '../widgetState.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
+import { getMenuWindow } from '@src/core/ui/popout.ts';
+import { isUpdatingMenu } from '@src/core/ui/render.ts';
+import { widgetState } from '@src/core/ui/widgetState.ts';
 
-/**
- * Multi-line code editor row. Ctrl+Enter submits, Tab indents. Focus, caret
- * and scroll position survive re-renders via `widgetState.activeCodeInput`.
- */
 export function appendCodeInput(
   inputKey: string,
   value: string,

@@ -1,15 +1,15 @@
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { getSearchKeyword } from '../../core/ui/widgetState.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { getSearchKeyword } from '@src/core/ui/widgetState.ts';
 import {
   amountSelector,
   makeApplyAmount,
-} from '../../shared/controls/amountSelector.ts';
+} from '@src/shared/controls/amountSelector.ts';
 import {
   getIndexInfo,
   makeScroll,
   type Matcher,
-} from '../../shared/controls/listSelector.ts';
+} from '@src/shared/controls/listSelector.ts';
 import { parseVariableInput } from './parseVariableInput.ts';
 
 const SEARCH_KEY = 'variable';

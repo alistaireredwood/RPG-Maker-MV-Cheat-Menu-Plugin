@@ -1,14 +1,14 @@
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import type { Direction } from '../../core/ui/widgets/scrollSelector.ts';
-import { actorSelector } from '../../shared/controls/actorSelector.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import type { Direction } from '@src/core/ui/widgets/scrollSelector.ts';
+import { actorSelector } from '@src/shared/controls/actorSelector.ts';
 import {
   amountSelector,
   makeApplyAmount,
-} from '../../shared/controls/amountSelector.ts';
-import { makeSetExact } from '../../shared/game/numbers.ts';
-import { getSelectedActor, sharedState } from '../../shared/state.ts';
+} from '@src/shared/controls/amountSelector.ts';
+import { makeSetExact } from '@src/shared/game/numbers.ts';
+import { getSelectedActor, sharedState } from '@src/shared/state.ts';
 
 const state = {
   selection: 0,

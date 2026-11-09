@@ -1,7 +1,7 @@
-import { patchMethod } from '../../core/engine/patch.ts';
-import { defineFeature } from '../../core/feature.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import type { Direction } from '../../core/ui/widgets/scrollSelector.ts';
+import { patchMethod } from '@src/core/engine/patch.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import type { Direction } from '@src/core/ui/widgets/scrollSelector.ts';
 
 // Speeds up the whole game (map, events, battles, animations, messages) by
 // running extra logic updates per frame; audio and rendering are unaffected.

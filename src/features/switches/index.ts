@@ -1,13 +1,13 @@
-import { defineFeature } from '../../core/feature.ts';
-import { renameV1Keys } from '../../core/persistence.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import { getSearchKeyword } from '../../core/ui/widgetState.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { renameV1Keys } from '@src/core/persistence.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { getSearchKeyword } from '@src/core/ui/widgetState.ts';
 import {
   getIndexInfo,
   makeScroll,
   type Matcher,
-} from '../../shared/controls/listSelector.ts';
-import { playToggleSound } from '../../shared/controls/status.ts';
+} from '@src/shared/controls/listSelector.ts';
+import { playToggleSound } from '@src/shared/controls/status.ts';
 
 const SEARCH_KEY = 'switch';
 

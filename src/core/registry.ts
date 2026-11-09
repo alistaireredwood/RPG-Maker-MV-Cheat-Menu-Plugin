@@ -5,7 +5,6 @@ type Registered = {
   feature: Feature<object>;
   /** live state: `feature.state` itself (or `{}`) — mutated in place, never replaced */
   state: object;
-  /** snapshot of `feature.state` at registration, used when nothing is saved */
   defaults: object;
 };
 
@@ -39,14 +38,12 @@ export function registerFeatures(features: readonly Feature<object>[]): void {
 export const getFeatures = (): readonly Feature<object>[] =>
   registered.map((r) => r.feature);
 
-/** Menu entries in display order. */
 export const getMenus = (): readonly MenuEntry<object>[] =>
   menus.map((m) => m.entry);
 
 export const findMenu = (id: string | null) =>
   id === null ? undefined : menus.find((m) => m.entry.id === id);
 
-/** Runs `render` of a menu with its owner's live state. */
 export function renderMenuEntry(
   id: string,
   ui: Parameters<MenuEntry['render']>[0],
@@ -55,7 +52,6 @@ export function renderMenuEntry(
   if (menu) menu.entry.render(ui, menu.owner.state);
 }
 
-/** Calls `hook` on every feature; one failing feature doesn't stop the rest. */
 export function emit(hook: FeatureHook): void {
   for (const { feature, state } of registered) {
     try {
@@ -66,7 +62,6 @@ export function emit(hook: FeatureHook): void {
   }
 }
 
-/** Replaces every live state with defaults overlaid by `saved[featureId]`. */
 export function restoreStates(saved: Readonly<Record<string, unknown>> | null) {
   for (const { feature, state, defaults } of registered) {
     const fresh = readSlice(defaults, saved?.[feature.id]);
@@ -76,7 +71,6 @@ export function restoreStates(saved: Readonly<Record<string, unknown>> | null) {
   }
 }
 
-/** Current live states keyed by feature id (only features that have state). */
 export function snapshotStates(): Record<string, object> {
   const result: Record<string, object> = {};
   for (const { feature, state } of registered) {

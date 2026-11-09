@@ -1,4 +1,3 @@
-/** `KeyboardEvent.key` values the menu reacts to. */
 export const KEYS = {
   KEY_0: '0',
   KEY_1: '1',
@@ -19,7 +18,6 @@ export const KEYS = {
   F9: 'F9',
 } as const;
 
-/** Key a sub-menu action can be bound to (shown as `[key]` in the menu). */
 export type ActionKey = string | number;
 
 const MAPPED_KEYS: ReadonlySet<string> = new Set(Object.values(KEYS));

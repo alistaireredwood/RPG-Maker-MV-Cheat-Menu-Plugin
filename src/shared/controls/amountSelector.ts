@@ -1,15 +1,20 @@
-import type { ActionKey } from '../../core/input/keymap.ts';
-import type { MenuBuilder } from '../../core/ui/builder.ts';
-import { getOverlay } from '../../core/ui/dom.ts';
-import { getMenuWindow } from '../../core/ui/popout.ts';
-import { isUpdatingMenu, updateMenu } from '../../core/ui/render.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
+import type { MenuBuilder } from '@src/core/ui/builder.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
+import { getMenuWindow } from '@src/core/ui/popout.ts';
+import { isUpdatingMenu, updateMenu } from '@src/core/ui/render.ts';
 import {
   bindArrows,
   type Direction,
   type ScrollHandler,
-} from '../../core/ui/widgets/scrollSelector.ts';
-import { appendTitle } from '../../core/ui/widgets/text.ts';
-import { AMOUNTS, amountInput, currentAmount, sharedState } from '../state.ts';
+} from '@src/core/ui/widgets/scrollSelector.ts';
+import { appendTitle } from '@src/core/ui/widgets/text.ts';
+import {
+  AMOUNTS,
+  amountInput,
+  currentAmount,
+  sharedState,
+} from '@src/shared/state.ts';
 
 /**
  * Preset index an arrow press snaps a typed amount to: the next preset *in
@@ -64,7 +69,6 @@ export function scrollAmount(direction: Direction): void {
   updateMenu();
 }
 
-/** ←/→ handler applying the current amount: left subtracts, right adds. */
 export function makeApplyAmount(
   action: (amount: number) => void,
 ): ScrollHandler {
@@ -91,7 +95,6 @@ const ALLOWED_KEYS = [
   'End',
 ];
 
-/** "Amount" title + ←/→ through the preset amounts, or type a custom one. */
 export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   appendTitle('Amount');
 
@@ -119,7 +122,6 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
     }
     if (e.ctrlKey || e.metaKey || e.altKey || ALLOWED_KEYS.includes(e.key))
       return;
-    // only whole digits — blocks commas, dots, minus signs, letters, etc.
     if (!/^[0-9]$/.test(e.key)) {
       e.preventDefault();
     }
@@ -185,7 +187,7 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   bindArrows(leftButton, rightButton, key1, key2, scrollAmount);
 }
 
-/** MenuBuilder variant: takes 2 keys (←/→). */
+/** Takes 2 keys. */
 export function amountSelector(ui: MenuBuilder): void {
   appendAmountSelection(ui.nextKey(), ui.nextKey());
 }

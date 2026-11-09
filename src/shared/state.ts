@@ -1,19 +1,16 @@
-import { defineFeature } from '../core/feature.ts';
+import { defineFeature } from '@src/core/feature.ts';
 
-/** Preset amounts the amount selector steps through. */
 export const AMOUNTS: readonly number[] = [
   1, 10, 100, 1000, 10000, 100000, 1000000,
 ];
 
-/** State used by several menus (persisted in the `shared` save slice). */
+/** Persisted in the `shared` save slice. */
 export const sharedState = {
-  /** actor id picked in the actor selector */
   selectedActor: 1,
-  /** index into AMOUNTS */
   amountIndex: 0,
 };
 
-/** Amount typed into the amount field (runtime only, not saved). */
+/** Runtime only, not saved. */
 export const amountInput = {
   /** valid typed amount — overrides the preset while set */
   custom: null as number | null,
@@ -23,7 +20,6 @@ export const amountInput = {
   focused: false,
 };
 
-/** Amount the +/- actions apply: the typed one, else the selected preset. */
 export const currentAmount = (): number =>
   amountInput.custom ?? AMOUNTS[sharedState.amountIndex];
 

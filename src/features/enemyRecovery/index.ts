@@ -1,6 +1,6 @@
-import { defineFeature } from '../../core/feature.ts';
-import { resourceCheats } from '../../shared/controls/resourceCheats.ts';
-import { changeResource } from '../../shared/game/resources.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { resourceCheats } from '@src/shared/controls/resourceCheats.ts';
+import { changeResource } from '@src/shared/game/resources.ts';
 
 export default defineFeature({
   id: 'enemyRecovery',

@@ -12,7 +12,6 @@ export type BootstrapOptions = {
   v1MenuOrder: readonly string[];
 };
 
-/** A game is (re)starting: close the menu, state gets restored on next open. */
 function resetSession(): void {
   store.isOverlayOpenable = true;
   store.restored = false;
@@ -22,7 +21,7 @@ function resetSession(): void {
 
 let booted = false;
 
-/** Starts the plugin. `features` order = order in the main menu grid. */
+/** `features` order = order in the main menu grid. */
 export function bootstrap(
   features: readonly Feature<object>[],
   options: BootstrapOptions,

@@ -1,12 +1,11 @@
-import { getMenus } from '../registry.ts';
-import { store } from '../store.ts';
+import { getMenus } from '@src/core/registry.ts';
+import { store } from '@src/core/store.ts';
 import { getOverlay } from './dom.ts';
 import { getMenuDocument } from './popout.ts';
 import { updateMenu } from './render.ts';
 
 let gridFocusIndex = 0;
 
-/** Next grid render focuses the first button (used when leaving a sub-menu). */
 export function resetGridFocus(): void {
   gridFocusIndex = 0;
 }

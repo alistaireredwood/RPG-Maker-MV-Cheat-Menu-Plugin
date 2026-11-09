@@ -1,5 +1,5 @@
-import { defineFeature } from '../../core/feature.ts';
-import { updateMenu } from '../../core/ui/render.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
 import { escapeHtml, formatError, formatValue, truncate } from './format.ts';
 
 // Runs arbitrary JavaScript in the game's global scope — useful when a game

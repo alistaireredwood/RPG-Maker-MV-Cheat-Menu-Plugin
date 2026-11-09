@@ -1,6 +1,6 @@
-import { clearKeyBindings } from '../input/keyListeners.ts';
-import { findMenu, renderMenuEntry } from '../registry.ts';
-import { store } from '../store.ts';
+import { clearKeyBindings } from '@src/core/input/keyListeners.ts';
+import { findMenu, renderMenuEntry } from '@src/core/registry.ts';
+import { store } from '@src/core/store.ts';
 import { createMenuBuilder } from './builder.ts';
 import {
   getIndicator,
@@ -20,7 +20,6 @@ const RENDER_INTERVAL_MS = 1000;
 let prevMenuId: string | null = null;
 let renderTimer: ReturnType<typeof setInterval> | null = null;
 
-/** Rebuilds the whole overlay: main grid or the open sub-menu. */
 function renderMenu(): void {
   runUpdating(() => {
     clearKeyBindings();

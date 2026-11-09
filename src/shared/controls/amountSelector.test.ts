@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AMOUNTS, amountInput, sharedState } from '../state.ts';
+import { AMOUNTS, amountInput, sharedState } from '@src/shared/state.ts';
 import {
   makeApplyAmount,
   scrollAmount,

@@ -1,5 +1,5 @@
-import { KEYS } from '../input/keymap.ts';
-import { store } from '../store.ts';
+import { KEYS } from '@src/core/input/keymap.ts';
+import { store } from '@src/core/store.ts';
 import { getIndicator, getOverlay } from './dom.ts';
 
 const POSITIONS: [string, string, string, string][] = [
@@ -11,7 +11,6 @@ const POSITIONS: [string, string, string, string][] = [
   ['5px', '', '', '5px'], // 4: bottom-left
 ];
 
-/** Moves the menu to the next screen corner (tilde key). */
 export function cyclePosition(): void {
   store.position =
     store.position >= POSITIONS.length - 1 ? 0 : store.position + 1;

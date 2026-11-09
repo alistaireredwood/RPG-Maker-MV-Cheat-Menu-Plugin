@@ -1,7 +1,7 @@
-import { defineFeature } from '../../core/feature.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import { actorSelector } from '../../shared/controls/actorSelector.ts';
-import { getSelectedActor } from '../../shared/state.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { actorSelector } from '@src/shared/controls/actorSelector.ts';
+import { getSelectedActor } from '@src/shared/state.ts';
 
 function clearStates(actor: Game_Actor): void {
   if ((actor.states()?.length ?? 0) > 0) actor.clearStates();

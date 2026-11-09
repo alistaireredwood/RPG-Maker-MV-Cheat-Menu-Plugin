@@ -1,17 +1,12 @@
-import type { ActionKey } from '../../input/keymap.ts';
-import { getOverlay } from '../dom.ts';
-import { getMenuWindow } from '../popout.ts';
-import { isUpdatingMenu, updateMenu } from '../render.ts';
-import { widgetState } from '../widgetState.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
+import { getMenuWindow } from '@src/core/ui/popout.ts';
+import { isUpdatingMenu, updateMenu } from '@src/core/ui/render.ts';
+import { widgetState } from '@src/core/ui/widgetState.ts';
 import { bindArrows, type ScrollHandler } from './scrollSelector.ts';
 
 /**
- * Like appendScrollSelector, but the middle cell is a text input for typing a
- * value directly. Enter commits (`onCommit`; return false to reject the
- * input), Esc or clicking away discards.
- *
- * While the user types, the draft survives re-renders (incl. the 1 s timer)
- * in `widgetState.valueInputDrafts` under `inputKey` — scope the key to the
+ * The draft survives re-renders under `inputKey` — scope the key to the
  * edited entity (e.g. `variable:12`) so a draft never leaks onto another one.
  */
 export function appendValueInput(

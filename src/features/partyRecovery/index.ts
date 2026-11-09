@@ -1,6 +1,6 @@
-import { defineFeature, type MenuEntry } from '../../core/feature.ts';
-import { resourceCheats } from '../../shared/controls/resourceCheats.ts';
-import { changeResource, type Resource } from '../../shared/game/resources.ts';
+import { defineFeature, type MenuEntry } from '@src/core/feature.ts';
+import { resourceCheats } from '@src/shared/controls/resourceCheats.ts';
+import { changeResource, type Resource } from '@src/shared/game/resources.ts';
 
 const partyMenu = (id: string, resource: Resource): MenuEntry => ({
   id,

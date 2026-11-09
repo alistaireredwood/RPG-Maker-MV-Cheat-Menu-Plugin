@@ -6,7 +6,7 @@ let restore: (() => void) | null = null;
 
 /**
  * RPG Maker can pause/skip updates while its window is unfocused — clicking
- * the pop-out window would otherwise freeze the game. Forces "active".
+ * the pop-out window would otherwise freeze the game.
  */
 export function forceGameActive(): void {
   const sm = SceneManager as unknown as Partial<WithIsGameActive>;

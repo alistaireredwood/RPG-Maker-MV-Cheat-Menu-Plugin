@@ -1,4 +1,4 @@
-import { defineInventoryFeature } from '../../shared/inventoryFeature.ts';
+import { defineInventoryFeature } from '@src/shared/inventoryFeature.ts';
 
 export default defineInventoryFeature({
   id: 'armors',

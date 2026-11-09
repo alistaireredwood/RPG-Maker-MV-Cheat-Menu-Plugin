@@ -1,4 +1,4 @@
-import { getOverlay } from '../dom.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
 
 export function appendTitle(title: string, sideText?: string): void {
   const titleRow = getOverlay().insertRow();
@@ -23,7 +23,6 @@ export function appendDescription(text: string): void {
   titleText.innerHTML = text;
 }
 
-/** Full-width variant of appendDescription (spans all three columns). */
 export function appendWideDescription(html: string): void {
   const row = getOverlay().insertRow();
   const cell = row.insertCell();

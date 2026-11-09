@@ -1,6 +1,6 @@
-import { defineFeature } from '../../core/feature.ts';
-import { updateMenu } from '../../core/ui/render.ts';
-import { onOffLabel, playToggleSound } from '../../shared/controls/status.ts';
+import { defineFeature } from '@src/core/feature.ts';
+import { updateMenu } from '@src/core/ui/render.ts';
+import { onOffLabel, playToggleSound } from '@src/shared/controls/status.ts';
 
 // "through" is the engine's own flag (the same one ghost events use), so no
 // state of our own — it isn't persisted by us either.

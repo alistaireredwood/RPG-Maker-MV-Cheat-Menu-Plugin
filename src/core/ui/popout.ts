@@ -1,4 +1,8 @@
-import CheatMenu from '../CheatMenu';
+import { forceGameActive, releaseGameActive } from '../engine/gameActive.ts';
+import { store } from '../store.ts';
+import { getOverlay, getStylesheetHref } from './dom.ts';
+import { positionMenu } from './position.ts';
+import { updateMenu } from './render.ts';
 
 // Pop-out mode: moves the cheat menu overlay into a separate native NW.js
 // window so it no longer covers the game screen. The window shares the game's
@@ -17,30 +21,18 @@ const POPOUT_OPTIONS = {
 };
 
 let popoutWin: NWWindow | null = null;
-let originalIsGameActive: (() => boolean) | null = null;
+let onPopupKeyDown: (event: KeyboardEvent) => void = () => {};
 
 const isNwjs = () => typeof nw !== 'undefined' && !!nw?.Window?.open;
 
-CheatMenu.isPoppedOut = false;
-CheatMenu.canPopout = isNwjs;
+export const canPopout = isNwjs;
 
-CheatMenu.getMenuDocument = () =>
-  CheatMenu.isPoppedOut && popoutWin ? popoutWin.window.document : document;
+/** Document currently hosting the overlay — use it instead of the global `document`. */
+export const getMenuDocument = (): Document =>
+  store.isPoppedOut && popoutWin ? popoutWin.window.document : document;
 
-// RPG Maker can pause/skip updates while its window is unfocused — clicking the
-// pop-out would otherwise freeze the game. Report "active" while popped out.
-const patchGameActive = () => {
-  const sm = SceneManager as any;
-  if (originalIsGameActive || typeof sm.isGameActive !== 'function') return;
-  originalIsGameActive = sm.isGameActive;
-  sm.isGameActive = () => true;
-};
-
-const restoreGameActive = () => {
-  if (!originalIsGameActive) return;
-  (SceneManager as any).isGameActive = originalIsGameActive;
-  originalIsGameActive = null;
-};
+export const getMenuWindow = (): Window =>
+  getMenuDocument().defaultView ?? window;
 
 const SETUP_MARK = '__cheatMenuPopoutReady';
 const WATCH_INTERVAL_MS = 200;
@@ -68,21 +60,19 @@ const setupPopoutDocument = (popupWindow: Window, doc: Document) => {
 
   doc.title = POPOUT_OPTIONS.title;
 
-  // styleCss.href is already resolved to an absolute URL, so it works
+  // the stylesheet href is already resolved to an absolute URL, so it works
   // regardless of the popup's base URL (about:blank)
   const css = doc.createElement('link');
   css.rel = 'stylesheet';
   css.type = 'text/css';
-  css.href = CheatMenu.styleCss.href;
+  css.href = getStylesheetHref();
   doc.head.appendChild(css);
 
   // the game's own keydown listener only sees the game window; route the
   // popup's key presses through the same handlers
-  popupWindow.addEventListener('keydown', (event) =>
-    CheatMenu.onKeyDown(event),
-  );
+  popupWindow.addEventListener('keydown', (event) => onPopupKeyDown(event));
 
-  (doc as any)[SETUP_MARK] = true;
+  (doc as unknown as Record<string, boolean>)[SETUP_MARK] = true;
   console.log(
     `[CheatMenu] Pop-out document ready (${doc.URL}, ${doc.readyState})`,
   );
@@ -103,23 +93,26 @@ const ensureAttached = (): boolean => {
   } catch (e) {
     // cross-origin access denied — retrying won't help
     console.error('[CheatMenu] Cannot access pop-out document:', e);
-    CheatMenu.closePopout(true);
+    closePopout(true);
     return false;
   }
   if (!popupWindow || !doc) return false;
 
-  if (!(doc as any)[SETUP_MARK]) setupPopoutDocument(popupWindow, doc);
+  if (!(doc as unknown as Record<string, boolean>)[SETUP_MARK]) {
+    setupPopoutDocument(popupWindow, doc);
+  }
   if (!doc.body) return false;
 
-  if (CheatMenu.isCheatMenuOpen && CheatMenu.overlay.parentNode !== doc.body) {
-    doc.body.appendChild(CheatMenu.overlay);
-    CheatMenu.updateMenu();
+  const overlay = getOverlay();
+  if (store.isOpen && overlay.parentNode !== doc.body) {
+    doc.body.appendChild(overlay);
+    updateMenu();
   }
   return true;
 };
 
-CheatMenu.openPopout = () => {
-  if (CheatMenu.isPoppedOut) {
+export function openPopout(): void {
+  if (store.isPoppedOut) {
     popoutWin?.focus();
     return;
   }
@@ -132,14 +125,14 @@ CheatMenu.openPopout = () => {
 
   nw.Window.open('about:blank', POPOUT_OPTIONS, (win) => {
     popoutWin = win;
-    CheatMenu.isPoppedOut = true;
-    patchGameActive();
+    store.isPoppedOut = true;
+    forceGameActive();
 
     // closed via the window's X button → close the menu (F7 is the way to
     // dock back into the game window). Programmatic closes already cleared
     // popoutWin, so this is a no-op for them.
     win.on('closed', () => {
-      if (popoutWin === win) CheatMenu.closePopout(false);
+      if (popoutWin === win) closePopout(false);
     });
     win.on('loaded', () => ensureAttached());
 
@@ -155,27 +148,28 @@ CheatMenu.openPopout = () => {
         console.error(
           '[CheatMenu] Pop-out window never became ready — docking back.',
         );
-        CheatMenu.closePopout(true);
+        closePopout(true);
       }
     }, WATCH_INTERVAL_MS);
     ensureAttached();
   });
-};
+}
 
 /**
  * Closes the pop-out window and moves the overlay back into the game window.
  * `keepMenuOpen` decides whether the overlay reappears in-game (F7 dock) or
  * the whole menu closes (window X button / menu toggle key).
  */
-CheatMenu.closePopout = (keepMenuOpen = false) => {
+export function closePopout(keepMenuOpen = false): void {
   const win = popoutWin;
   popoutWin = null;
-  const wasPoppedOut = CheatMenu.isPoppedOut;
-  CheatMenu.isPoppedOut = false;
+  const wasPoppedOut = store.isPoppedOut;
+  store.isPoppedOut = false;
   stopWatch();
-  restoreGameActive();
+  releaseGameActive();
 
-  CheatMenu.overlay.remove();
+  const overlay = getOverlay();
+  overlay.remove();
   try {
     win?.close(true);
   } catch {
@@ -184,29 +178,34 @@ CheatMenu.closePopout = (keepMenuOpen = false) => {
 
   if (!wasPoppedOut) return;
 
-  if (keepMenuOpen && CheatMenu.isCheatMenuOpen) {
-    document.body.appendChild(CheatMenu.overlay);
-    CheatMenu.updateMenu();
+  if (keepMenuOpen && store.isOpen) {
+    document.body.appendChild(overlay);
+    updateMenu();
   } else {
-    CheatMenu.isCheatMenuOpen = false;
-    CheatMenu.positionMenu(); // shows the in-game indicator again
+    store.isOpen = false;
+    positionMenu(); // shows the in-game indicator again
   }
-};
+}
 
-CheatMenu.togglePopout = () => {
-  if (CheatMenu.isPoppedOut) {
-    CheatMenu.closePopout(true);
+export function togglePopout(): void {
+  if (store.isPoppedOut) {
+    closePopout(true);
   } else if (isNwjs()) {
     // overlay leaves the game window now; setupPopoutDocument re-attaches it
-    CheatMenu.overlay.remove();
-    CheatMenu.openPopout();
+    getOverlay().remove();
+    openPopout();
   } else {
-    CheatMenu.openPopout(); // logs the "requires NW.js" warning
+    openPopout(); // logs the "requires NW.js" warning
     return;
   }
   SoundManager.playSystemSound(0);
-};
+}
 
-// F5 reload / game shutdown — don't leave an orphaned window behind holding
-// references to the old context
-window.addEventListener('beforeunload', () => CheatMenu.closePopout());
+export function installPopout(options: {
+  onKeyDown: (event: KeyboardEvent) => void;
+}): void {
+  onPopupKeyDown = options.onKeyDown;
+  // F5 reload / game shutdown — don't leave an orphaned window behind holding
+  // references to the old context
+  window.addEventListener('beforeunload', () => closePopout());
+}

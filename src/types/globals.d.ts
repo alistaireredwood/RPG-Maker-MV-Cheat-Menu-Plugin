@@ -13,18 +13,7 @@ declare class CheatMenu_Game_Actor extends Game_Actor {
 }
 
 declare class Game_System {
-  /** persisted CheatMenu state (keys of CheatMenu.initialValues) */
+  /** persisted cheat menu state — see core/persistence.ts */
   CheatMenu?: Record<string, unknown>;
   onBeforeSave(): void;
-}
-
-declare class DataManager {
-  static default_loadGame?: (saveFileId: number) => boolean;
-  static default_setupNewGame?: () => void;
-  static default_saveGame?: (saveFileId: number) => boolean;
-  // don't know why I needed to re-declare those
-  static loadGame: ((saveFileId: number) => boolean) | undefined;
-  static setupNewGame: () => void;
-  static saveGame: ((saveFileId: number) => boolean) | undefined;
-  static maxSavefiles(): number;
 }

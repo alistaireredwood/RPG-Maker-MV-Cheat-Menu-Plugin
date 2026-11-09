@@ -1,13 +1,17 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  test: {
+    include: ['src/**/*.test.ts'],
+    environment: 'node',
+  },
   build: {
     target: 'chrome66',
     outDir: './www/js/plugins',
     rolldownOptions: {
       input: {
-        Cheat_Menu: 'src/Cheat_Menu.ts',
-        Cheat_Menu_style: 'src/Cheat_Menu.css',
+        Cheat_Menu: 'src/main.ts',
+        Cheat_Menu_style: 'src/core/ui/Cheat_Menu.css',
       },
       output: {
         assetFileNames: (assetInfo) => {

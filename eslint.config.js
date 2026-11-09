@@ -11,6 +11,7 @@ import prettier from 'eslint-config-prettier';
 //   - shared   → core, shared
 //   - feature  → core, shared, its own folder
 //   - app      → core, shared, feature entry points (features/<name>/index.ts)
+//                (main.ts, features.ts, legacyBridge.ts, legacyFeature.ts)
 //
 // `legacy` covers the pre-refactor singleton and is reachable from everywhere
 // until the migration removes it.
@@ -60,16 +61,21 @@ export default tseslint.config(
         typescript: { project: './tsconfig.json' },
       },
       'boundaries/include': ['src/**/*.ts'],
-      'boundaries/ignore': ['src/types/**'],
+      'boundaries/ignore': ['src/types/**', 'src/**/*.test.ts'],
       // single files: classified by category
       'boundaries/files': [
         {
           category: 'app',
-          pattern: ['src/main.ts', 'src/features.ts', 'src/Cheat_Menu.ts'],
+          pattern: [
+            'src/main.ts',
+            'src/features.ts',
+            'src/legacyBridge.ts',
+            'src/legacyFeature.ts',
+          ],
         },
         {
           category: 'legacy',
-          pattern: ['src/CheatMenu.ts', 'src/components/**/*.ts'],
+          pattern: ['src/CheatMenu.ts'],
         },
       ],
       // folders: classified by element type
@@ -95,7 +101,7 @@ export default tseslint.config(
               from: { file: { categories: 'app' } },
               allow: [
                 { to: { element: { types: ['core', 'shared'] } } },
-                { to: { file: { categories: 'legacy' } } },
+                { to: { file: { categories: ['app', 'legacy'] } } },
                 // features only through their entry point
                 {
                   to: {

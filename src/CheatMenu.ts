@@ -1,21 +1,16 @@
 import type { CheatMenuT } from './types/CheatMenu';
 
+// Legacy singleton: runtime state and functions of the features that are not
+// migrated to src/features/<name>/ yet. Menu/UI state lives in core/ (store,
+// widgetState); legacyBridge.ts exposes the core widgets here for old code.
+// Persistence is handled by the adapters in features.ts.
 const CheatMenu = {
-  initialized: false,
-  isCheatMenuOpen: false,
-  isOverlayOpenable: false,
-  isPoppedOut: false,
-  position: 1,
-  menuUpdateTimer: null,
   cheatSelectedActor: 1,
   amounts: [1, 10, 100, 1000, 10000, 100000, 1000000],
   amountIndex: 0,
   customAmount: null,
   amountInputText: null,
   _activeAmountInput: false,
-  _valueInputDrafts: {},
-  _activeValueInputKey: null,
-  _activeCodeInput: null,
   statSelection: 0,
   itemSelection: 1,
   weaponSelection: 1,
@@ -38,38 +33,6 @@ const CheatMenu = {
   godModeActors: [] as number[],
   forceMouseMovement: false,
   forceCtrlSkip: false,
-  searchKeywords: {} as Record<string, string>,
-  _activeSearchKey: null,
-  _prevMenuIndex: null,
 } as CheatMenuT;
-
-// Check if already defined (allows game specific extensions to be loaded in any order)
-if (!CheatMenu.initialValues) {
-  CheatMenu.initialValues = {
-    position: 1,
-    cheatSelectedActor: 1,
-    amountIndex: 0,
-    statSelection: 0,
-    itemSelection: 1,
-    weaponSelection: 1,
-    armorSelection: 1,
-    moveAmountIndex: 1,
-    variableSelection: 1,
-    switchSelection: 1,
-    savedPositions: [
-      { m: -1, x: -1, y: -1 },
-      { m: -1, x: -1, y: -1 },
-      { m: -1, x: -1, y: -1 },
-    ],
-    teleportLocation: { m: 1, x: 0, y: 0 },
-    speed: 5,
-    speedUnlocked: true,
-    godModeActors: [],
-    currentMenuIndex: null,
-    forceMouseMovement: false,
-    forceCtrlSkip: false,
-    saveSlotSelection: 1,
-  };
-}
 
 export default CheatMenu;

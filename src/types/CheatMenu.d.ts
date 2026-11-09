@@ -4,59 +4,13 @@ export type PositionData = {
   y: number;
 };
 
-export type KeyCodeMapping = {
-  keyCode: number;
-  keyListener: number | string;
-};
-
-export type KeyListeners = {
-  [key: string]: (event?: Event) => void;
-  [key: number]: (event?: Event) => void;
-};
-
-export type InitialValues = {
-  position: number;
-  cheatSelectedActor: number;
-  amountIndex: number;
-  statSelection: number;
-  itemSelection: number;
-  weaponSelection: number;
-  armorSelection: number;
-  moveAmountIndex: number;
-  variableSelection: number;
-  switchSelection: number;
-  savedPositions: [PositionData, PositionData, PositionData];
-  teleportLocation: PositionData;
-  speed: number | null;
-  speedUnlocked: boolean;
-  godModeActors: number[];
-  currentMenuIndex: number | null;
-  forceMouseMovement: boolean;
-  forceCtrlSkip: boolean;
-  saveSlotSelection: number;
-};
-
 export type CheatMenuT = {
-  _prevMenuIndex: number | null;
-  // --- Properties ---
-
-  initialized: boolean;
-  isCheatMenuOpen: boolean;
-  isOverlayOpenable: boolean;
-  position: number;
-  menuUpdateTimer: NodeJS.Timeout | null;
-
   cheatSelectedActor: number;
   amounts: number[];
   amountIndex: number;
   customAmount: number | null;
   amountInputText: string | null;
   _activeAmountInput: boolean;
-  /** appendValueInput drafts (typed, not yet applied) — not persisted to save */
-  _valueInputDrafts: Record<string, { text: string; caret: number }>;
-  _activeValueInputKey: string | null;
-  /** focus/caret of the appendCodeInput textarea, restored across re-renders */
-  _activeCodeInput: { key: string; caret: number; scroll: number } | null;
   statSelection: number;
   itemSelection: number;
   weaponSelection: number;
@@ -82,34 +36,8 @@ export type CheatMenuT = {
   forceMouseMovement: boolean;
   forceCtrlSkip: boolean;
 
+  /** same object as core widgetState.searchKeywords (bridged) */
   searchKeywords: Record<string, string>;
-  _activeSearchKey: string | null;
-
-  initialValues: InitialValues;
-
-  // DOM Elements
-  overlay: HTMLTableElement;
-  styleCss: HTMLLinkElement;
-
-  // --- Pop-out window (core/popout.ts) ---
-  isPoppedOut: boolean;
-  canPopout: () => boolean;
-  getMenuDocument: () => Document;
-  openPopout: () => void;
-  closePopout: (keepMenuOpen?: boolean) => void;
-  togglePopout: () => void;
-
-  menus: MenuEntry[];
-  currentMenuIndex: number | null;
-  renderMainMenuGrid: () => void;
-  appendBackButton: () => void;
-  appendTopBar: () => void;
-
-  keyListeners: KeyListeners;
-
-  keyMappings: {
-    [keyName: string]: string;
-  };
 
   // --- Cheat Functions ---
 
@@ -148,9 +76,7 @@ export type CheatMenuT = {
   toggleSwitch: (switchId: number) => void;
   teleport: (mapId: number, xPos: number, yPos: number) => void;
 
-  // --- Overlay and Menu Building Functions ---
-
-  positionMenu: (event?: Event) => void;
+  // --- Core widgets (bridged from core/ui, see legacyBridge.ts) ---
 
   appendScrollSelector: (
     text: string | number,
@@ -191,7 +117,6 @@ export type CheatMenuT = {
 
   // --- Menu Page Setup Functions ---
 
-  scrollCheat: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendCheatTitle: () => void;
 
   scrollActor: (direction: 'left' | 'right', event?: MouseEvent) => void;
@@ -361,16 +286,11 @@ export type CheatMenuT = {
     onSearchChange?: (keyword: string) => void,
   ) => void;
 
-  // --- Core Menu Logic & Input Handlers ---
   updateMenu: () => void;
-  initialize: () => void;
-  handleShowDevTools: (event: KeyboardEvent) => void;
-  handleShowRpgMakerDebug: (event: KeyboardEvent) => void;
-  handleToggleCheatMenu: (event: KeyboardEvent) => void;
-  onKeyDown: (event: KeyboardEvent) => void;
 };
 
-export type MenuEntry = {
+/** Menu shape exported by not-yet-migrated feature files. */
+export type LegacyMenu = {
   name: string;
   render: () => void;
 };

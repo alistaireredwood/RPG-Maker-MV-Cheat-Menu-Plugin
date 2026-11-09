@@ -3,7 +3,7 @@ import {
   makeScroll,
   makeApplyAmount,
   appendInventorySection,
-} from '../core/scrollable.ts';
+} from '../shared/scrollable.ts';
 
 CheatMenu.giveItem = (itemId, amount) => {
   if ($dataItems[itemId] != undefined) {

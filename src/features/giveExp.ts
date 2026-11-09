@@ -1,5 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount } from '../core/scrollable.ts';
+import { makeApplyAmount } from '../shared/scrollable.ts';
 
 CheatMenu.giveExp = (actor, amount) => {
   if (actor) {

@@ -1,6 +1,16 @@
 import CheatMenu from '../CheatMenu.ts';
+import type { ActionKey } from '../core/input/keymap.ts';
+import { updateMenu } from '../core/ui/render.ts';
+import { getSearchKeyword } from '../core/ui/widgetState.ts';
+import {
+  appendScrollSelector,
+  type ScrollHandler,
+} from '../core/ui/widgets/scrollSelector.ts';
+import { appendSearchInput } from '../core/ui/widgets/searchInput.ts';
+import { appendTitle } from '../core/ui/widgets/text.ts';
+import { appendValueInput } from '../core/ui/widgets/valueInput.ts';
 
-type ScrollFn = (direction: 'left' | 'right', event?: MouseEvent) => void;
+type ScrollFn = ScrollHandler;
 type RPGDataItem = { name?: string };
 
 export function makeScroll(config: {
@@ -13,9 +23,7 @@ export function makeScroll(config: {
 }): ScrollFn {
   const startIdx = config.startIdx ?? 1;
   return function (direction) {
-    const keyword = (
-      CheatMenu.searchKeywords?.[config.stateKey] || ''
-    ).toLowerCase();
+    const keyword = getSearchKeyword(config.stateKey);
     const step = direction === 'left' ? -1 : 1;
     const data = config.getData();
     const len = data.length;
@@ -32,7 +40,7 @@ export function makeScroll(config: {
     }
     if (found) config.setIdx(idx);
     SoundManager.playSystemSound(0);
-    CheatMenu.updateMenu();
+    updateMenu();
   };
 }
 
@@ -88,7 +96,7 @@ export function makeApplyAmount(action: (amount: number) => void): ScrollFn {
       SoundManager.playSystemSound(1);
     }
     action(amount);
-    CheatMenu.updateMenu();
+    updateMenu();
   };
 }
 
@@ -107,31 +115,25 @@ export function appendInventorySection(
     gainCount: (item: RPGDataItem, delta: number) => void;
     matches: (item: RPGDataItem, keyword: string) => boolean;
   },
-  key1: string | number,
-  key2: string | number,
-  key3: string | number,
-  key4: string | number,
+  key1: ActionKey,
+  key2: ActionKey,
+  key3: ActionKey,
+  key4: ActionKey,
 ): void {
-  CheatMenu.appendSearchInput(
-    config.searchPlaceholder,
-    config.stateKey,
-    (keyword) => {
-      const idx = config
-        .getData()
-        .findIndex(
-          (item, i) =>
-            i >= 1 && !!item?.name && item.name.toLowerCase().includes(keyword),
-        );
-      if (idx > 0) config.setIdx(idx);
-    },
-  );
+  appendSearchInput(config.searchPlaceholder, config.stateKey, (keyword) => {
+    const idx = config
+      .getData()
+      .findIndex(
+        (item, i) =>
+          i >= 1 && !!item?.name && item.name.toLowerCase().includes(keyword),
+      );
+    if (idx > 0) config.setIdx(idx);
+  });
   const items = config.getData();
   const idx = config.getIdx();
   const item = items[idx];
 
-  const keyword = (
-    CheatMenu.searchKeywords?.[config.stateKey] || ''
-  ).toLowerCase();
+  const keyword = getSearchKeyword(config.stateKey);
   const { index, total } = getIndexInfo(
     items,
     idx,
@@ -139,7 +141,7 @@ export function appendInventorySection(
     keyword,
   );
 
-  CheatMenu.appendTitle(config.title, `${index}/${total}`);
+  appendTitle(config.title, `${index}/${total}`);
 
   let count: number | string = 0;
 
@@ -154,16 +156,10 @@ export function appendInventorySection(
     }
   }
 
-  CheatMenu.appendScrollSelector(
-    item?.name ?? '',
-    key1,
-    key2,
-    config.scrollFn,
-    true,
-  );
+  appendScrollSelector(item?.name ?? '', key1, key2, config.scrollFn, true);
 
   if (item && typeof count === 'number') {
-    CheatMenu.appendValueInput(
+    appendValueInput(
       String(count),
       `${config.stateKey}:${idx}`,
       makeSetExact(
@@ -175,6 +171,6 @@ export function appendInventorySection(
       config.applyFn,
     );
   } else {
-    CheatMenu.appendScrollSelector(count, key3, key4, config.applyFn);
+    appendScrollSelector(count, key3, key4, config.applyFn);
   }
 }

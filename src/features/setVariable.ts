@@ -3,7 +3,7 @@ import {
   makeScroll,
   makeApplyAmount,
   getIndexInfo,
-} from '../core/scrollable.ts';
+} from '../shared/scrollable.ts';
 
 CheatMenu.setVariable = (variableId, value) => {
   if ($dataSystem.variables[variableId] != undefined) {

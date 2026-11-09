@@ -1,5 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount, makeSetExact } from '../core/scrollable.ts';
+import { makeApplyAmount, makeSetExact } from '../shared/scrollable.ts';
 
 CheatMenu.giveStat = (actor, statIndex, amount) => {
   if (actor && actor.paramPlus(statIndex) != undefined) {

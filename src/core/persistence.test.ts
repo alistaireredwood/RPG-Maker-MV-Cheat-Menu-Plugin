@@ -3,6 +3,7 @@ import {
   migrate,
   migrateV1,
   readSlice,
+  renameV1Keys,
   SAVE_VERSION,
   writeSave,
   type MigrationContext,
@@ -181,5 +182,16 @@ describe('writeSave', () => {
     );
     live.selection.push(2);
     expect(data.items).toEqual({ selection: [1] });
+  });
+});
+
+describe('renameV1Keys', () => {
+  it('copies present v1 keys under their slice names', () => {
+    expect(
+      renameV1Keys<{ selection: number; slot: number }>(
+        { itemSelection: 4, other: 1 },
+        { selection: 'itemSelection', slot: 'saveSlotSelection' },
+      ),
+    ).toEqual({ selection: 4 });
   });
 });

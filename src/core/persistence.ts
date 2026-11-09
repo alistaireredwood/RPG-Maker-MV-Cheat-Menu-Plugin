@@ -113,3 +113,14 @@ export function writeSave(
   for (const id of Object.keys(slices)) data[id] = clone(slices[id]);
   return data;
 }
+
+export function renameV1Keys<S extends object>(
+  v1: Readonly<Record<string, unknown>>,
+  keys: { readonly [K in keyof S]?: string },
+): Partial<S> {
+  const slice: Partial<S> = {};
+  for (const [sliceKey, v1Key] of Object.entries(keys) as [keyof S, string][]) {
+    if (v1Key in v1) slice[sliceKey] = v1[v1Key] as S[keyof S];
+  }
+  return slice;
+}

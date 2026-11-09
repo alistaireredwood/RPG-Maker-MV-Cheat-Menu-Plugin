@@ -26,7 +26,7 @@ The project compiles with TypeScript 7 (native). typescript-eslint still needs t
 - `app` (`src/main.ts`, `src/features.ts`, `src/legacyBridge.ts`, `src/legacyFeature.ts`) → anything, but features only through `features/<name>/index.ts`
 - `legacy` (`src/CheatMenu.ts`) — the pre-refactor singleton, reachable from everywhere until it is removed
 
-Boundary rules are at `warn` while the code is migrated to the folder-per-feature layout (flat `src/features/*.ts` files show up as `no-unknown-files`); switch `BOUNDARIES_SEVERITY` to `error` once the migration is done.
+Boundary rules are still at `warn` (`BOUNDARIES_SEVERITY`); the code base has no violations, switching to `error` is part of the cleanup step.
 
 ## Architecture
 
@@ -54,9 +54,9 @@ This repo contains the plugin and a patcher CLI:
 
 `render(ui)` receives a `MenuBuilder` (`core/ui/builder.ts`): `ui.cheat()`, `ui.scrollSelector()`, `ui.valueInput()` take the next free action key (4, 5, 6, … `0`, `-`, `=`) — no hard-coded key numbers. `ui.cheatTitle()` draws the sub-menu switcher (keys 2/3).
 
-### Legacy features (transitional)
+### Legacy leftovers
 
-The flat `src/features/*.ts` files predate the contract: they export `menu` / `menus` (`{ name, render }`), keep their state on the `CheatMenu` singleton (`src/CheatMenu.ts`) and call `CheatMenu.appendX(...)` with explicit keys. `legacyBridge.ts` puts the core widgets onto the singleton; `legacyFeature()` (`legacyFeature.ts`, used in `features.ts`) wraps such a file into a `Feature` and mirrors its singleton fields into / out of the persisted slice (`fields: { sliceKey: ['CheatMenuField', default] }`). New code should not add to the singleton.
+Every feature is migrated to `src/features/<name>/`. `src/CheatMenu.ts`, `types/CheatMenu.d.ts`, `legacyBridge.ts` and `legacyFeature.ts` are no longer used by any feature and are removed in the cleanup step; `window.Cheat_Menu` still points at the (now empty) singleton until then. Don't add anything to them.
 
 ### Persistence (`src/core/persistence.ts`, `session.ts`)
 
@@ -78,11 +78,14 @@ Save format v2: `{ version: 2, core: { position, currentMenuId }, <featureId>: {
 
 Building blocks for several features; may import `core/`, never `features/` or the singleton.
 
-- `state.ts` — `sharedState` (`selectedActor`, `amountIndex`; persisted via the menu-less `sharedFeature`, registered first in `features.ts`), `AMOUNTS`, `amountInput` (typed amount, runtime only), `currentAmount()`, `getSelectedActor()`
+- `state.ts` — `sharedState` (`selectedActor`, `amountIndex`; persisted via the menu-less `sharedFeature` registered in `features.ts`), `AMOUNTS`, `amountInput` (typed amount, runtime only), `currentAmount()`, `getSelectedActor()`
 - `controls/actorSelector.ts` — `appendActorSelection(k1, k2)` / `actorSelector(ui)`
 - `controls/amountSelector.ts` — `appendAmountSelection(k1, k2)` / `amountSelector(ui)`, `makeApplyAmount(action)` (left = subtract / right = add the current amount), `snapToPreset`
 - `controls/listSelector.ts` — `makeScroll` (search-aware ←/→ over an RPG Maker data array), `findNextIndex`, `getIndexInfo`, `nameMatches`
 - `controls/inventorySection.ts` — `appendInventorySection(config, k1..k4)` / `inventorySection(ui, config)`: search + title + item + editable count (Items/Weapons/Armors)
+- `controls/resourceCheats.ts` — `resourceCheats(ui, who, 'HP' | 'MP' | 'TP', apply)`: Alive / All × to 0 / to 1 / half / full (8 keys); `game/resources.ts` — `changeResource(battlers, resource, change, aliveOnly)`
+- `controls/status.ts` — `onOffLabel(on)`, `playToggleSound(on)`
+- `inventoryFeature.ts` — `defineInventoryFeature({...})`: the whole Items / Weapons / Armors feature over a data array
 - `game/numbers.ts` — `parseIntegerInput`, `makeSetExact` (integer `onCommit` for value inputs)
 - `game/teleport.ts` — `teleport(mapId, x, y)`
 
@@ -104,4 +107,4 @@ The `append*(…keys)` forms are for legacy feature files; new features use the 
 2. Add it to the `features` array in `src/features.ts` (array position = grid position).
 3. Keep persisted state in a module-level object passed as `state` (and `migrateV1` if it replaces old singleton fields), engine patches in `onInit` / per-object patches via `patchMethod`, re-installation after a load in `onStateRestored`, and draw with the `MenuBuilder` + `shared/controls` (`actorSelector(ui)`, `amountSelector(ui)`, `inventorySection(ui, …)`, `onOffLabel`).
 
-Reference implementations (migrated pilots): `features/noClip/` (stateless toggle), `features/godMode/` (persisted state, per-actor `patchMethod` overrides, `onStateRestored`, unit tests with a fake actor), `features/items/` (list + search + amount + editable count).
+Reference implementations: `features/noClip/` (stateless toggle), `features/godMode/` (persisted state, per-actor `patchMethod` overrides, `onStateRestored`, unit tests with a fake actor), `features/unlockControls/` / `features/gameSpeed/` (prototype patches in `onInit`), `features/speed/` (`onLoad` / `onNewGame` resetting per-game state), `features/variables/` (search list + editable value). `src/features.test.ts` pins the v1 save migration of every feature — extend it when a feature gets persisted state.

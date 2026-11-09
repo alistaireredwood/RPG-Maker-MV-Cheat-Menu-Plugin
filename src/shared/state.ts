@@ -30,10 +30,6 @@ export const currentAmount = (): number =>
 export const getSelectedActor = (): Game_Actor | null =>
   $gameActors.actor(sharedState.selectedActor);
 
-/**
- * Menu-less feature that persists `sharedState`. Register it in
- * `src/features.ts` (first, so it is restored before the features using it).
- */
 export const sharedFeature = defineFeature({
   id: 'shared',
   state: sharedState,

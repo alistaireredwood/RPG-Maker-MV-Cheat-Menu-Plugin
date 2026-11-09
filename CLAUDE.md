@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build
 
-Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build:release` (scripts/build-release.js) assembles a distributable `release/` folder: the plugin files under `release/www/js/plugins/`, a `plugins_patch.go.txt` listing plugin names to inject, and the compiled patcher executable.
+`pnpm build` writes the plugin straight into the distributable folder: `release/www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build:release` (scripts/build-release.js) runs the build and adds the rest of `release/`: `plugins_patch.go.txt` listing plugin names to inject, and the compiled patcher executable. `release/` is the only build output (gitignored).
 
 `pnpm build` runs `tsc`, `eslint .`, `vitest run`, then `vite build`; a lint error or failing test fails the build. `pnpm lint` / `pnpm test` / `pnpm format` run ESLint / Vitest / Prettier on their own. Unit tests (`src/**/*.test.ts`) run in Node without the engine — keep tested logic free of RPG Maker globals and DOM at import time.
 

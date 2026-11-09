@@ -10,7 +10,7 @@ export default defineConfig({
   },
   build: {
     target: 'chrome66',
-    outDir: './www/js/plugins',
+    outDir: './release/www/js/plugins',
     rolldownOptions: {
       input: {
         Cheat_Menu: 'src/main.ts',

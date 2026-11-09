@@ -13,8 +13,6 @@ This repo contains two independent plugin implementations plus a patcher CLI:
 - **`src/new/`** — active development, TypeScript + Vite (root `package.json` / `pnpm`)
 - **`src/plus/`** — separate, more feature-rich implementation, TypeScript + Webpack (its own `package.json` / `npm`, plus its own copy of the patcher) — see `src/plus/CLAUDE.md`
 - **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
-- `popout.ts` — F7 moves the overlay into a separate always-on-top NW.js window (`nw.Window.open('about:blank')`, shared JS context) and back; use `CheatMenu.getMenuDocument()` instead of the global `document` for anything touching the overlay's DOM/focus/selection. Popup key presses are routed through `CheatMenu.onKeyDown`; `SceneManager.isGameActive` is forced to `true` while popped out
-
 - **`src/old/`** — legacy JS plugin and C++ MVPluginPatcher, kept for reference only
 
 ### Module loading pattern
@@ -30,6 +28,7 @@ Single singleton object holding all runtime state (current menu, position, amoun
 - `state.ts` — hooks `DataManager` to persist `CheatMenu` state in `$gameSystem.CheatMenu`; runs a 1 s interval to re-render open sub-menus (skips main grid to avoid hover-pulse)
 - `ui.ts` — creates/destroys the DOM overlay, injects CSS, handles positioning (5 positions cycled with tilde key); all `append*` helpers live here. `appendBackButton()` is injected automatically by `updateMenu()` — don't call it manually.
 - `listeners.ts` — keyboard event handlers; keys 0–9 dispatch to `CheatMenu.keyListeners`; tilde cycles position; F8/F9 open dev tools / debug menu
+- `popout.ts` — F7 moves the overlay into a separate always-on-top NW.js window (`nw.Window.open('about:blank')`, shared JS context) and back; use `CheatMenu.getMenuDocument()` instead of the global `document` for anything touching the overlay's DOM/focus/selection. Popup key presses are routed through `CheatMenu.onKeyDown`; `SceneManager.isGameActive` is forced to `true` while popped out
 - `scrollable.ts` — factory helpers shared by list-based features: `makeScroll` (search-aware ←/→ scroll handler that skips entries not matching `CheatMenu.searchKeywords[stateKey]`), `makeApplyAmount` (left = subtract / right = add the selected amount), `appendInventorySection` (search input + title + item selector + count selector, used by Items/Weapons/Armors)
 
 ### Re-render behaviour

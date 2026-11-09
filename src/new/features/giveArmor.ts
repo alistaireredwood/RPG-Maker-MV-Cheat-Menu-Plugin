@@ -33,6 +33,7 @@ CheatMenu.appendArmorSelection = function (key1, key2, key3, key4) {
     scrollFn: CheatMenu.scrollArmor,
     applyFn: CheatMenu.applyCurrentArmor,
     getCount: (item) => $gameParty.numItems(item as any),
+    gainCount: (item, delta) => $gameParty.gainItem(item as any, delta, false),
     matches: armorMatches,
   }, key1, key2, key3, key4);
 };

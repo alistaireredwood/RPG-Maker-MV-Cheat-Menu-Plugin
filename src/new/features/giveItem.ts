@@ -33,6 +33,7 @@ CheatMenu.appendItemSelection = function (key1, key2, key3, key4) {
     scrollFn: CheatMenu.scrollItem,
     applyFn: CheatMenu.applyCurrentItem,
     getCount: (item) => $gameParty.numItems(item as any),
+    gainCount: (item, delta) => $gameParty.gainItem(item as any, delta, false),
     matches: itemMatches,
   }, key1, key2, key3, key4);
 };

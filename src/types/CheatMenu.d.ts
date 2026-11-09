@@ -164,7 +164,7 @@ export type CheatMenuT = {
   appendValueInput: (
     value: string,
     inputKey: string,
-    onCommit: (text: string) => void,
+    onCommit: (text: string) => boolean | void,
     key1: string | number,
     key2: string | number,
     scrollHandler: (direction: 'left' | 'right', event?: MouseEvent) => void,

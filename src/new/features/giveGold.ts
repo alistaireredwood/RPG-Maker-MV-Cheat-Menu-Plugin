@@ -1,5 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount } from '../core/scrollable.ts';
+import { makeApplyAmount, makeSetExact } from '../core/scrollable.ts';
 
 CheatMenu.giveGold = (amount) => {
   $gameParty.gainGold(amount);
@@ -9,7 +9,14 @@ CheatMenu.applyCurrentGold = makeApplyAmount((amount) => CheatMenu.giveGold(amou
 
 CheatMenu.appendGoldStatus = function (key1, key2) {
   CheatMenu.appendTitle('Gold');
-  CheatMenu.appendScrollSelector($gameParty.gold(), key1, key2, CheatMenu.applyCurrentGold);
+  CheatMenu.appendValueInput(
+    String($gameParty.gold()),
+    'gold',
+    makeSetExact(() => $gameParty.gold(), (delta) => CheatMenu.giveGold(delta)),
+    key1,
+    key2,
+    CheatMenu.applyCurrentGold,
+  );
 };
 
 export const menu = {

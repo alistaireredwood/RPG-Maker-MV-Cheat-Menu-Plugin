@@ -55,6 +55,28 @@ export function getIndexInfo(
   return { index, total };
 }
 
+// typed text → whole number, or null if it isn't one (e.g. "", "abc", "1.5")
+export function parseIntegerInput(text: string): number | null {
+  const trimmed = text.trim();
+  return /^[+-]?\d+$/.test(trimmed) ? Number(trimmed) : null;
+}
+
+// onCommit for appendValueInput: set a counter to the typed whole number by
+// applying the difference — the engine's own gain* methods keep their clamping
+// (max items, max gold, …). Returns false to reject non-integer input.
+export function makeSetExact(
+  getCurrent: () => number,
+  applyDelta: (delta: number) => void,
+): (text: string) => boolean {
+  return (text) => {
+    const target = parseIntegerInput(text);
+    if (target === null) return false;
+    applyDelta(target - getCurrent());
+    SoundManager.playSystemSound(1);
+    return true;
+  };
+}
+
 export function makeApplyAmount(action: (amount: number) => void): ScrollFn {
   return function (direction) {
     let amount = CheatMenu.customAmount ?? CheatMenu.amounts[CheatMenu.amountIndex];
@@ -80,6 +102,8 @@ export function appendInventorySection(
     scrollFn: ScrollFn;
     applyFn: ScrollFn;
     getCount: (item: RPGDataItem) => number;
+    /** adds (or removes, when negative) this many of `item` */
+    gainCount: (item: RPGDataItem, delta: number) => void;
     matches: (item: RPGDataItem, keyword: string) => boolean;
   },
   key1: string | number,
@@ -123,5 +147,20 @@ export function appendInventorySection(
   }
 
   CheatMenu.appendScrollSelector(item?.name ?? '', key1, key2, config.scrollFn, true);
-  CheatMenu.appendScrollSelector(count, key3, key4, config.applyFn);
+
+  if (item && typeof count === 'number') {
+    CheatMenu.appendValueInput(
+      String(count),
+      `${config.stateKey}:${idx}`,
+      makeSetExact(
+        () => config.getCount(item),
+        (delta) => config.gainCount(item, delta),
+      ),
+      key3,
+      key4,
+      config.applyFn,
+    );
+  } else {
+    CheatMenu.appendScrollSelector(count, key3, key4, config.applyFn);
+  }
 }

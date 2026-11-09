@@ -270,6 +270,12 @@
   border-bottom-style: dashed;
 }
 
+/* rejected on Enter (e.g. not a whole number) */
+.cheat-menu-value-input.is-invalid {
+  color: var(--cm-red);
+  border-bottom-color: var(--cm-red);
+}
+
 /* --- POP-OUT WINDOW (core/popout.ts) --- */
 body.cheat-menu-popout {
   margin: 0;

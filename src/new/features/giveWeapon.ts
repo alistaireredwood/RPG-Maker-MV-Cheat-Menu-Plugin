@@ -33,6 +33,7 @@ CheatMenu.appendWeaponSelection = function (key1, key2, key3, key4) {
     scrollFn: CheatMenu.scrollWeapon,
     applyFn: CheatMenu.applyCurrentWeapon,
     getCount: (item) => $gameParty.numItems(item as any),
+    gainCount: (item, delta) => $gameParty.gainItem(item as any, delta, false),
     matches: weaponMatches,
   }, key1, key2, key3, key4);
 };

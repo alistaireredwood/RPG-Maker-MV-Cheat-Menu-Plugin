@@ -172,7 +172,8 @@ CheatMenu.appendScrollSelector = function (
 };
 
 // Like appendScrollSelector, but the middle cell is a text input for typing a
-// value directly. Enter commits (onCommit), Esc or clicking away discards.
+// value directly. Enter commits (onCommit; return false to reject the input),
+// Esc or clicking away discards.
 // While the user types, the draft survives re-renders (incl. the 1 s timer)
 // in CheatMenu._valueInputDrafts under `inputKey` — scope the key to the edited
 // entity (e.g. `variable:12`) so a draft never leaks onto another one.
@@ -223,9 +224,15 @@ CheatMenu.appendValueInput = function (
     e.stopPropagation();
     if (e.key === 'Enter') {
       const text = input.value;
+      // onCommit returning false = rejected input: keep the draft and focus
+      // so the user can fix it
+      if (onCommit(text) === false) {
+        SoundManager.playBuzzer();
+        input.classList.add('is-invalid');
+        return;
+      }
       discard();
       input.blur();
-      onCommit(text);
       CheatMenu.updateMenu();
     } else if (e.key === 'Escape') {
       discard();
@@ -256,6 +263,7 @@ CheatMenu.appendValueInput = function (
       caret: input.selectionStart ?? input.value.length,
     };
     input.classList.toggle('is-dirty', input.value !== value);
+    input.classList.remove('is-invalid');
   });
   // keep the caret where the user left it across re-renders
   ['keyup', 'click', 'select'].forEach((evt) => {

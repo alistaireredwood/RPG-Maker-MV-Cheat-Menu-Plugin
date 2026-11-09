@@ -10,7 +10,7 @@ const STORAGE_KEY = 'Cheat_Menu.evaluateScript';
 
 type Result = { ok: boolean; text: string };
 
-let script = loadScript();
+let script: string | null = null;
 let lastResult: Result | null = null;
 
 function loadScript(): string {
@@ -20,6 +20,8 @@ function loadScript(): string {
     return '';
   }
 }
+
+const currentScript = (): string => (script ??= loadScript());
 
 function saveScript(value: string): void {
   try {
@@ -35,16 +37,17 @@ function setResult(result: Result): void {
 }
 
 function run(): void {
-  if (!script.trim()) {
+  const code = currentScript();
+  if (!code.trim()) {
     SoundManager.playBuzzer();
     return;
   }
-  saveScript(script);
+  saveScript(code);
 
   let value: unknown;
   try {
     // indirect eval: runs in global scope, can't see this module's locals
-    value = (0, eval)(script);
+    value = (0, eval)(code);
   } catch (e) {
     console.error('[Cheat_Menu] Evaluate:', e);
     SoundManager.playBuzzer();
@@ -89,7 +92,7 @@ export default defineFeature({
       render(ui) {
         ui.cheatTitle();
         ui.title('Script');
-        ui.codeInput('evaluate', script, editScript, run);
+        ui.codeInput('evaluate', currentScript(), editScript, run);
         ui.cheat('Run (Ctrl+Enter in editor)', 'Activate', run);
 
         if (!lastResult) return;

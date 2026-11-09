@@ -82,6 +82,14 @@ export type CheatMenuT = {
   overlay: HTMLTableElement;
   styleCss: HTMLLinkElement;
 
+  // --- Pop-out window (core/popout.ts) ---
+  isPoppedOut: boolean;
+  /** Document currently hosting the overlay — the game's or the pop-out's. */
+  getMenuDocument: () => Document;
+  openPopout: () => void;
+  closePopout: (keepMenuOpen?: boolean) => void;
+  togglePopout: () => void;
+
   menus: MenuEntry[];
   currentMenuIndex: number | null;
   renderMainMenuGrid: () => void;
@@ -343,6 +351,7 @@ export type CheatMenuT = {
   handleShowDevTools: (event: KeyboardEvent) => void;
   handleShowRpgMakerDebug: (event: KeyboardEvent) => void;
   handleToggleCheatMenu: (event: KeyboardEvent) => void;
+  onKeyDown: (event: KeyboardEvent) => void;
 };
 
 export type MenuEntry = {

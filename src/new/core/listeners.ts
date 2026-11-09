@@ -19,6 +19,7 @@ CheatMenu.keyMappings = {
   EQUAL: '=',
   TILDE: '`',
   F1: 'F1',
+  F7: 'F7',
   F8: 'F8',
   F9: 'F9',
 };
@@ -106,10 +107,11 @@ CheatMenu.handleToggleCheatMenu = (event) => {
 
       if (!CheatMenu.isCheatMenuOpen) {
         CheatMenu.isCheatMenuOpen = true;
-        document.body.appendChild(CheatMenu.overlay);
+        CheatMenu.getMenuDocument().body.appendChild(CheatMenu.overlay);
         CheatMenu.updateMenu();
         SoundManager.playSystemSound(1);
       } else {
+        if (CheatMenu.isPoppedOut) CheatMenu.closePopout();
         CheatMenu.isCheatMenuOpen = false;
         CheatMenu.overlay.remove();
         SoundManager.playSystemSound(2);
@@ -117,7 +119,12 @@ CheatMenu.handleToggleCheatMenu = (event) => {
         if (ind) ind.style.display = '';
       }
     } else if (CheatMenu.isCheatMenuOpen) {
-      if (event.key === CheatMenu.keyMappings.TILDE) {
+      if (event.key === CheatMenu.keyMappings.F7) {
+        event.preventDefault();
+        CheatMenu.togglePopout();
+      } else if (event.key === CheatMenu.keyMappings.TILDE) {
+        // screen positions are meaningless inside the pop-out window
+        if (CheatMenu.isPoppedOut) return;
         CheatMenu.position++;
         if (CheatMenu.position > 4) {
           CheatMenu.position = 0;
@@ -138,10 +145,13 @@ CheatMenu.handleToggleCheatMenu = (event) => {
   }
 };
 
-window.addEventListener('keydown', (event) => {
+// shared by the game window and the pop-out window (core/popout.ts)
+CheatMenu.onKeyDown = (event) => {
   CheatMenu.handleShowDevTools(event);
   CheatMenu.handleShowRpgMakerDebug(event);
   CheatMenu.handleToggleCheatMenu(event);
-});
+};
+
+window.addEventListener('keydown', (event) => CheatMenu.onKeyDown(event));
 
 window.addEventListener('resize', () => CheatMenu.positionMenu());

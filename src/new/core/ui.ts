@@ -3,6 +3,9 @@ import CheatMenu from '../CheatMenu';
 let _gridFocusIndex = 0;
 let _updatingMenu = false;
 
+// the overlay may live in the pop-out window (core/popout.ts)
+const menuWindow = (): Window => CheatMenu.getMenuDocument().defaultView ?? window;
+
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
 
@@ -28,6 +31,15 @@ const positions: [string, string, string, string][] = [
 CheatMenu.positionMenu = () => {
   const pos = positions[CheatMenu.position] ?? positions[1];
   const overlay = CheatMenu.overlay;
+
+  if (CheatMenu.isPoppedOut) {
+    // the pop-out window lays the overlay out via .cheat-menu-popout CSS
+    overlay.style.left = overlay.style.top = overlay.style.right = overlay.style.bottom = '';
+    overlay.style.transform = '';
+    const ind = document.getElementById('cheat-menu-indicator');
+    if (ind) ind.style.display = 'none';
+    return;
+  }
 
   overlay.style.left = pos[0];
   overlay.style.top = pos[1];
@@ -95,7 +107,7 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   cell.appendChild(input);
 
   if (CheatMenu._activeSearchKey === stateKey) {
-    requestAnimationFrame(() => {
+    menuWindow().requestAnimationFrame(() => {
       input.focus();
       const len = input.value.length;
       input.setSelectionRange(len, len);
@@ -377,7 +389,7 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
   cell.appendChild(input);
 
   if (CheatMenu._activeAmountInput) {
-    requestAnimationFrame(() => {
+    menuWindow().requestAnimationFrame(() => {
       input.focus();
       const len = input.value.length;
       input.setSelectionRange(len, len);
@@ -453,7 +465,7 @@ CheatMenu.renderMainMenuGrid = function () {
     if (event.key !== 'Tab') return;
     event.preventDefault();
     event.stopPropagation();
-    const idx = buttons.indexOf(document.activeElement as HTMLElement);
+    const idx = buttons.indexOf(CheatMenu.getMenuDocument().activeElement as HTMLElement);
     const current = idx >= 0 ? idx : _gridFocusIndex;
     const next = event.shiftKey
       ? (current <= 0 ? buttons.length - 1 : current - 1)

@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+release/
+patcher/
+# vendored RPG Maker MV typings
+src/types/rpgmaker-mv/
+*.md

@@ -2,55 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Build
+## Repository
 
-Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build:release` (scripts/build-release.js) assembles a distributable `release/` folder: the plugin files under `release/www/js/plugins/`, a `plugins_patch.go.txt` listing plugin names to inject, and the compiled patcher executable.
+- **`src/`** — the plugin, TypeScript + Vite (root `package.json` / `pnpm`)
+- **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
+- **`docs/`** — `ARCHITECTURE.md` (how the plugin is built), `game-specific-extensions.md` (planned public extension API)
 
 ## Architecture
 
-This repo contains the plugin and a patcher CLI:
+**Read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) before adding or changing a feature** — it is the source of truth for the layer rules, the `defineFeature` contract, lifecycle hooks, persistence / save compatibility, the render model and `MenuBuilder` keys, engine patching, shared building blocks and the new-feature checklist. Keep it up to date when the architecture changes.
 
-- **`src/new/`** — the plugin, TypeScript + Vite (root `package.json` / `pnpm`)
-- **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
+Rules that are easy to break:
 
-### Module loading pattern
+- One folder per feature in `src/features/<name>/`, registered in `src/features.ts`; a feature never imports another feature (shared code goes to `src/shared/`).
+- No eager imports / no import-time side effects: modules only declare things; anything touching the DOM, the engine, timers or storage runs from `bootstrap()`, a lifecycle hook, or lazily on first use. No `import.meta.glob`.
+- Imports leaving the file's directory use `@src/...`, never `../`; same-directory imports stay `./`.
+- `feature.id` / `menu.id` are persisted in saves — never rename them.
+- Engine patches only via `patchMethod`; never store flags on engine objects (they end up in save files).
+- Draw menus only through the `MenuBuilder` (`ui.*` + `shared/controls`), never with hard-coded key numbers.
+- Comments explain *why*, never *what*.
 
-`src/new/Cheat_Menu.ts` is the entry point. It uses `import.meta.glob()` to eagerly load all files under `core/` and `features/`, then exposes `window.Cheat_Menu`. Core modules hook into the game engine as an import side effect. Feature modules export a `menu` object (`{ name, render }`) — or `menus` for multi-entry features — and `features/_menuOrder.ts` is the single source of truth for menu order: it imports every feature and pushes them into `CheatMenu.menus[]` in display order. Features do not register themselves.
+## Verification
 
-### State (`src/new/CheatMenu.ts`)
-
-Single singleton object holding all runtime state (current menu, position, amounts, saved coordinates, etc.) plus an `initialValues` snapshot used for save/load persistence.
-
-### Core modules (`src/new/core/`)
-
-- `state.ts` — hooks `DataManager` to persist `CheatMenu` state in `$gameSystem.CheatMenu`; runs a 1 s interval to re-render open sub-menus (skips main grid to avoid hover-pulse)
-- `ui.ts` — creates/destroys the DOM overlay, injects CSS, handles positioning (5 positions cycled with tilde key); all `append*` helpers live here. `appendBackButton()` and `appendTopBar()` (title + pop-out/pop-in SVG icon button, hidden without NW.js) are injected automatically by `updateMenu()` — don't call them manually.
-- `listeners.ts` — keyboard event handlers; keys 0–9 dispatch to `CheatMenu.keyListeners`; tilde cycles position; F8/F9 open dev tools / debug menu
-- `popout.ts` — F7 moves the overlay into a separate always-on-top NW.js window (`nw.Window.open('about:blank')`, shared JS context) and back; use `CheatMenu.getMenuDocument()` instead of the global `document` for anything touching the overlay's DOM/focus/selection. Popup key presses are routed through `CheatMenu.onKeyDown`; `SceneManager.isGameActive` is forced to `true` while popped out
-- `scrollable.ts` — factory helpers shared by list-based features: `makeScroll` (search-aware ←/→ scroll handler that skips entries not matching `CheatMenu.searchKeywords[stateKey]`), `makeApplyAmount` (left = subtract / right = add the selected amount), `appendInventorySection` (search input + title + item selector + count selector, used by Items/Weapons/Armors)
-
-### Components (`src/new/components/`)
-
-Reusable UI building blocks imported explicitly where needed (not auto-loaded by `import.meta.glob`, no side effects). `icons.ts` exports inline SVG icon strings (`ICON_POP_OUT`, `ICON_POP_IN`) that use `currentColor`.
-
-### Re-render behaviour
-
-`updateMenu()` tears down and rebuilds the entire sub-menu DOM on every call. Avoid storing DOM references across renders. The 1 s timer only fires when a sub-menu is open (`currentMenuIndex !== null`).
-
-### Search inputs
-
-Features with large lists (Items, Weapons, Armors, Variables, Switches) use `appendSearchInput`, which stops key propagation so typing doesn't trigger game/menu keys and restores focus across re-renders via `CheatMenu._activeSearchKey`. The scroll handler for each checks `CheatMenu.searchKeywords['<key>']` and skips non-matching entries. `onSearchChange` callback jumps to the first match when the keyword changes.
-
-### State fields to know
-
-- `CheatMenu.searchKeywords` — `Record<string, string>`, per-feature search terms (not persisted to save)
-- `CheatMenu._activeSearchKey` — which search input currently owns focus; managed by `focus`/`blur` events and the `_updatingMenu` flag in `ui.ts`
-- `CheatMenu._valueInputDrafts` / `_activeValueInputKey` — typed-but-not-applied text and focus owner for `appendValueInput` (editable value cell, Enter commits — `onCommit` returning `false` rejects and keeps the draft — Esc or blur discards; used by Variables, Items, Weapons, Armors, Gold, Stats; `makeSetExact` in `core/scrollable.ts` builds the integer onCommit); scope the `inputKey` to the edited entity (e.g. `variable:12`)
-- `CheatMenu._activeCodeInput` — focus/caret/scroll of the `appendCodeInput` textarea (Evaluate); while a textarea in the overlay is focused, the 1 s re-render timer in `state.ts` is skipped
-- `CheatMenu.initialValues` — keys listed here are persisted to `$gameSystem.CheatMenu` on save/load; do **not** add `searchKeywords` or `_activeSearchKey` here
-
-### Adding a new feature (`src/new/`)
-
-Create a new file in `src/new/features/`. It will be auto-loaded by `import.meta.glob`. Export a `menu` object (`{ name, render }`), then import it in `features/_menuOrder.ts` and add it at the desired position in the `CheatMenu.menus.push(...)` call. Use `CheatMenu.keyListeners` for keyboard shortcuts within the sub-menu.
-
-If the feature scrolls through a large list, build the scroll handler with `makeScroll` from `core/scrollable.ts` (it handles search filtering) and add `appendSearchInput` before the title row — or use `appendInventorySection` if it follows the item/count shape.
+After code changes run `pnpm typecheck` and `pnpm lint` (no `--fix`; lint is at 0 warnings and 0 errors — keep it there, boundary violations are errors). Run `pnpm test` when touching code covered by `*.test.ts` or adding pure logic. Lint does not check formatting and there is no pre-commit hook — run `pnpm exec prettier --write <files>`. `pnpm build` runs all of the above and bundles into `release/`. Other scripts: `package.json`.

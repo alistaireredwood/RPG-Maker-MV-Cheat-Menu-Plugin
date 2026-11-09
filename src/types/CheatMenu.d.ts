@@ -31,6 +31,8 @@ export type InitialValues = {
   speedUnlocked: boolean;
   godModeActors: number[];
   currentMenuIndex: number | null;
+  forceMouseMovement: boolean;
+  forceCtrlSkip: boolean;
 };
 
 export type CheatMenuT = {
@@ -67,6 +69,9 @@ export type CheatMenuT = {
   speedInitialized: boolean;
 
   godModeActors: number[];
+
+  forceMouseMovement: boolean;
+  forceCtrlSkip: boolean;
 
   searchKeywords: Record<string, string>;
   _activeSearchKey: string | null;
@@ -191,6 +196,13 @@ export type CheatMenuT = {
 
   toggleNoClipStatus: (event?: MouseEvent) => void;
   appendNoClipStatus: (key1: string | number) => void;
+
+  toggleForceMouseMovement: (event?: MouseEvent) => void;
+  toggleForceCtrlSkip: (event?: MouseEvent) => void;
+  appendUnlockControlsStatus: (
+    key1: string | number,
+    key2: string | number,
+  ) => void;
 
   scrollAmount: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendAmountSelection: (

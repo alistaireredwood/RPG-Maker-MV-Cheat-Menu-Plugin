@@ -15,6 +15,7 @@ import { menu as giveWeapon } from './giveWeapon.ts';
 import { menu as giveArmor } from './giveArmor.ts';
 import { menu as clearStates } from './clearStates.ts';
 import { menu as giveStat } from './giveStat.ts';
+import { menu as unlockControls } from './unlockControls.ts';
 
 CheatMenu.menus.push(
   teleport,
@@ -33,4 +34,5 @@ CheatMenu.menus.push(
   giveArmor,
   clearStates,
   giveStat,
+  unlockControls,
 );

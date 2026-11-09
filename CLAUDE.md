@@ -13,6 +13,8 @@ This repo contains two independent plugin implementations plus a patcher CLI:
 - **`src/new/`** — active development, TypeScript + Vite (root `package.json` / `pnpm`)
 - **`src/plus/`** — separate, more feature-rich implementation, TypeScript + Webpack (its own `package.json` / `npm`, plus its own copy of the patcher) — see `src/plus/CLAUDE.md`
 - **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
+- `popout.ts` — F7 moves the overlay into a separate always-on-top NW.js window (`nw.Window.open('about:blank')`, shared JS context) and back; use `CheatMenu.getMenuDocument()` instead of the global `document` for anything touching the overlay's DOM/focus/selection. Popup key presses are routed through `CheatMenu.onKeyDown`; `SceneManager.isGameActive` is forced to `true` while popped out
+
 - **`src/old/`** — legacy JS plugin and C++ MVPluginPatcher, kept for reference only
 
 ### Module loading pattern

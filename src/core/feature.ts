@@ -12,14 +12,15 @@ export type MenuEntry<S extends object = object> = {
  * A self-contained cheat. Core knows nothing about concrete features — it only
  * calls these hooks, renders `menus` and persists `state`.
  *
- * `state` holds the defaults; at runtime every hook / render receives the same
- * live object (mutate it, never replace it). It is persisted in
- * `$gameSystem.CheatMenu[id]`.
+ * `state` is the live state object: its values at registration are the
+ * defaults, afterwards it is restored *in place* from saves — so module code
+ * may keep a reference to it (mutate it, never replace it). Hooks and `render`
+ * receive the same object. It is persisted in `$gameSystem.CheatMenu[id]`.
  */
 export type Feature<S extends object = object> = {
   /** Key of the persisted state slice — never reuse/rename it lightly. */
   id: string;
-  /** Persisted state defaults. Must be JSON-serializable. */
+  /** Live persisted state (initial values = defaults). Must be JSON-serializable. */
   state?: S;
   menus: MenuEntry<S>[];
 

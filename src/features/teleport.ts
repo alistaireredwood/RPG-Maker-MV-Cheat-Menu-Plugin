@@ -1,9 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
-
-CheatMenu.teleport = (mapId, xPos, yPos) => {
-  $gamePlayer.reserveTransfer(mapId, xPos, yPos, $gamePlayer.direction(), 0);
-  $gamePlayer.setPosition(xPos, yPos);
-};
+import { teleport } from '../shared/game/teleport.ts';
 
 CheatMenu.scrollMapTeleportSelection = function (direction) {
   // skip deleted (null) and unnamed map entries — teleporting to a deleted
@@ -85,7 +81,7 @@ CheatMenu.scrollYTeleportSelection = function (direction) {
 };
 
 CheatMenu.teleportCurrentLocation = function () {
-  CheatMenu.teleport(
+  teleport(
     CheatMenu.teleportLocation.m,
     CheatMenu.teleportLocation.x,
     CheatMenu.teleportLocation.y,

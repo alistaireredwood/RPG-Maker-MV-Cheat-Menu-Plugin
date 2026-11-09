@@ -1,9 +1,7 @@
 import CheatMenu from '../CheatMenu.ts';
-import {
-  makeScroll,
-  makeApplyAmount,
-  appendInventorySection,
-} from '../shared/scrollable.ts';
+import { makeScroll } from '../shared/controls/listSelector.ts';
+import { makeApplyAmount } from '../shared/controls/amountSelector.ts';
+import { appendInventorySection } from '../shared/controls/inventorySection.ts';
 
 CheatMenu.giveArmor = (armorId, amount) => {
   if ($dataArmors[armorId] != undefined) {

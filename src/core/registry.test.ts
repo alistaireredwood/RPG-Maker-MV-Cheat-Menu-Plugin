@@ -58,6 +58,8 @@ describe('registry', () => {
     restoreStates({ alpha: { count: 5, unknown: 1 } });
     const after = snapshotStates().alpha;
     expect(after).toBe(before);
+    // the feature's own `state` object is the live one
+    expect(after).toBe(alpha.state);
     expect(after).toEqual({ count: 5, list: [] });
   });
 

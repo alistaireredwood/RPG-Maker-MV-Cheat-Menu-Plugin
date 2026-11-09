@@ -1,4 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
+import { sharedState } from '../shared/state.ts';
 
 CheatMenu.clearActorStates = (actor) => {
   if (actor.states() != undefined && actor.states().length > 0) {
@@ -15,7 +16,7 @@ CheatMenu.clearPartyStates = () => {
 };
 
 CheatMenu.clearCurrentActorStates = function () {
-  const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const actor = $gameActors.actor(sharedState.selectedActor);
   if (actor) CheatMenu.clearActorStates(actor);
   SoundManager.playSystemSound(1);
   CheatMenu.updateMenu();
@@ -39,7 +40,7 @@ CheatMenu.appendCurrentState = function (key1) {
   CheatMenu.appendTitle('Current State');
   let numberStates = 0;
 
-  const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const actorInstance = $gameActors.actor(sharedState.selectedActor);
   const activeStates = actorInstance?.states();
 
   if (activeStates) {

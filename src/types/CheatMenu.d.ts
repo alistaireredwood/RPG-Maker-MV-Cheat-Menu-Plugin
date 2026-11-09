@@ -5,12 +5,6 @@ export type PositionData = {
 };
 
 export type CheatMenuT = {
-  cheatSelectedActor: number;
-  amounts: number[];
-  amountIndex: number;
-  customAmount: number | null;
-  amountInputText: string | null;
-  _activeAmountInput: boolean;
   statSelection: number;
   itemSelection: number;
   weaponSelection: number;
@@ -74,7 +68,6 @@ export type CheatMenuT = {
   setVariable: (variableId: number, value: number) => void;
   setVariableValue: (variableId: number, text: string) => void;
   toggleSwitch: (switchId: number) => void;
-  teleport: (mapId: number, xPos: number, yPos: number) => void;
 
   // --- Core widgets (bridged from core/ui, see legacyBridge.ts) ---
 

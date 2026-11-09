@@ -1,63 +1,84 @@
-import CheatMenu from '../../CheatMenu.ts';
 import type { ActionKey } from '../../core/input/keymap.ts';
+import type { MenuBuilder } from '../../core/ui/builder.ts';
 import { getOverlay } from '../../core/ui/dom.ts';
 import { getMenuWindow } from '../../core/ui/popout.ts';
 import { isUpdatingMenu, updateMenu } from '../../core/ui/render.ts';
 import {
   bindArrows,
   type Direction,
+  type ScrollHandler,
 } from '../../core/ui/widgets/scrollSelector.ts';
 import { appendTitle } from '../../core/ui/widgets/text.ts';
+import { AMOUNTS, amountInput, currentAmount, sharedState } from '../state.ts';
 
-// amount state lives in CheatMenu (amounts, amountIndex, customAmount,
-// amountInputText, _activeAmountInput) until shared/state.ts exists
+/**
+ * Preset index an arrow press snaps a typed amount to: the next preset *in
+ * that direction* — right goes to the next higher value, left to the next
+ * lower one — rather than the closest value overall.
+ */
+export function snapToPreset(
+  amounts: readonly number[],
+  typed: number,
+  direction: Direction,
+): number {
+  if (direction === 'right') {
+    const idx = amounts.findIndex((value) => value > typed);
+    return idx === -1 ? amounts.length - 1 : idx;
+  }
+  let idx = 0;
+  for (let i = 0; i < amounts.length; i++) {
+    if (amounts[i] < typed) idx = i;
+    else break;
+  }
+  return idx;
+}
 
 export function scrollAmount(direction: Direction): void {
   // typed amount takes over from here; clear it so the display reverts to
   // the hardcoded amounts list on this and future renders
-  CheatMenu.amountInputText = null;
+  amountInput.text = null;
 
-  if (CheatMenu.customAmount !== null) {
-    // arrows snap a typed value to the nearest hardcoded amount *in that
-    // direction* — right goes to the next higher value, left to the next
-    // lower one — rather than the closest value overall
-    const current = CheatMenu.customAmount;
-    let targetIdx: number;
-    if (direction === 'right') {
-      targetIdx = CheatMenu.amounts.findIndex((value) => value > current);
-      if (targetIdx === -1) targetIdx = CheatMenu.amounts.length - 1;
-    } else {
-      targetIdx = 0;
-      for (let i = 0; i < CheatMenu.amounts.length; i++) {
-        if (CheatMenu.amounts[i] < current) {
-          targetIdx = i;
-        } else {
-          break;
-        }
-      }
-    }
-    CheatMenu.amountIndex = targetIdx;
-    CheatMenu.customAmount = null;
+  if (amountInput.custom !== null) {
+    sharedState.amountIndex = snapToPreset(
+      AMOUNTS,
+      amountInput.custom,
+      direction,
+    );
+    amountInput.custom = null;
     SoundManager.playSystemSound(direction === 'left' ? 2 : 1);
     updateMenu();
     return;
   }
 
   if (direction == 'left') {
-    CheatMenu.amountIndex--;
-    if (CheatMenu.amountIndex < 0) {
-      CheatMenu.amountIndex = 0;
-    }
+    sharedState.amountIndex = Math.max(0, sharedState.amountIndex - 1);
     SoundManager.playSystemSound(2);
   } else {
-    CheatMenu.amountIndex++;
-    if (CheatMenu.amountIndex >= CheatMenu.amounts.length) {
-      CheatMenu.amountIndex = CheatMenu.amounts.length - 1;
-    }
+    sharedState.amountIndex = Math.min(
+      AMOUNTS.length - 1,
+      sharedState.amountIndex + 1,
+    );
     SoundManager.playSystemSound(1);
   }
 
   updateMenu();
+}
+
+/** ←/→ handler applying the current amount: left subtracts, right adds. */
+export function makeApplyAmount(
+  action: (amount: number) => void,
+): ScrollHandler {
+  return function (direction) {
+    let amount = currentAmount();
+    if (direction === 'left') {
+      amount = -amount;
+      SoundManager.playSystemSound(2);
+    } else {
+      SoundManager.playSystemSound(1);
+    }
+    action(amount);
+    updateMenu();
+  };
 }
 
 const ALLOWED_KEYS = [
@@ -88,9 +109,7 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   input.inputMode = 'numeric';
   input.autocomplete = 'off';
   input.className = 'cheat-menu-amount-input actor-name-highlight';
-  input.value =
-    CheatMenu.amountInputText ??
-    String(CheatMenu.amounts[CheatMenu.amountIndex]);
+  input.value = amountInput.text ?? String(AMOUNTS[sharedState.amountIndex]);
 
   input.addEventListener('keydown', (e) => {
     e.stopPropagation();
@@ -124,16 +143,16 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   });
 
   input.addEventListener('focus', () => {
-    CheatMenu._activeAmountInput = true;
+    amountInput.focused = true;
   });
 
   input.addEventListener('blur', () => {
     if (!isUpdatingMenu()) {
-      CheatMenu._activeAmountInput = false;
+      amountInput.focused = false;
       // an empty/cleared field with no valid typed amount reverts to the
       // hardcoded value once the user clicks away
-      if (CheatMenu.customAmount === null) {
-        CheatMenu.amountInputText = null;
+      if (amountInput.custom === null) {
+        amountInput.text = null;
       }
     }
   });
@@ -145,15 +164,14 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
       input.value = digitsOnly;
       input.setSelectionRange(pos, pos);
     }
-    CheatMenu.amountInputText = digitsOnly;
-    CheatMenu.customAmount =
-      digitsOnly === '' ? null : parseInt(digitsOnly, 10);
+    amountInput.text = digitsOnly;
+    amountInput.custom = digitsOnly === '' ? null : parseInt(digitsOnly, 10);
     updateMenu();
   });
 
   cell.appendChild(input);
 
-  if (CheatMenu._activeAmountInput) {
+  if (amountInput.focused) {
     getMenuWindow().requestAnimationFrame(() => {
       input.focus();
       const len = input.value.length;
@@ -165,4 +183,9 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
   bindArrows(leftButton, rightButton, key1, key2, scrollAmount);
+}
+
+/** MenuBuilder variant: takes 2 keys (←/→). */
+export function amountSelector(ui: MenuBuilder): void {
+  appendAmountSelection(ui.nextKey(), ui.nextKey());
 }

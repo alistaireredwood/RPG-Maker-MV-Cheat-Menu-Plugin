@@ -1,5 +1,7 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount, makeSetExact } from '../shared/scrollable.ts';
+import { sharedState } from '../shared/state.ts';
+import { makeApplyAmount } from '../shared/controls/amountSelector.ts';
+import { makeSetExact } from '../shared/game/numbers.ts';
 
 CheatMenu.giveStat = (actor, statIndex, amount) => {
   if (actor && actor.paramPlus(statIndex) != undefined) {
@@ -9,16 +11,15 @@ CheatMenu.giveStat = (actor, statIndex, amount) => {
 
 CheatMenu.applyCurrentStat = makeApplyAmount((amount) =>
   CheatMenu.giveStat(
-    $gameActors.actor(CheatMenu.cheatSelectedActor),
+    $gameActors.actor(sharedState.selectedActor),
     CheatMenu.statSelection,
     amount,
   ),
 );
 
 CheatMenu.scrollStat = function (direction) {
-  const actorParamPlus = ($gameActors as any).actor(
-    CheatMenu.cheatSelectedActor,
-  )?._paramPlus as Game_Actor['_paramPlus'];
+  const actorParamPlus = ($gameActors as any).actor(sharedState.selectedActor)
+    ?._paramPlus as Game_Actor['_paramPlus'];
 
   if (actorParamPlus) {
     if (direction == 'left') {
@@ -43,12 +44,11 @@ CheatMenu.scrollStat = function (direction) {
 CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
   CheatMenu.appendTitle('Stat');
 
-  const actorParamPlus = ($gameActors as any).actor(
-    CheatMenu.cheatSelectedActor,
-  )?._paramPlus as Game_Actor['_paramPlus'];
+  const actorParamPlus = ($gameActors as any).actor(sharedState.selectedActor)
+    ?._paramPlus as Game_Actor['_paramPlus'];
 
   let statString = '';
-  if ($gameActors.actor(CheatMenu.cheatSelectedActor) && actorParamPlus) {
+  if ($gameActors.actor(sharedState.selectedActor) && actorParamPlus) {
     if (CheatMenu.statSelection >= actorParamPlus.length) {
       CheatMenu.statSelection = 0;
     }
@@ -63,7 +63,7 @@ CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
     true,
   );
 
-  const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const actor = $gameActors.actor(sharedState.selectedActor);
   const statIndex = CheatMenu.statSelection;
   if (
     actor &&
@@ -72,7 +72,7 @@ CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
   ) {
     CheatMenu.appendValueInput(
       String(actorParamPlus[statIndex]),
-      `stat:${CheatMenu.cheatSelectedActor}:${statIndex}`,
+      `stat:${sharedState.selectedActor}:${statIndex}`,
       makeSetExact(
         () => actor.paramPlus(statIndex),
         (delta) => CheatMenu.giveStat(actor, statIndex, delta),

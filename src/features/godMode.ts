@@ -1,4 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
+import { sharedState } from '../shared/state.ts';
 
 // Interval ids live here (module scope) instead of on the actor, so they are
 // never serialized into save files.
@@ -203,7 +204,7 @@ CheatMenu.reapplyGodMode = () => {
 };
 
 CheatMenu.toggleGodMode = function () {
-  const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const actorInstance = $gameActors.actor(sharedState.selectedActor);
 
   if (actorInstance) {
     const cheatActor = actorInstance as CheatMenu_Game_Actor;
@@ -223,7 +224,7 @@ CheatMenu.toggleGodMode = function () {
 CheatMenu.appendGodmodeStatus = function () {
   let statusHtml;
 
-  const actorInstance = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const actorInstance = $gameActors.actor(sharedState.selectedActor);
 
   if (actorInstance && isGodModeActive(actorInstance)) {
     statusHtml = '<span class="status-on">on</span>';

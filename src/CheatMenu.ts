@@ -2,15 +2,10 @@ import type { CheatMenuT } from './types/CheatMenu';
 
 // Legacy singleton: runtime state and functions of the features that are not
 // migrated to src/features/<name>/ yet. Menu/UI state lives in core/ (store,
-// widgetState); legacyBridge.ts exposes the core widgets here for old code.
+// widgetState), state shared by several menus in shared/state.ts;
+// legacyBridge.ts exposes the core widgets here for old code.
 // Persistence is handled by the adapters in features.ts.
 const CheatMenu = {
-  cheatSelectedActor: 1,
-  amounts: [1, 10, 100, 1000, 10000, 100000, 1000000],
-  amountIndex: 0,
-  customAmount: null,
-  amountInputText: null,
-  _activeAmountInput: false,
   statSelection: 0,
   itemSelection: 1,
   weaponSelection: 1,

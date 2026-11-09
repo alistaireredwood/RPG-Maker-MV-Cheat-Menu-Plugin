@@ -3,8 +3,10 @@ import { clone, readSlice } from './persistence.ts';
 
 type Registered = {
   feature: Feature<object>;
-  /** live state object — mutated in place, never replaced */
+  /** live state: `feature.state` itself (or `{}`) — mutated in place, never replaced */
   state: object;
+  /** snapshot of `feature.state` at registration, used when nothing is saved */
+  defaults: object;
 };
 
 const registered: Registered[] = [];
@@ -20,7 +22,8 @@ export function registerFeatures(features: readonly Feature<object>[]): void {
     }
     featureIds.add(feature.id);
 
-    const owner: Registered = { feature, state: clone(feature.state ?? {}) };
+    const state = feature.state ?? {};
+    const owner: Registered = { feature, state, defaults: clone(state) };
     registered.push(owner);
 
     for (const entry of feature.menus) {
@@ -65,8 +68,8 @@ export function emit(hook: FeatureHook): void {
 
 /** Replaces every live state with defaults overlaid by `saved[featureId]`. */
 export function restoreStates(saved: Readonly<Record<string, unknown>> | null) {
-  for (const { feature, state } of registered) {
-    const fresh = readSlice(feature.state ?? {}, saved?.[feature.id]);
+  for (const { feature, state, defaults } of registered) {
+    const fresh = readSlice(defaults, saved?.[feature.id]);
     const live = state as Record<string, unknown>;
     for (const key of Object.keys(live)) delete live[key];
     Object.assign(live, fresh);

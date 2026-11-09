@@ -6,7 +6,8 @@
 // adapter copies it into / out of the feature's persisted slice.
 import CheatMenu from './CheatMenu.ts';
 import type { Feature } from './core/feature.ts';
-import { legacyFeature, type LegacyState } from './legacyFeature.ts';
+import { legacyFeature } from './legacyFeature.ts';
+import { sharedFeature } from './shared/state.ts';
 
 import { menu as clearStates } from './features/clearStates.ts';
 import { menu as enemyRecovery } from './features/enemyRecovery.ts';
@@ -34,16 +35,9 @@ const resetSpeedLock = () => {
   CheatMenu.speedInitialized = false;
 };
 
-export const features: Feature<LegacyState>[] = [
+export const features: Feature<object>[] = [
   // menu-less: state shared by several menus (selected actor, amount)
-  legacyFeature({
-    id: 'shared',
-    menus: [],
-    fields: {
-      selectedActor: ['cheatSelectedActor', 1],
-      amountIndex: ['amountIndex', 0],
-    },
-  }),
+  sharedFeature,
 
   legacyFeature({
     id: 'teleport',

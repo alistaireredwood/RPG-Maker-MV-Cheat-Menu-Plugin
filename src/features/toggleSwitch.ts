@@ -1,5 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeScroll, getIndexInfo } from '../shared/scrollable.ts';
+import { makeScroll, getIndexInfo } from '../shared/controls/listSelector.ts';
 
 CheatMenu.toggleSwitch = (switchId) => {
   if ($dataSystem.switches[switchId] != undefined) {

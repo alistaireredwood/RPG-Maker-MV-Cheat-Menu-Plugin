@@ -1,5 +1,6 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount, makeSetExact } from '../shared/scrollable.ts';
+import { makeApplyAmount } from '../shared/controls/amountSelector.ts';
+import { makeSetExact } from '../shared/game/numbers.ts';
 
 CheatMenu.giveGold = (amount) => {
   $gameParty.gainGold(amount);

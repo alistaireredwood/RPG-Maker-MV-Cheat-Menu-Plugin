@@ -1,5 +1,6 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount } from '../shared/scrollable.ts';
+import { sharedState } from '../shared/state.ts';
+import { makeApplyAmount } from '../shared/controls/amountSelector.ts';
 
 CheatMenu.giveExp = (actor, amount) => {
   if (actor) {
@@ -8,12 +9,12 @@ CheatMenu.giveExp = (actor, amount) => {
 };
 
 CheatMenu.applyCurrentExp = makeApplyAmount((amount) =>
-  CheatMenu.giveExp($gameActors.actor(CheatMenu.cheatSelectedActor), amount),
+  CheatMenu.giveExp($gameActors.actor(sharedState.selectedActor), amount),
 );
 
 CheatMenu.appendExpCheat = function (key1, key2) {
   const currentExp =
-    $gameActors.actor(CheatMenu.cheatSelectedActor)?.currentExp() ?? 0;
+    $gameActors.actor(sharedState.selectedActor)?.currentExp() ?? 0;
   CheatMenu.appendTitle('EXP');
   CheatMenu.appendScrollSelector(
     currentExp,

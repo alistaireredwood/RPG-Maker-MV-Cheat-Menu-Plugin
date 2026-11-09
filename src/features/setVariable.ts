@@ -1,9 +1,6 @@
 import CheatMenu from '../CheatMenu.ts';
-import {
-  makeScroll,
-  makeApplyAmount,
-  getIndexInfo,
-} from '../shared/scrollable.ts';
+import { makeScroll, getIndexInfo } from '../shared/controls/listSelector.ts';
+import { makeApplyAmount } from '../shared/controls/amountSelector.ts';
 
 CheatMenu.setVariable = (variableId, value) => {
   if ($dataSystem.variables[variableId] != undefined) {

@@ -1,34 +1,30 @@
-import CheatMenu from '../../CheatMenu.ts';
 import type { ActionKey } from '../../core/input/keymap.ts';
+import type { MenuBuilder } from '../../core/ui/builder.ts';
 import { updateMenu } from '../../core/ui/render.ts';
 import {
   appendScrollSelector,
   type Direction,
 } from '../../core/ui/widgets/scrollSelector.ts';
 import { appendTitle } from '../../core/ui/widgets/text.ts';
-
-// selection lives in CheatMenu.cheatSelectedActor until shared/state.ts exists
+import { getSelectedActor, sharedState } from '../state.ts';
 
 export function scrollActor(direction: Direction): void {
   const gameActorsData = ($gameActors as unknown as { _data: Game_Actor[] })
     ._data;
 
   if (direction == 'left') {
-    CheatMenu.cheatSelectedActor--;
+    sharedState.selectedActor--;
 
-    if (CheatMenu.cheatSelectedActor < 0) {
-      CheatMenu.cheatSelectedActor =
+    if (sharedState.selectedActor < 0) {
+      sharedState.selectedActor =
         gameActorsData && gameActorsData.length > 0
           ? gameActorsData.length - 1
           : 0;
     }
   } else {
-    CheatMenu.cheatSelectedActor++;
-    if (
-      gameActorsData &&
-      CheatMenu.cheatSelectedActor >= gameActorsData.length
-    ) {
-      CheatMenu.cheatSelectedActor = 0;
+    sharedState.selectedActor++;
+    if (gameActorsData && sharedState.selectedActor >= gameActorsData.length) {
+      sharedState.selectedActor = 0;
     }
   }
 
@@ -40,7 +36,7 @@ export function appendActorSelection(key1: ActionKey, key2: ActionKey): void {
   appendTitle('Actor');
 
   let actorNameDisplay;
-  const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const actor = getSelectedActor();
 
   if (actor && actor.name()) {
     actorNameDisplay = `<span class='actor-name-highlight'>${actor.name()}</span>`;
@@ -49,4 +45,10 @@ export function appendActorSelection(key1: ActionKey, key2: ActionKey): void {
   }
 
   appendScrollSelector(actorNameDisplay, key1, key2, scrollActor, true);
+}
+
+/** MenuBuilder variant: takes 2 keys (←/→). Returns the selected actor. */
+export function actorSelector(ui: MenuBuilder): Game_Actor | null {
+  appendActorSelection(ui.nextKey(), ui.nextKey());
+  return getSelectedActor();
 }

@@ -41,7 +41,7 @@ This repo contains the plugin and a patcher CLI:
 
 `defineFeature({ id, state?, menus: [{ id, name, render(ui, state) }], onInit?, onNewGame?, onLoad?, onStateRestored?, onSave?, migrateV1? })`. Core never references a concrete feature — engine/lifecycle work goes into the hooks:
 
-- `state` = persisted defaults; hooks and `render` get the same live object (mutate, never replace). Saved as `$gameSystem.CheatMenu[featureId]`.
+- `state` is the live persisted object — its values at registration are the defaults, later it is restored *in place*, so module code may hold a reference to it (mutate, never replace). Hooks and `render` get the same object. Saved as `$gameSystem.CheatMenu[featureId]`.
 - `onNewGame` / `onLoad` — before the engine sets up a new game / loads a save (game objects are about to be replaced).
 - `onStateRestored` — after `state` is restored from the save; runs lazily on the first menu open after a load / new game (re-install patches on fresh game objects here).
 - `onSave` — right before `state` is written into the save.
@@ -72,8 +72,17 @@ Save format v2: `{ version: 2, core: { position, currentMenuId }, <featureId>: {
 
 ### Shared (`src/shared/`)
 
-- `controls/actorSelector.ts`, `controls/amountSelector.ts` — actor / amount pickers used by several features (state still on the singleton: `cheatSelectedActor`, `amounts`, `amountIndex`, `customAmount`, …)
-- `scrollable.ts` — `makeScroll` (search-aware ←/→ over a data list), `getIndexInfo`, `makeApplyAmount` (left = subtract / right = add the selected amount), `makeSetExact` (integer `onCommit` for value inputs), `appendInventorySection` (search + title + item + count, used by Items/Weapons/Armors)
+Building blocks for several features; may import `core/`, never `features/` or the singleton.
+
+- `state.ts` — `sharedState` (`selectedActor`, `amountIndex`; persisted via the menu-less `sharedFeature`, registered first in `features.ts`), `AMOUNTS`, `amountInput` (typed amount, runtime only), `currentAmount()`, `getSelectedActor()`
+- `controls/actorSelector.ts` — `appendActorSelection(k1, k2)` / `actorSelector(ui)`
+- `controls/amountSelector.ts` — `appendAmountSelection(k1, k2)` / `amountSelector(ui)`, `makeApplyAmount(action)` (left = subtract / right = add the current amount), `snapToPreset`
+- `controls/listSelector.ts` — `makeScroll` (search-aware ←/→ over an RPG Maker data array), `findNextIndex`, `getIndexInfo`, `nameMatches`
+- `controls/inventorySection.ts` — `appendInventorySection(config, k1..k4)` / `inventorySection(ui, config)`: search + title + item + editable count (Items/Weapons/Armors)
+- `game/numbers.ts` — `parseIntegerInput`, `makeSetExact` (integer `onCommit` for value inputs)
+- `game/teleport.ts` — `teleport(mapId, x, y)`
+
+The `append*(…keys)` forms are for legacy feature files; new features use the `MenuBuilder` forms (`actorSelector(ui)` etc.), which take their keys from the builder.
 
 ### Re-render behaviour
 

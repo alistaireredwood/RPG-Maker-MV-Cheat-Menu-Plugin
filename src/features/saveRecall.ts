@@ -1,4 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
+import { teleport } from '../shared/game/teleport.ts';
 
 CheatMenu.savePosition = function (posNum) {
   CheatMenu.savedPositions[posNum].m = $gameMap.mapId();
@@ -11,7 +12,7 @@ CheatMenu.savePosition = function (posNum) {
 
 CheatMenu.recallPosition = function (posNum) {
   if (CheatMenu.savedPositions[posNum].m != -1) {
-    CheatMenu.teleport(
+    teleport(
       CheatMenu.savedPositions[posNum].m,
       CheatMenu.savedPositions[posNum].x,
       CheatMenu.savedPositions[posNum].y,

@@ -8,6 +8,10 @@ Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build
 
 `pnpm build` runs `tsc`, `eslint .`, `vitest run`, then `vite build`; a lint error or failing test fails the build. `pnpm lint` / `pnpm test` / `pnpm format` run ESLint / Vitest / Prettier on their own. Unit tests (`src/**/*.test.ts`) run in Node without the engine — keep tested logic free of RPG Maker globals and DOM at import time.
 
+### Import alias
+
+`@src/*` → `src/*` (e.g. `import { defineFeature } from '@src/core/feature.ts'`). Defined only in `tsconfig.json` `paths`; tsc, the ESLint import resolver (so boundaries classify aliased imports too) and Vite / Vitest (`resolve.tsconfigPaths`) all read it from there.
+
 ### TypeScript versions
 
 The project compiles with TypeScript 7 (native). typescript-eslint still needs the classic `require('typescript')` JS API, which TS 7 no longer ships, so `.pnpmfile.cjs` swaps the `typescript` peer of `typescript-eslint` / `@typescript-eslint/*` / `ts-api-utils` for a pinned TS 6 dependency. Drop that hook once typescript-eslint supports TS 7.

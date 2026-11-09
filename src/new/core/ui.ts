@@ -1,7 +1,12 @@
 import CheatMenu from '../CheatMenu';
+import { ICON_POP_IN, ICON_POP_OUT } from '../components/icons';
 
 let _gridFocusIndex = 0;
 let _updatingMenu = false;
+
+// the overlay may live in the pop-out window (core/popout.ts)
+const menuWindow = (): Window =>
+  CheatMenu.getMenuDocument().defaultView ?? window;
 
 CheatMenu.overlay = document.createElement('table');
 CheatMenu.overlay.id = 'cheat-menu-text';
@@ -18,22 +23,36 @@ document.body.appendChild(indicator);
 
 const positions: [string, string, string, string][] = [
   // [left, top, right, bottom]
-  ['50%', '50%', '', ''],   // 0: center
-  ['5px', '5px', '', ''],   // 1: top-left
-  ['', '5px', '5px', ''],   // 2: top-right
-  ['', '', '5px', '5px'],   // 3: bottom-right
-  ['5px', '', '', '5px'],   // 4: bottom-left
+  ['50%', '50%', '', ''], // 0: center
+  ['5px', '5px', '', ''], // 1: top-left
+  ['', '5px', '5px', ''], // 2: top-right
+  ['', '', '5px', '5px'], // 3: bottom-right
+  ['5px', '', '', '5px'], // 4: bottom-left
 ];
 
 CheatMenu.positionMenu = () => {
   const pos = positions[CheatMenu.position] ?? positions[1];
   const overlay = CheatMenu.overlay;
 
+  if (CheatMenu.isPoppedOut) {
+    // the pop-out window lays the overlay out via .cheat-menu-popout CSS
+    overlay.style.left =
+      overlay.style.top =
+      overlay.style.right =
+      overlay.style.bottom =
+        '';
+    overlay.style.transform = '';
+    const ind = document.getElementById('cheat-menu-indicator');
+    if (ind) ind.style.display = 'none';
+    return;
+  }
+
   overlay.style.left = pos[0];
   overlay.style.top = pos[1];
   overlay.style.right = pos[2];
   overlay.style.bottom = pos[3];
-  overlay.style.transform = CheatMenu.position === 0 ? 'translate(-50%, -50%)' : '';
+  overlay.style.transform =
+    CheatMenu.position === 0 ? 'translate(-50%, -50%)' : '';
 
   const ind = document.getElementById('cheat-menu-indicator');
   if (ind) {
@@ -95,7 +114,7 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   cell.appendChild(input);
 
   if (CheatMenu._activeSearchKey === stateKey) {
-    requestAnimationFrame(() => {
+    menuWindow().requestAnimationFrame(() => {
       input.focus();
       const len = input.value.length;
       input.setSelectionRange(len, len);
@@ -103,7 +122,14 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   }
 };
 
-CheatMenu.appendScrollSelector = function (text, key1, key2, scrollHandler, selectable, showArrows = true) {
+CheatMenu.appendScrollSelector = function (
+  text,
+  key1,
+  key2,
+  scrollHandler,
+  selectable,
+  showArrows = true,
+) {
   const scrollSelector = CheatMenu.overlay.insertRow();
   scrollSelector.className = 'scroll-selector-row';
 
@@ -314,10 +340,17 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
   input.autocomplete = 'off';
   input.className = 'cheat-menu-amount-input actor-name-highlight';
   input.value =
-    CheatMenu.amountInputText ?? String(CheatMenu.amounts[CheatMenu.amountIndex]);
+    CheatMenu.amountInputText ??
+    String(CheatMenu.amounts[CheatMenu.amountIndex]);
 
   const allowedKeys = [
-    'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End',
+    'Backspace',
+    'Delete',
+    'ArrowLeft',
+    'ArrowRight',
+    'Tab',
+    'Home',
+    'End',
   ];
 
   input.addEventListener('keydown', (e) => {
@@ -326,7 +359,8 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
       input.blur();
       return;
     }
-    if (e.ctrlKey || e.metaKey || e.altKey || allowedKeys.includes(e.key)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || allowedKeys.includes(e.key))
+      return;
     // only whole digits — blocks commas, dots, minus signs, letters, etc.
     if (!/^[0-9]$/.test(e.key)) {
       e.preventDefault();
@@ -339,7 +373,10 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
 
   input.addEventListener('paste', (e) => {
     e.preventDefault();
-    const text = (e.clipboardData?.getData('text') ?? '').replace(/[^0-9]/g, '');
+    const text = (e.clipboardData?.getData('text') ?? '').replace(
+      /[^0-9]/g,
+      '',
+    );
     const start = input.selectionStart ?? input.value.length;
     const end = input.selectionEnd ?? input.value.length;
     input.value = input.value.slice(0, start) + text + input.value.slice(end);
@@ -370,14 +407,15 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
       input.setSelectionRange(pos, pos);
     }
     CheatMenu.amountInputText = digitsOnly;
-    CheatMenu.customAmount = digitsOnly === '' ? null : parseInt(digitsOnly, 10);
+    CheatMenu.customAmount =
+      digitsOnly === '' ? null : parseInt(digitsOnly, 10);
     CheatMenu.updateMenu();
   });
 
   cell.appendChild(input);
 
   if (CheatMenu._activeAmountInput) {
-    requestAnimationFrame(() => {
+    menuWindow().requestAnimationFrame(() => {
       input.focus();
       const len = input.value.length;
       input.setSelectionRange(len, len);
@@ -388,8 +426,14 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
   rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
   rightButton.innerHTML = '[' + key2 + ']→';
 
-  leftButton.addEventListener('mousedown', CheatMenu.scrollAmount.bind(null, 'left'));
-  rightButton.addEventListener('mousedown', CheatMenu.scrollAmount.bind(null, 'right'));
+  leftButton.addEventListener(
+    'mousedown',
+    CheatMenu.scrollAmount.bind(null, 'left'),
+  );
+  rightButton.addEventListener(
+    'mousedown',
+    CheatMenu.scrollAmount.bind(null, 'right'),
+  );
 
   // @ts-ignore
   CheatMenu.keyListeners[key1] = CheatMenu.scrollAmount.bind(null, 'left');
@@ -398,9 +442,43 @@ CheatMenu.appendAmountSelection = function (key1, key2) {
 };
 
 CheatMenu.appendCheatTitle = function () {
-  const name = CheatMenu.menus[CheatMenu.currentMenuIndex as number]?.name ?? '';
+  const name =
+    CheatMenu.menus[CheatMenu.currentMenuIndex as number]?.name ?? '';
   CheatMenu.appendTitle('Cheat');
   CheatMenu.appendScrollSelector(name, 2, 3, CheatMenu.scrollCheat);
+};
+
+CheatMenu.appendTopBar = function () {
+  const row = CheatMenu.overlay.insertRow(0);
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-topbar-cell';
+
+  const bar = document.createElement('div');
+  bar.className = 'cheat-menu-topbar';
+  cell.appendChild(bar);
+
+  const title = document.createElement('span');
+  title.className = 'cheat-menu-topbar-title';
+  title.textContent = 'Cheat Menu';
+  bar.appendChild(title);
+
+  if (!CheatMenu.canPopout()) return;
+
+  const poppedOut = CheatMenu.isPoppedOut;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'cheat-menu-topbar-button';
+  button.title = poppedOut
+    ? 'Pop in — back to game window [F7]'
+    : 'Pop out to separate window [F7]';
+  button.innerHTML = poppedOut ? ICON_POP_IN : ICON_POP_OUT;
+  button.tabIndex = -1;
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    CheatMenu.togglePopout();
+  });
+  bar.appendChild(button);
 };
 
 CheatMenu.appendBackButton = function () {
@@ -443,7 +521,9 @@ CheatMenu.renderMainMenuGrid = function () {
     grid.appendChild(button);
   });
 
-  const buttons = Array.from(grid.querySelectorAll<HTMLElement>('.cheat-menu-grid-button'));
+  const buttons = Array.from(
+    grid.querySelectorAll<HTMLElement>('.cheat-menu-grid-button'),
+  );
   if (buttons.length) {
     _gridFocusIndex = Math.min(_gridFocusIndex, buttons.length - 1);
     buttons[_gridFocusIndex].focus();
@@ -453,11 +533,17 @@ CheatMenu.renderMainMenuGrid = function () {
     if (event.key !== 'Tab') return;
     event.preventDefault();
     event.stopPropagation();
-    const idx = buttons.indexOf(document.activeElement as HTMLElement);
+    const idx = buttons.indexOf(
+      CheatMenu.getMenuDocument().activeElement as HTMLElement,
+    );
     const current = idx >= 0 ? idx : _gridFocusIndex;
     const next = event.shiftKey
-      ? (current <= 0 ? buttons.length - 1 : current - 1)
-      : (current >= buttons.length - 1 ? 0 : current + 1);
+      ? current <= 0
+        ? buttons.length - 1
+        : current - 1
+      : current >= buttons.length - 1
+        ? 0
+        : current + 1;
     _gridFocusIndex = next;
     buttons[next].focus();
   });
@@ -508,6 +594,7 @@ CheatMenu.updateMenu = function () {
     }
   }
 
+  CheatMenu.appendTopBar();
   CheatMenu.positionMenu();
   _updatingMenu = false;
 };

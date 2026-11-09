@@ -4,6 +4,7 @@ const CheatMenu = {
   initialized: false,
   isCheatMenuOpen: false,
   isOverlayOpenable: false,
+  isPoppedOut: false,
   position: 1,
   menuUpdateTimer: null,
   cheatSelectedActor: 1,

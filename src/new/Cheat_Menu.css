@@ -154,6 +154,45 @@
   text-shadow: 0 0 6px rgba(240, 192, 64, 0.5);
 }
 
+/* --- TOP BAR --- */
+.cheat-menu-topbar-cell {
+  padding: 0 0 4px 0 !important;
+}
+
+.cheat-menu-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--cm-border);
+}
+
+.cheat-menu-topbar-title {
+  color: var(--cm-dim);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cheat-menu-topbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  color: var(--cm-cyan);
+  border: 1px solid var(--cm-border);
+  cursor: pointer;
+}
+
+.cheat-menu-topbar-button:hover {
+  border-color: var(--cm-cyan);
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.35);
+}
+
 /* --- SEARCH INPUT --- */
 .cheat-menu-cell.cheat-menu-search-cell {
   padding: 3px 2px;
@@ -204,4 +243,18 @@
 .cheat-menu-amount-input:focus {
   border-bottom-color: var(--cm-cyan);
   box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
+}
+
+/* --- POP-OUT WINDOW (core/popout.ts) --- */
+body.cheat-menu-popout {
+  margin: 0;
+  background: #020812;
+  overflow-y: auto;
+}
+
+body.cheat-menu-popout #cheat-menu-text {
+  position: static;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: none;
 }

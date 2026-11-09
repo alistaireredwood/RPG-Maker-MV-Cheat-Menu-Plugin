@@ -86,7 +86,10 @@ CheatMenu.handleToggleCheatMenu = (event) => {
         }
 
         if ($gameSystem.CheatMenu) {
-          for (let name in $gameSystem.CheatMenu) {
+          // only restore known keys: a save written by an older/other version
+          // of the plugin may carry fields that would clobber runtime state
+          for (let name in CheatMenu.initialValues) {
+            if (!(name in $gameSystem.CheatMenu)) continue;
             // @ts-ignore
             CheatMenu[name] = clone($gameSystem.CheatMenu[name]);
           }

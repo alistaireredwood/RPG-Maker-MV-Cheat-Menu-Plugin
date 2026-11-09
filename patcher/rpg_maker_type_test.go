@@ -274,6 +274,38 @@ func TestMZPostPatchRefreshesExistingCopy(t *testing.T) {
 	}
 }
 
+func TestMZPostPatchCopiesStylesheet(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "plugin")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.css", "css v1")
+	writeGameFile(t, dir, "js/plugins/.keep", "")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu")
+
+	got, err := os.ReadFile(path.Join(dir, "js/plugins/Cheat_Menu.css"))
+	if err != nil {
+		t.Fatal("stylesheet was not copied:", err)
+	}
+	if string(got) != "css v1" {
+		t.Fatalf("unexpected stylesheet content: %q", got)
+	}
+}
+
+func TestMZPostPatchWithoutStylesheet(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "plugin")
+	writeGameFile(t, dir, "js/plugins/.keep", "")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu")
+
+	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.js")); err != nil {
+		t.Fatal("plugin file was not copied:", err)
+	}
+	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.css")); err == nil {
+		t.Fatal("no stylesheet should be created when the source has none")
+	}
+}
+
 func TestMVHasNoPostPatch(t *testing.T) {
 	if engineByName(t, "MV").PostPatch != nil {
 		t.Fatal("MV must not define a PostPatch step")

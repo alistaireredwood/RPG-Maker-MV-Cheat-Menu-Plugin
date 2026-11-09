@@ -471,6 +471,15 @@ CheatMenu.updateMenu = function () {
   _updatingMenu = true;
   CheatMenu.keyListeners = {};
 
+  // a stale/invalid index (e.g. restored from a save) would render an empty
+  // overlay — fall back to the main grid instead
+  if (
+    CheatMenu.currentMenuIndex == null ||
+    !CheatMenu.menus[CheatMenu.currentMenuIndex]
+  ) {
+    CheatMenu.currentMenuIndex = null;
+  }
+
   const prev = CheatMenu._prevMenuIndex ?? null;
   CheatMenu._prevMenuIndex = CheatMenu.currentMenuIndex;
 

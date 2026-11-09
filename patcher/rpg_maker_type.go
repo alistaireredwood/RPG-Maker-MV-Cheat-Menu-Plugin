@@ -202,28 +202,44 @@ var RPGMakerEngineTypes = []RPGMakerEngineType{
 		Name:         "MZ",
 		PluginsJsRel: "js/plugins.js",
 		PostPatch: func(pwd string, pluginName string) {
-			// copy plugin cheat file, because in default, cheat plugin is inside www/js/plugins
-			pluginJsPath := path.Join(pwd, "www/js/plugins", pluginName+".js")
-			targetPluginJsPath := path.Join(pwd, "js/plugins", pluginName+".js")
-			if reader, err := os.Open(pluginJsPath); err == nil {
-				defer func() {
-					_ = reader.Close()
-				}()
-				if writer, err := os.Create(targetPluginJsPath); err == nil {
-					defer func() {
-						_ = writer.Close()
-					}()
-					if _, err = io.Copy(writer, reader); err != nil {
-						_, _ = RedUnderline.Printf("failed to copy \"%s\" to \"%s\"\n", pluginJsPath, targetPluginJsPath)
-					} else {
-						_, _ = Cyan.Printf("\"%s.js\" copied to js/plugins\n", pluginName)
-					}
-				} else {
-					_, _ = RedUnderline.Printf("failed to create \"%s\"\n", targetPluginJsPath)
-				}
-			} else {
-				_, _ = RedUnderline.Printf("failed to open \"%s\"\n", pluginJsPath)
-			}
+			// MZ loads plugins from js/plugins, but the release ships them in
+			// www/js/plugins. Copy the script (required) and its stylesheet
+			// (optional, not every plugin has one).
+			copyPluginFile(pwd, pluginName+".js", true)
+			copyPluginFile(pwd, pluginName+".css", false)
 		},
 	},
+}
+
+// copyPluginFile copies www/js/plugins/<fileName> to js/plugins/<fileName>.
+// A missing source file is reported only when required is true.
+func copyPluginFile(pwd string, fileName string, required bool) {
+	srcPath := path.Join(pwd, "www/js/plugins", fileName)
+	dstPath := path.Join(pwd, "js/plugins", fileName)
+
+	reader, err := os.Open(srcPath)
+	if err != nil {
+		if required || !os.IsNotExist(err) {
+			_, _ = RedUnderline.Printf("failed to open \"%s\"\n", srcPath)
+		}
+		return
+	}
+	defer func() {
+		_ = reader.Close()
+	}()
+
+	writer, err := os.Create(dstPath)
+	if err != nil {
+		_, _ = RedUnderline.Printf("failed to create \"%s\"\n", dstPath)
+		return
+	}
+	defer func() {
+		_ = writer.Close()
+	}()
+
+	if _, err = io.Copy(writer, reader); err != nil {
+		_, _ = RedUnderline.Printf("failed to copy \"%s\" to \"%s\"\n", srcPath, dstPath)
+		return
+	}
+	_, _ = Cyan.Printf("\"%s\" copied to js/plugins\n", fileName)
 }

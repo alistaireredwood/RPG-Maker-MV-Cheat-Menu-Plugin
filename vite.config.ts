@@ -18,6 +18,11 @@ export default defineConfig({
           return '[name].[ext]';
         },
         entryFileNames: '[name].js',
+        // plugins load as classic <script> tags: without a wrapper every
+        // minified top-level name (e.g. the CheatMenu state object) becomes a
+        // window global that any other game script can overwrite
+        banner: '(function () {',
+        footer: '})();',
       },
     },
   },

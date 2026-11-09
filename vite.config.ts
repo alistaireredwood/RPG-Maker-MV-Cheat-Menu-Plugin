@@ -4,14 +4,14 @@ export default defineConfig({
   build: {
     target: 'chrome66',
     outDir: './www/js/plugins',
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         Cheat_Menu: 'src/new/Cheat_Menu.ts',
         Cheat_Menu_style: 'src/new/Cheat_Menu.css',
       },
       output: {
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'Cheat_Menu_style.css') {
+          if (assetInfo.names.includes('Cheat_Menu_style.css')) {
             return 'Cheat_Menu.css';
           }
 

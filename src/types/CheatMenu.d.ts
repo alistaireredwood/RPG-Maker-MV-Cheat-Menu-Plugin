@@ -52,6 +52,9 @@ export type CheatMenuT = {
   customAmount: number | null;
   amountInputText: string | null;
   _activeAmountInput: boolean;
+  /** appendValueInput drafts (typed, not yet applied) — not persisted to save */
+  _valueInputDrafts: Record<string, { text: string; caret: number }>;
+  _activeValueInputKey: string | null;
   statSelection: number;
   itemSelection: number;
   weaponSelection: number;
@@ -139,6 +142,7 @@ export type CheatMenuT = {
   clearActorStates: (actor: CheatMenu_Game_Actor) => void;
   clearPartyStates: () => void;
   setVariable: (variableId: number, value: number) => void;
+  setVariableValue: (variableId: number, text: string) => void;
   toggleSwitch: (switchId: number) => void;
   teleport: (mapId: number, xPos: number, yPos: number) => void;
 
@@ -152,6 +156,16 @@ export type CheatMenuT = {
     key2: string | number,
     scrollHandler: (direction: 'left' | 'right', event?: MouseEvent) => void,
     selectable?: boolean,
+    showArrows?: boolean,
+  ) => void;
+
+  appendValueInput: (
+    value: string,
+    inputKey: string,
+    onCommit: (text: string) => void,
+    key1: string | number,
+    key2: string | number,
+    scrollHandler: (direction: 'left' | 'right', event?: MouseEvent) => void,
     showArrows?: boolean,
   ) => void;
 

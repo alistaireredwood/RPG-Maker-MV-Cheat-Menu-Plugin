@@ -13,6 +13,8 @@ const CheatMenu = {
   customAmount: null,
   amountInputText: null,
   _activeAmountInput: false,
+  _valueInputDrafts: {},
+  _activeValueInputKey: null,
   statSelection: 0,
   itemSelection: 1,
   weaponSelection: 1,

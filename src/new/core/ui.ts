@@ -171,6 +171,123 @@ CheatMenu.appendScrollSelector = function (
   CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
 };
 
+// Like appendScrollSelector, but the middle cell is a text input for typing a
+// value directly. Enter commits (onCommit), Esc or clicking away discards.
+// While the user types, the draft survives re-renders (incl. the 1 s timer)
+// in CheatMenu._valueInputDrafts under `inputKey` — scope the key to the edited
+// entity (e.g. `variable:12`) so a draft never leaks onto another one.
+CheatMenu.appendValueInput = function (
+  value,
+  inputKey,
+  onCommit,
+  key1,
+  key2,
+  scrollHandler,
+  showArrows = true,
+) {
+  const row = CheatMenu.overlay.insertRow();
+  row.className = 'scroll-selector-row';
+
+  const leftButton = row.insertCell();
+  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
+
+  const cell = row.insertCell();
+  cell.className = 'cheat-menu-cell';
+
+  const rightButton = row.insertCell();
+  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
+
+  // a draft for another entity (selection changed) is dropped
+  if (CheatMenu._activeValueInputKey !== inputKey) {
+    for (const key in CheatMenu._valueInputDrafts) {
+      if (key !== inputKey) delete CheatMenu._valueInputDrafts[key];
+    }
+  }
+  const draft = CheatMenu._valueInputDrafts[inputKey];
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  input.className = 'cheat-menu-amount-input cheat-menu-value-input';
+  input.title = 'Enter: apply, Esc: cancel';
+  input.value = draft ? draft.text : value;
+  if (draft && draft.text !== value) input.classList.add('is-dirty');
+
+  const discard = () => {
+    delete CheatMenu._valueInputDrafts[inputKey];
+    CheatMenu._activeValueInputKey = null;
+  };
+
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      const text = input.value;
+      discard();
+      input.blur();
+      onCommit(text);
+      CheatMenu.updateMenu();
+    } else if (e.key === 'Escape') {
+      discard();
+      input.blur();
+      CheatMenu.updateMenu();
+    }
+  });
+  ['keyup', 'keypress'].forEach((evt) => {
+    input.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  input.addEventListener('focus', () => {
+    CheatMenu._activeValueInputKey = inputKey;
+  });
+
+  input.addEventListener('blur', () => {
+    // a re-render removes the element (and blurs it) — keep the draft then
+    if (!_updatingMenu && CheatMenu._activeValueInputKey === inputKey) {
+      discard();
+      CheatMenu.updateMenu();
+    }
+  });
+
+  input.addEventListener('input', () => {
+    CheatMenu._valueInputDrafts[inputKey] = {
+      text: input.value,
+      caret: input.selectionStart ?? input.value.length,
+    };
+    input.classList.toggle('is-dirty', input.value !== value);
+  });
+  // keep the caret where the user left it across re-renders
+  ['keyup', 'click', 'select'].forEach((evt) => {
+    input.addEventListener(evt, () => {
+      const d = CheatMenu._valueInputDrafts[inputKey];
+      if (d) d.caret = input.selectionStart ?? d.caret;
+    });
+  });
+
+  cell.appendChild(input);
+
+  if (CheatMenu._activeValueInputKey === inputKey) {
+    menuWindow().requestAnimationFrame(() => {
+      input.focus();
+      const pos = Math.min(draft?.caret ?? input.value.length, input.value.length);
+      input.setSelectionRange(pos, pos);
+    });
+  }
+
+  if (!showArrows) return;
+
+  leftButton.innerHTML = '←[' + key1 + ']';
+  rightButton.innerHTML = '[' + key2 + ']→';
+  leftButton.addEventListener('mousedown', scrollHandler.bind(null, 'left'));
+  rightButton.addEventListener('mousedown', scrollHandler.bind(null, 'right'));
+
+  // @ts-ignore
+  CheatMenu.keyListeners[key1] = scrollHandler.bind(null, 'left');
+  // @ts-ignore
+  CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
+};
+
 CheatMenu.appendTitle = function (title, sideText) {
   let titleRow = CheatMenu.overlay.insertRow();
   let temp = titleRow.insertCell();

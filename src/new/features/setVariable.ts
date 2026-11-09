@@ -8,6 +8,26 @@ CheatMenu.setVariable = (variableId, value) => {
   }
 };
 
+// typed text → number if it looks like one, otherwise stored as a string
+// (some games/plugins keep text in variables). Empty input resets to 0, the
+// engine's default for an unset variable.
+const NUMBER_RE = /^[+-]?(\d+\.?\d*|\.\d+)$/;
+
+CheatMenu.setVariableValue = (variableId, text) => {
+  if ($dataSystem.variables[variableId] == undefined) return;
+  const trimmed = text.trim();
+  let value: number | string;
+  if (trimmed === '') {
+    value = 0;
+  } else if (NUMBER_RE.test(trimmed)) {
+    value = Number(trimmed);
+  } else {
+    value = text;
+  }
+  $gameVariables.setValue(variableId, value as number);
+  SoundManager.playSystemSound(1);
+};
+
 const variableMatches = (item: any, keyword: string) =>
   typeof item === 'string' && item !== '' && item.toLowerCase().includes(keyword);
 
@@ -47,24 +67,33 @@ CheatMenu.appendVariableSelection = function (key1, key2, key3, key4) {
 
   CheatMenu.appendScrollSelector(currentVariable, key1, key2, CheatMenu.scrollVariable, true);
 
-  const rawValue = $gameVariables.value(CheatMenu.variableSelection);
+  const variableId = CheatMenu.variableSelection;
+  const rawValue: unknown = $gameVariables.value(variableId);
   const isNumeric = typeof rawValue === 'number';
+  const exists = $dataSystem.variables[variableId] != undefined;
 
+  if (exists && (isNumeric || typeof rawValue === 'string')) {
+    // type a number or text and press Enter; ←/→ still add/subtract Amount
+    // for numbers (hidden for strings — "abc" + 10 would corrupt the value)
+    CheatMenu.appendValueInput(
+      String(rawValue),
+      `variable:${variableId}`,
+      (text) => CheatMenu.setVariableValue(variableId, text),
+      key3,
+      key4,
+      CheatMenu.applyCurrentVariable,
+      isNumeric,
+    );
+    return;
+  }
+
+  // arrays/objects (or a missing variable) stay read-only
   const currentVariableValue =
     rawValue != undefined
-      ? isNumeric || typeof rawValue === 'string'
-        ? rawValue
-        : `<span class="error-text">[${Array.isArray(rawValue) ? 'Array' : 'Object'}]</span>`
+      ? `<span class="error-text">[${Array.isArray(rawValue) ? 'Array' : 'Object'}]</span>`
       : 'NULL';
 
-  CheatMenu.appendScrollSelector(
-    currentVariableValue,
-    key3,
-    key4,
-    CheatMenu.applyCurrentVariable,
-    false,
-    isNumeric,
-  );
+  CheatMenu.appendScrollSelector(currentVariableValue, key3, key4, CheatMenu.applyCurrentVariable, false, false);
 };
 
 export const menu = {

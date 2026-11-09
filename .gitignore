@@ -24,8 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
-src/plus
-
 release/
 
 # Claude Code local settings

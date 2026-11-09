@@ -8,10 +8,9 @@ Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build
 
 ## Architecture
 
-This repo contains two independent plugin implementations plus a patcher CLI:
+This repo contains the plugin and a patcher CLI:
 
-- **`src/new/`** — active development, TypeScript + Vite (root `package.json` / `pnpm`)
-- **`src/plus/`** — separate, more feature-rich implementation, TypeScript + Webpack (its own `package.json` / `npm`, plus its own copy of the patcher) — see `src/plus/CLAUDE.md`
+- **`src/new/`** — the plugin, TypeScript + Vite (root `package.json` / `pnpm`)
 - **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
 
 ### Module loading pattern

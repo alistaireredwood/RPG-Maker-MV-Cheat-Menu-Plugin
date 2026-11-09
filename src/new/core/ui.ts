@@ -122,6 +122,32 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   }
 };
 
+const CJK_RE =
+  /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+
+function wrapWords(el: HTMLElement): void {
+  const doc = el.ownerDocument;
+  const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+
+  for (const node of textNodes) {
+    const fragment = doc.createDocumentFragment();
+    for (const part of (node.textContent ?? '').split(/(\s+)/)) {
+      if (part === '') continue;
+      if (/^\s+$/.test(part) || CJK_RE.test(part)) {
+        fragment.appendChild(doc.createTextNode(part));
+      } else {
+        const word = doc.createElement('span');
+        word.className = 'cheat-menu-word';
+        word.textContent = part;
+        fragment.appendChild(word);
+      }
+    }
+    node.replaceWith(fragment);
+  }
+}
+
 CheatMenu.appendScrollSelector = function (
   text,
   key1,
@@ -144,12 +170,21 @@ CheatMenu.appendScrollSelector = function (
   const scrollRightButton = scrollSelector.insertCell();
   scrollRightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
-  scrollText.innerHTML = text + '';
+  if (selectable) {
+    const box = document.createElement('div');
+    box.className = 'cheat-menu-name';
+    const inner = document.createElement('div');
+    inner.className = 'cheat-menu-name-text';
+    inner.innerHTML = text + '';
+    wrapWords(inner);
+    box.title = inner.textContent ?? '';
+    box.appendChild(inner);
+    scrollText.appendChild(box);
+  } else {
+    scrollText.innerHTML = text + '';
+  }
 
   if (!showArrows) {
-    // non-numeric values (string/object) can't be incremented/decremented —
-    // leave the arrow cells blank instead of binding a handler that would
-    // corrupt the value
     return;
   }
 
@@ -278,7 +313,10 @@ CheatMenu.appendValueInput = function (
   if (CheatMenu._activeValueInputKey === inputKey) {
     menuWindow().requestAnimationFrame(() => {
       input.focus();
-      const pos = Math.min(draft?.caret ?? input.value.length, input.value.length);
+      const pos = Math.min(
+        draft?.caret ?? input.value.length,
+        input.value.length,
+      );
       input.setSelectionRange(pos, pos);
     });
   }
@@ -296,12 +334,13 @@ CheatMenu.appendValueInput = function (
   CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
 };
 
-// Multi-line text area spanning the whole row (e.g. a script editor).
-// onChange fires on every keystroke — the caller owns the text. Ctrl+Enter
-// calls onSubmit. While it has focus the 1 s re-render timer is skipped
-// (core/state.ts) so typing/undo history isn't wiped; after a re-render caused
-// by onSubmit, focus, caret and scroll position are restored.
-CheatMenu.appendCodeInput = function (inputKey, value, onChange, onSubmit, rows = 6) {
+CheatMenu.appendCodeInput = function (
+  inputKey,
+  value,
+  onChange,
+  onSubmit,
+  rows = 6,
+) {
   const row = CheatMenu.overlay.insertRow();
   const cell = row.insertCell();
   cell.colSpan = 3;

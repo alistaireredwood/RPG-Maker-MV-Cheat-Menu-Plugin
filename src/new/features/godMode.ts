@@ -23,6 +23,8 @@ function applyGodModeOverrides(actor: CheatMenu_Game_Actor): void {
   actor.setMpBackup = actor.setMp;
   actor.gainTpBackup = actor.gainTp;
   actor.setTpBackup = actor.setTp;
+  actor.canPaySkillCostBackup = actor.canPaySkillCost;
+  actor.paySkillCostBackup = actor.paySkillCost;
 
   actor.gainHp = function (this: CheatMenu_Game_Actor, value: number): void {
     const finalValue = isGodModeActive(this) ? this.mhp : value;
@@ -65,6 +67,19 @@ function applyGodModeOverrides(actor: CheatMenu_Game_Actor): void {
       this.setTpBackup.call(this, finalTp);
     }
   };
+
+  // skills are free: also usable when they cost more than max MP/TP
+  actor.canPaySkillCost = function (this: CheatMenu_Game_Actor, skill: DataSkill): boolean {
+    if (isGodModeActive(this)) return true;
+    return this.canPaySkillCostBackup ? this.canPaySkillCostBackup.call(this, skill) : true;
+  };
+
+  actor.paySkillCost = function (this: CheatMenu_Game_Actor, skill: number): void {
+    if (isGodModeActive(this)) return;
+    if (this.paySkillCostBackup) {
+      this.paySkillCostBackup.call(this, skill);
+    }
+  };
 }
 
 function removeGodModeOverrides(actor: CheatMenu_Game_Actor): void {
@@ -91,6 +106,14 @@ function removeGodModeOverrides(actor: CheatMenu_Game_Actor): void {
   if (typeof actor.setTpBackup === 'function') {
     actor.setTp = actor.setTpBackup;
     actor.setTpBackup = undefined;
+  }
+  if (typeof actor.canPaySkillCostBackup === 'function') {
+    actor.canPaySkillCost = actor.canPaySkillCostBackup;
+    actor.canPaySkillCostBackup = undefined;
+  }
+  if (typeof actor.paySkillCostBackup === 'function') {
+    actor.paySkillCost = actor.paySkillCostBackup;
+    actor.paySkillCostBackup = undefined;
   }
 }
 

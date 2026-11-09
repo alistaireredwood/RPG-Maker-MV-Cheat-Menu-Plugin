@@ -8,12 +8,10 @@ Build output goes to `www/js/plugins/Cheat_Menu.js` and `Cheat_Menu.css`. `build
 
 ## Architecture
 
-This repo contains two independent plugin implementations plus a patcher CLI:
+This repo contains the plugin and a patcher CLI:
 
-- **`src/new/`** — active development, TypeScript + Vite (root `package.json` / `pnpm`)
-- **`src/plus/`** — separate, more feature-rich implementation, TypeScript + Webpack (its own `package.json` / `npm`, plus its own copy of the patcher) — see `src/plus/CLAUDE.md`
+- **`src/new/`** — the plugin, TypeScript + Vite (root `package.json` / `pnpm`)
 - **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
-- **`src/old/`** — legacy JS plugin and C++ MVPluginPatcher, kept for reference only
 
 ### Module loading pattern
 
@@ -47,6 +45,8 @@ Features with large lists (Items, Weapons, Armors, Variables, Switches) use `app
 
 - `CheatMenu.searchKeywords` — `Record<string, string>`, per-feature search terms (not persisted to save)
 - `CheatMenu._activeSearchKey` — which search input currently owns focus; managed by `focus`/`blur` events and the `_updatingMenu` flag in `ui.ts`
+- `CheatMenu._valueInputDrafts` / `_activeValueInputKey` — typed-but-not-applied text and focus owner for `appendValueInput` (editable value cell, Enter commits — `onCommit` returning `false` rejects and keeps the draft — Esc or blur discards; used by Variables, Items, Weapons, Armors, Gold, Stats; `makeSetExact` in `core/scrollable.ts` builds the integer onCommit); scope the `inputKey` to the edited entity (e.g. `variable:12`)
+- `CheatMenu._activeCodeInput` — focus/caret/scroll of the `appendCodeInput` textarea (Evaluate); while a textarea in the overlay is focused, the 1 s re-render timer in `state.ts` is skipped
 - `CheatMenu.initialValues` — keys listed here are persisted to `$gameSystem.CheatMenu` on save/load; do **not** add `searchKeywords` or `_activeSearchKey` here
 
 ### Adding a new feature (`src/new/`)

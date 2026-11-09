@@ -122,6 +122,32 @@ CheatMenu.appendSearchInput = function (placeholder, stateKey, onSearchChange) {
   }
 };
 
+const CJK_RE =
+  /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+
+function wrapWords(el: HTMLElement): void {
+  const doc = el.ownerDocument;
+  const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+
+  for (const node of textNodes) {
+    const fragment = doc.createDocumentFragment();
+    for (const part of (node.textContent ?? '').split(/(\s+)/)) {
+      if (part === '') continue;
+      if (/^\s+$/.test(part) || CJK_RE.test(part)) {
+        fragment.appendChild(doc.createTextNode(part));
+      } else {
+        const word = doc.createElement('span');
+        word.className = 'cheat-menu-word';
+        word.textContent = part;
+        fragment.appendChild(word);
+      }
+    }
+    node.replaceWith(fragment);
+  }
+}
+
 CheatMenu.appendScrollSelector = function (
   text,
   key1,
@@ -144,12 +170,21 @@ CheatMenu.appendScrollSelector = function (
   const scrollRightButton = scrollSelector.insertCell();
   scrollRightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
-  scrollText.innerHTML = text + '';
+  if (selectable) {
+    const box = document.createElement('div');
+    box.className = 'cheat-menu-name';
+    const inner = document.createElement('div');
+    inner.className = 'cheat-menu-name-text';
+    inner.innerHTML = text + '';
+    wrapWords(inner);
+    box.title = inner.textContent ?? '';
+    box.appendChild(inner);
+    scrollText.appendChild(box);
+  } else {
+    scrollText.innerHTML = text + '';
+  }
 
   if (!showArrows) {
-    // non-numeric values (string/object) can't be incremented/decremented —
-    // leave the arrow cells blank instead of binding a handler that would
-    // corrupt the value
     return;
   }
 
@@ -169,6 +204,203 @@ CheatMenu.appendScrollSelector = function (
   CheatMenu.keyListeners[key1] = scrollHandler.bind(null, 'left');
   // @ts-ignore
   CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
+};
+
+// Like appendScrollSelector, but the middle cell is a text input for typing a
+// value directly. Enter commits (onCommit; return false to reject the input),
+// Esc or clicking away discards.
+// While the user types, the draft survives re-renders (incl. the 1 s timer)
+// in CheatMenu._valueInputDrafts under `inputKey` — scope the key to the edited
+// entity (e.g. `variable:12`) so a draft never leaks onto another one.
+CheatMenu.appendValueInput = function (
+  value,
+  inputKey,
+  onCommit,
+  key1,
+  key2,
+  scrollHandler,
+  showArrows = true,
+) {
+  const row = CheatMenu.overlay.insertRow();
+  row.className = 'scroll-selector-row';
+
+  const leftButton = row.insertCell();
+  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
+
+  const cell = row.insertCell();
+  cell.className = 'cheat-menu-cell';
+
+  const rightButton = row.insertCell();
+  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
+
+  // a draft for another entity (selection changed) is dropped
+  if (CheatMenu._activeValueInputKey !== inputKey) {
+    for (const key in CheatMenu._valueInputDrafts) {
+      if (key !== inputKey) delete CheatMenu._valueInputDrafts[key];
+    }
+  }
+  const draft = CheatMenu._valueInputDrafts[inputKey];
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
+  input.className = 'cheat-menu-amount-input cheat-menu-value-input';
+  input.title = 'Enter: apply, Esc: cancel';
+  input.value = draft ? draft.text : value;
+  if (draft && draft.text !== value) input.classList.add('is-dirty');
+
+  const discard = () => {
+    delete CheatMenu._valueInputDrafts[inputKey];
+    CheatMenu._activeValueInputKey = null;
+  };
+
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') {
+      const text = input.value;
+      // onCommit returning false = rejected input: keep the draft and focus
+      // so the user can fix it
+      if (onCommit(text) === false) {
+        SoundManager.playBuzzer();
+        input.classList.add('is-invalid');
+        return;
+      }
+      discard();
+      input.blur();
+      CheatMenu.updateMenu();
+    } else if (e.key === 'Escape') {
+      discard();
+      input.blur();
+      CheatMenu.updateMenu();
+    }
+  });
+  ['keyup', 'keypress'].forEach((evt) => {
+    input.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  input.addEventListener('focus', () => {
+    CheatMenu._activeValueInputKey = inputKey;
+  });
+
+  input.addEventListener('blur', () => {
+    // a re-render removes the element (and blurs it) — keep the draft then
+    if (!_updatingMenu && CheatMenu._activeValueInputKey === inputKey) {
+      discard();
+      CheatMenu.updateMenu();
+    }
+  });
+
+  input.addEventListener('input', () => {
+    CheatMenu._valueInputDrafts[inputKey] = {
+      text: input.value,
+      caret: input.selectionStart ?? input.value.length,
+    };
+    input.classList.toggle('is-dirty', input.value !== value);
+    input.classList.remove('is-invalid');
+  });
+  // keep the caret where the user left it across re-renders
+  ['keyup', 'click', 'select'].forEach((evt) => {
+    input.addEventListener(evt, () => {
+      const d = CheatMenu._valueInputDrafts[inputKey];
+      if (d) d.caret = input.selectionStart ?? d.caret;
+    });
+  });
+
+  cell.appendChild(input);
+
+  if (CheatMenu._activeValueInputKey === inputKey) {
+    menuWindow().requestAnimationFrame(() => {
+      input.focus();
+      const pos = Math.min(
+        draft?.caret ?? input.value.length,
+        input.value.length,
+      );
+      input.setSelectionRange(pos, pos);
+    });
+  }
+
+  if (!showArrows) return;
+
+  leftButton.innerHTML = '←[' + key1 + ']';
+  rightButton.innerHTML = '[' + key2 + ']→';
+  leftButton.addEventListener('mousedown', scrollHandler.bind(null, 'left'));
+  rightButton.addEventListener('mousedown', scrollHandler.bind(null, 'right'));
+
+  // @ts-ignore
+  CheatMenu.keyListeners[key1] = scrollHandler.bind(null, 'left');
+  // @ts-ignore
+  CheatMenu.keyListeners[key2] = scrollHandler.bind(null, 'right');
+};
+
+CheatMenu.appendCodeInput = function (
+  inputKey,
+  value,
+  onChange,
+  onSubmit,
+  rows = 6,
+) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'cheat-menu-search-input cheat-menu-code-input';
+  textarea.rows = rows;
+  textarea.spellcheck = false;
+  textarea.autocomplete = 'off';
+  textarea.value = value;
+  textarea.placeholder = 'Ctrl+Enter: run';
+
+  const remember = () => {
+    CheatMenu._activeCodeInput = {
+      key: inputKey,
+      caret: textarea.selectionStart ?? textarea.value.length,
+      scroll: textarea.scrollTop,
+    };
+  };
+
+  textarea.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      remember();
+      onSubmit(textarea.value);
+    } else if (e.key === 'Tab') {
+      // insert indentation instead of moving focus out of the editor
+      e.preventDefault();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.setRangeText('  ', start, end, 'end');
+      onChange(textarea.value);
+    }
+  });
+  ['keyup', 'keypress'].forEach((evt) => {
+    textarea.addEventListener(evt, (e) => e.stopPropagation());
+  });
+  textarea.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  textarea.addEventListener('focus', remember);
+  textarea.addEventListener('blur', () => {
+    if (!_updatingMenu && CheatMenu._activeCodeInput?.key === inputKey) {
+      CheatMenu._activeCodeInput = null;
+    }
+  });
+  textarea.addEventListener('input', () => onChange(textarea.value));
+
+  cell.appendChild(textarea);
+
+  const active = CheatMenu._activeCodeInput;
+  if (active?.key === inputKey) {
+    menuWindow().requestAnimationFrame(() => {
+      textarea.focus();
+      const pos = Math.min(active.caret, textarea.value.length);
+      textarea.setSelectionRange(pos, pos);
+      textarea.scrollTop = active.scroll;
+    });
+  }
 };
 
 CheatMenu.appendTitle = function (title, sideText) {
@@ -192,6 +424,15 @@ CheatMenu.appendDescription = function (text) {
   temp = titleRow.insertCell();
   temp.className = 'cheat-menu-cell';
   titleText.innerHTML = text;
+};
+
+// full-width variant of appendDescription (spans all three columns)
+CheatMenu.appendWideDescription = function (html) {
+  const row = CheatMenu.overlay.insertRow();
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-search-cell';
+  cell.innerHTML = html;
 };
 
 CheatMenu.appendCheat = function (cheatText, statusText, key, clickHandler) {

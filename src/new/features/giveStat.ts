@@ -1,5 +1,5 @@
 import CheatMenu from '../CheatMenu.ts';
-import { makeApplyAmount } from '../core/scrollable.ts';
+import { makeApplyAmount, makeSetExact } from '../core/scrollable.ts';
 
 CheatMenu.giveStat = (actor, statIndex, amount) => {
   if (actor && actor.paramPlus(statIndex) != undefined) {
@@ -57,11 +57,23 @@ CheatMenu.appendStatSelection = function (key1, key2, key3, key4) {
 
   CheatMenu.appendScrollSelector(statString, key1, key2, CheatMenu.scrollStat, true);
 
-  let currentValue: number | 'NULL' = 'NULL';
-  if ($gameActors.actor(CheatMenu.cheatSelectedActor) && actorParamPlus) {
-    currentValue = actorParamPlus[CheatMenu.statSelection];
+  const actor = $gameActors.actor(CheatMenu.cheatSelectedActor);
+  const statIndex = CheatMenu.statSelection;
+  if (actor && actorParamPlus && typeof actorParamPlus[statIndex] === 'number') {
+    CheatMenu.appendValueInput(
+      String(actorParamPlus[statIndex]),
+      `stat:${CheatMenu.cheatSelectedActor}:${statIndex}`,
+      makeSetExact(
+        () => actor.paramPlus(statIndex),
+        (delta) => CheatMenu.giveStat(actor, statIndex, delta),
+      ),
+      key3,
+      key4,
+      CheatMenu.applyCurrentStat,
+    );
+  } else {
+    CheatMenu.appendScrollSelector('NULL', key3, key4, CheatMenu.applyCurrentStat);
   }
-  CheatMenu.appendScrollSelector(currentValue, key3, key4, CheatMenu.applyCurrentStat);
 };
 
 export const menu = {

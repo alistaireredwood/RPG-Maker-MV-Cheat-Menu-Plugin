@@ -30,7 +30,12 @@ CheatMenu.initialize = () => {
         CheatMenu.overlay.contains(active) &&
         active.selectionStart !== active.selectionEnd;
 
-      if (hasSelectionInMenu || hasInputSelection) return;
+      // rebuilding a focused <textarea> (appendCodeInput) would reset its
+      // undo history and scroll position every second
+      const isEditingTextarea =
+        !!active && active.tagName === 'TEXTAREA' && CheatMenu.overlay.contains(active);
+
+      if (hasSelectionInMenu || hasInputSelection || isEditingTextarea) return;
 
       CheatMenu.updateMenu();
     }

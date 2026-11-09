@@ -1,10 +1,10 @@
 import CheatMenu from '../CheatMenu.ts';
 
-CheatMenu.setEnemyHp = (hp, alive) => {
+function setEnemyResource(alive: boolean, setter: (member: Game_Battler) => void) {
   const members = $gameTroop.members();
   for (let i = 0; i < members.length; i++) {
     if (members[i] && ((alive && members[i].hp !== 0) || !alive)) {
-      members[i].setHp(hp);
+      setter(members[i]);
     }
   }
 
@@ -16,22 +16,30 @@ CheatMenu.setEnemyHp = (hp, alive) => {
   if ($gameParty.inBattle()) {
     BattleManager.checkBattleEnd();
   }
-};
+}
 
-CheatMenu.appendEnemyCheats = function (key1, key2, key3, key4) {
+CheatMenu.setEnemyHp = (hp, alive) => setEnemyResource(alive, (m) => m.setHp(hp));
+CheatMenu.halfEnemyHp = (alive) => setEnemyResource(alive, (m) => m.setHp(Math.max(1, Math.floor(m.mhp / 2))));
+CheatMenu.recoverEnemyHp = (alive) => setEnemyResource(alive, (m) => m.setHp(m.mhp));
+
+CheatMenu.appendEnemyCheats = function (...keys) {
   const sound = () => SoundManager.playSystemSound(1);
+  const appendGroup = (alive: boolean, groupKeys: (string | number)[]) => {
+    CheatMenu.appendCheat('Enemy HP to 0', 'Activate', groupKeys[0], () => { CheatMenu.setEnemyHp(0, alive); sound(); });
+    CheatMenu.appendCheat('Enemy HP to 1', 'Activate', groupKeys[1], () => { CheatMenu.setEnemyHp(1, alive); sound(); });
+    CheatMenu.appendCheat('Enemy Half HP', 'Activate', groupKeys[2], () => { CheatMenu.halfEnemyHp(alive); sound(); });
+    CheatMenu.appendCheat('Enemy Full HP', 'Activate', groupKeys[3], () => { CheatMenu.recoverEnemyHp(alive); sound(); });
+  };
   CheatMenu.appendTitle('Alive');
-  CheatMenu.appendCheat('Enemy HP to 0', 'Activate', key1, () => { CheatMenu.setEnemyHp(0, true); sound(); });
-  CheatMenu.appendCheat('Enemy HP to 1', 'Activate', key2, () => { CheatMenu.setEnemyHp(1, true); sound(); });
+  appendGroup(true, keys.slice(0, 4));
   CheatMenu.appendTitle('All');
-  CheatMenu.appendCheat('Enemy HP to 0', 'Activate', key3, () => { CheatMenu.setEnemyHp(0, false); sound(); });
-  CheatMenu.appendCheat('Enemy HP to 1', 'Activate', key4, () => { CheatMenu.setEnemyHp(1, false); sound(); });
+  appendGroup(false, keys.slice(4, 8));
 };
 
 export const menu = {
   name: 'Enemy HP',
   render: () => {
     CheatMenu.appendCheatTitle();
-    CheatMenu.appendEnemyCheats(4, 5, 6, 7);
+    CheatMenu.appendEnemyCheats(4, 5, 6, 7, 8, 9, 0, '-');
   },
 };

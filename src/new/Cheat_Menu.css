@@ -91,6 +91,34 @@
   cursor: text;
 }
 
+.cheat-menu-name {
+  width: 100px;
+  height: 26px; /* always 2 lines, so the menu doesn't jump */
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cheat-menu-name-text {
+  width: 100%;
+  line-height: 13px;
+  max-height: 26px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cheat-menu-word {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
 .cheat-menu-title-side {
   text-align: right;
   color: var(--cm-dim);
@@ -243,6 +271,37 @@
 .cheat-menu-amount-input:focus {
   border-bottom-color: var(--cm-cyan);
   box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
+}
+
+/* --- CODE INPUT (Evaluate) --- */
+.cheat-menu-code-input {
+  display: block;
+  resize: vertical;
+  font-family: Consolas, 'Courier New', monospace;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.cheat-menu-eval-result {
+  display: block;
+  max-height: 160px;
+  overflow: auto;
+  font-family: Consolas, 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: left;
+}
+
+/* typed but not yet applied (Enter) */
+.cheat-menu-value-input.is-dirty {
+  font-style: italic;
+  border-bottom-style: dashed;
+}
+
+/* rejected on Enter (e.g. not a whole number) */
+.cheat-menu-value-input.is-invalid {
+  color: var(--cm-red);
+  border-bottom-color: var(--cm-red);
 }
 
 /* --- POP-OUT WINDOW (core/popout.ts) --- */

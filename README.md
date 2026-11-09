@@ -41,11 +41,11 @@ Install
 * Patch your www/js/plugins.js
   * Backup your www/js/plugins.js file
   * Patch
-      * Run MVPluginPatcher.exe
+      * Run patcher.exe (it can back up plugins.js for you)
         or
       * Manually Add the following to your plugins.js file, ensure you follow proper JavaScript formating for the $plugins array and include a , at end of the line before where you add this (recommended to add the bottom of plugins.js file)
         * {"name":"Cheat_Menu","status":true,"description":"","parameters":{}}
- * Delete MVPluginPatcher.exe and plugins_patch.txt
+ * Delete patcher.exe and plugins_patch.go.txt
 
 If the www/js/plugins.js is read only, remove that in the properties or the patch with fail.
 
@@ -76,4 +76,4 @@ Uninstall
 * Remove plugin entry from www/js/plugins.js
   * Be sure to remove the comma from new last entry if this plugin was last in the list
   * Ideally you can just restore you backup of plugins.js
-* Delete MVPluginPatcher.exe and plugins_patch.txt if you haven't already
+* Delete patcher.exe and plugins_patch.go.txt if you haven't already

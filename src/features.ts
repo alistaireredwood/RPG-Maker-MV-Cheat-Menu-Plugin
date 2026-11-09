@@ -9,6 +9,10 @@ import type { Feature } from './core/feature.ts';
 import { legacyFeature } from './legacyFeature.ts';
 import { sharedFeature } from './shared/state.ts';
 
+import godMode from './features/godMode/index.ts';
+import items from './features/items/index.ts';
+import noClip from './features/noClip/index.ts';
+
 import { menu as clearStates } from './features/clearStates.ts';
 import { menu as enemyRecovery } from './features/enemyRecovery.ts';
 import { menu as evaluate } from './features/evaluate.ts';
@@ -16,11 +20,8 @@ import { menu as gameSpeed } from './features/gameSpeed.ts';
 import { menu as giveArmor } from './features/giveArmor.ts';
 import { menu as giveExp } from './features/giveExp.ts';
 import { menu as giveGold } from './features/giveGold.ts';
-import { menu as giveItem } from './features/giveItem.ts';
 import { menu as giveStat } from './features/giveStat.ts';
 import { menu as giveWeapon } from './features/giveWeapon.ts';
-import { menu as godMode } from './features/godMode.ts';
-import { menu as noClip } from './features/noClip.ts';
 import { menus as partyRecovery } from './features/partyRecovery.ts';
 import { menu as saveGame } from './features/saveGame.ts';
 import { menu as saveRecall } from './features/saveRecall.ts';
@@ -58,7 +59,7 @@ export const features: Feature<object>[] = [
       ],
     },
   }),
-  legacyFeature({ id: 'noClip', menus: [['noClip', noClip]] }),
+  noClip,
   legacyFeature({
     id: 'speed',
     menus: [['speed', speed]],
@@ -84,12 +85,7 @@ export const features: Feature<object>[] = [
     menus: [['variables', setVariable]],
     fields: { selection: ['variableSelection', 1] },
   }),
-  legacyFeature({
-    id: 'godMode',
-    menus: [['godMode', godMode]],
-    fields: { actors: ['godModeActors', []] },
-    onStateRestored: () => CheatMenu.reapplyGodMode(),
-  }),
+  godMode,
   legacyFeature({ id: 'exp', menus: [['exp', giveExp]] }),
   legacyFeature({
     id: 'partyRecovery',
@@ -104,11 +100,7 @@ export const features: Feature<object>[] = [
     menus: [['enemyRecovery', enemyRecovery]],
   }),
   legacyFeature({ id: 'gold', menus: [['gold', giveGold]] }),
-  legacyFeature({
-    id: 'items',
-    menus: [['items', giveItem]],
-    fields: { selection: ['itemSelection', 1] },
-  }),
+  items,
   legacyFeature({
     id: 'weapons',
     menus: [['weapons', giveWeapon]],

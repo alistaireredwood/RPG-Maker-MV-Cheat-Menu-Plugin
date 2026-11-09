@@ -7,7 +7,6 @@ import type { CheatMenuT } from './types/CheatMenu';
 // Persistence is handled by the adapters in features.ts.
 const CheatMenu = {
   statSelection: 0,
-  itemSelection: 1,
   weaponSelection: 1,
   armorSelection: 1,
   move_amounts: [0.5, 1, 1.5, 2],
@@ -25,7 +24,6 @@ const CheatMenu = {
   speedInitialized: false,
   gameSpeedIndex: 0,
   saveSlotSelection: 1,
-  godModeActors: [] as number[],
   forceMouseMovement: false,
   forceCtrlSkip: false,
 } as CheatMenuT;

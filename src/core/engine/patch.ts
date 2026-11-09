@@ -10,7 +10,8 @@ type MethodKeys<T> = {
  *
  * Returns `restore()`, which puts the original back — unless someone patched
  * the method again on top of ours, in which case restoring would drop their
- * patch, so it is left alone.
+ * patch, so it is left alone. Patching an inherited method (e.g. on a single
+ * game object) adds an own property; restoring removes it again.
  */
 export function patchMethod<T extends object, K extends MethodKeys<T>>(
   target: T,
@@ -23,10 +24,13 @@ export function patchMethod<T extends object, K extends MethodKeys<T>>(
       `[CheatMenu] patchMethod: "${String(name)}" is not a method`,
     );
   }
+  const wasOwn = Object.prototype.hasOwnProperty.call(target, name);
   const patched = wrap(original);
   target[name] = patched;
 
   return () => {
-    if (target[name] === patched) target[name] = original;
+    if (target[name] !== patched) return;
+    if (wasOwn) target[name] = original;
+    else delete target[name];
   };
 }

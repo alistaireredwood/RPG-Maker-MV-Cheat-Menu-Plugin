@@ -96,4 +96,8 @@ The `append*(…keys)` forms are for legacy feature files; new features use the 
 
 ### Adding a new feature
 
-Prefer the new contract: `export default defineFeature({...})` (one folder per feature once the migration reaches step 4 — see the ESLint boundaries), then add it to the `features` array in `src/features.ts`. Keep all its state in `state`, engine patches in `onInit` via `patchMethod`, and draw with the `MenuBuilder`.
+1. Create `src/features/<name>/index.ts` with `export default defineFeature({...})`; private logic goes in other files of the same folder (import only `core/`, `shared/` and the own folder — ESLint boundaries enforce it).
+2. Add it to the `features` array in `src/features.ts` (array position = grid position).
+3. Keep persisted state in a module-level object passed as `state` (and `migrateV1` if it replaces old singleton fields), engine patches in `onInit` / per-object patches via `patchMethod`, re-installation after a load in `onStateRestored`, and draw with the `MenuBuilder` + `shared/controls` (`actorSelector(ui)`, `amountSelector(ui)`, `inventorySection(ui, …)`, `onOffLabel`).
+
+Reference implementations (migrated pilots): `features/noClip/` (stateless toggle), `features/godMode/` (persisted state, per-actor `patchMethod` overrides, `onStateRestored`, unit tests with a fake actor), `features/items/` (list + search + amount + editable count).

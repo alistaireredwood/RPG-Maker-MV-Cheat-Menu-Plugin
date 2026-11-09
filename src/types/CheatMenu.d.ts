@@ -6,7 +6,6 @@ export type PositionData = {
 
 export type CheatMenuT = {
   statSelection: number;
-  itemSelection: number;
   weaponSelection: number;
   armorSelection: number;
   move_amounts: number[];
@@ -25,8 +24,6 @@ export type CheatMenuT = {
   gameSpeedIndex: number;
   saveSlotSelection: number;
 
-  godModeActors: number[];
-
   forceMouseMovement: boolean;
   forceCtrlSkip: boolean;
 
@@ -35,9 +32,6 @@ export type CheatMenuT = {
 
   // --- Cheat Functions ---
 
-  godMode: (actor: CheatMenu_Game_Actor) => void;
-  godMode_off: (actor: CheatMenu_Game_Actor) => void;
-  reapplyGodMode: () => void;
   setPartyHp: (hp: number, alive: boolean) => void;
   setPartyMp: (mp: number, alive: boolean) => void;
   setPartyTp: (tp: number, alive: boolean) => void;
@@ -50,20 +44,19 @@ export type CheatMenuT = {
   setEnemyHp: (hp: number, alive: boolean) => void;
   halfEnemyHp: (alive: boolean) => void;
   recoverEnemyHp: (alive: boolean) => void;
-  giveExp: (actor: CheatMenu_Game_Actor | null, amount: number) => void;
+  giveExp: (actor: Game_Actor | null, amount: number) => void;
   giveStat: (
-    actor: CheatMenu_Game_Actor | null,
+    actor: Game_Actor | null,
     statIndex: number,
     amount: number,
   ) => void;
   giveGold: (amount: number) => void;
-  giveItem: (itemId: number, amount: number) => void;
   giveWeapon: (weaponId: number, amount: number) => void;
   giveArmor: (armorId: number, amount: number) => void;
   initializeSpeedLock: () => void;
   changePlayerSpeed: (amount: number) => void;
   toggleLockPlayerSpeed: () => void;
-  clearActorStates: (actor: CheatMenu_Game_Actor) => void;
+  clearActorStates: (actor: Game_Actor) => void;
   clearPartyStates: () => void;
   setVariable: (variableId: number, value: number) => void;
   setVariableValue: (variableId: number, text: string) => void;
@@ -115,9 +108,6 @@ export type CheatMenuT = {
   scrollActor: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendActorSelection: (key1: string | number, key2: string | number) => void;
 
-  toggleGodMode: (event?: MouseEvent) => void;
-  appendGodmodeStatus: () => void;
-
   appendEnemyCheats: (...keys: (string | number)[]) => void;
 
   appendHpCheats: (...keys: (string | number)[]) => void;
@@ -125,9 +115,6 @@ export type CheatMenuT = {
   appendMpCheats: (...keys: (string | number)[]) => void;
 
   appendTpCheats: (...keys: (string | number)[]) => void;
-
-  toggleNoClipStatus: (event?: MouseEvent) => void;
-  appendNoClipStatus: (key1: string | number) => void;
 
   toggleForceMouseMovement: (event?: MouseEvent) => void;
   toggleForceCtrlSkip: (event?: MouseEvent) => void;
@@ -185,15 +172,6 @@ export type CheatMenuT = {
     key1: string | number,
     key2: string | number,
     key3: string | number,
-  ) => void;
-
-  scrollItem: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  applyCurrentItem: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  appendItemSelection: (
-    key1: string | number,
-    key2: string | number,
-    key3: string | number,
-    key4: string | number,
   ) => void;
 
   scrollWeapon: (direction: 'left' | 'right', event?: MouseEvent) => void;

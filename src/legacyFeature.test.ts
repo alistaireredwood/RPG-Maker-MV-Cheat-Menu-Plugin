@@ -6,10 +6,10 @@ const render = vi.fn();
 const restored = vi.fn();
 
 const feature = legacyFeature({
-  id: 'items',
-  menus: [['items', { name: 'Items', render }]],
+  id: 'weapons',
+  menus: [['weapons', { name: 'Weapons', render }]],
   fields: {
-    selection: ['itemSelection', 1],
+    selection: ['weaponSelection', 1],
     positions: ['savedPositions', [{ m: -1, x: -1, y: -1 }]],
   },
   onStateRestored: restored,
@@ -30,7 +30,7 @@ describe('legacyFeature', () => {
 
   it('wraps legacy menus with stable ids', () => {
     const [menu] = feature.menus;
-    expect(menu).toMatchObject({ id: 'items', name: 'Items' });
+    expect(menu).toMatchObject({ id: 'weapons', name: 'Weapons' });
     menu.render({} as never, {});
     expect(render).toHaveBeenCalledOnce();
   });
@@ -38,7 +38,7 @@ describe('legacyFeature', () => {
   it('onStateRestored copies the slice onto CheatMenu, then runs the hook', () => {
     const state = { selection: 7, positions: [{ m: 2, x: 3, y: 4 }] };
     restored.mockImplementation(() => {
-      expect(CheatMenu.itemSelection).toBe(7);
+      expect(CheatMenu.weaponSelection).toBe(7);
     });
     feature.onStateRestored?.(state);
     expect(restored).toHaveBeenCalledOnce();
@@ -49,14 +49,14 @@ describe('legacyFeature', () => {
 
   it('onSave copies CheatMenu back into the slice', () => {
     const state: Record<string, unknown> = { selection: 1, positions: [] };
-    CheatMenu.itemSelection = 42;
+    CheatMenu.weaponSelection = 42;
     feature.onSave?.(state);
     expect(state.selection).toBe(42);
   });
 
   it('migrateV1 renames known v1 keys and ignores the rest', () => {
     expect(
-      feature.migrateV1?.({ itemSelection: 9, weaponSelection: 3 }),
+      feature.migrateV1?.({ weaponSelection: 9, armorSelection: 3 }),
     ).toEqual({ selection: 9 });
   });
 
@@ -66,6 +66,6 @@ describe('legacyFeature', () => {
       menus: [['noClip', { name: 'No Clip', render }]],
     });
     expect(plain.state).toBeUndefined();
-    expect(plain.migrateV1?.({ itemSelection: 1 })).toEqual({});
+    expect(plain.migrateV1?.({ weaponSelection: 1 })).toEqual({});
   });
 });

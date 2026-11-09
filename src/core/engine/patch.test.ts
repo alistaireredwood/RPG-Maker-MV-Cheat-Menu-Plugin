@@ -39,6 +39,21 @@ describe('patchMethod', () => {
     expect(target.add).toBe(later);
   });
 
+  it('patching an inherited method adds an own property, restore removes it', () => {
+    class Base {
+      greet() {
+        return 'base';
+      }
+    }
+    const obj = new Base();
+    const restore = patchMethod(obj, 'greet', () => () => 'patched');
+    expect(Object.prototype.hasOwnProperty.call(obj, 'greet')).toBe(true);
+    expect(obj.greet()).toBe('patched');
+    restore();
+    expect(Object.prototype.hasOwnProperty.call(obj, 'greet')).toBe(false);
+    expect(obj.greet()).toBe('base');
+  });
+
   it('throws for non-methods', () => {
     const target = { notAMethod: 1 } as unknown as { notAMethod: () => void };
     expect(() => patchMethod(target, 'notAMethod', (o) => o)).toThrow(

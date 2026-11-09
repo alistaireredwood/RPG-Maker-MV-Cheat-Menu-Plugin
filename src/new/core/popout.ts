@@ -22,6 +22,7 @@ let originalIsGameActive: (() => boolean) | null = null;
 const isNwjs = () => typeof nw !== 'undefined' && !!nw?.Window?.open;
 
 CheatMenu.isPoppedOut = false;
+CheatMenu.canPopout = isNwjs;
 
 CheatMenu.getMenuDocument = () =>
   CheatMenu.isPoppedOut && popoutWin ? popoutWin.window.document : document;

@@ -84,7 +84,7 @@ export type CheatMenuT = {
 
   // --- Pop-out window (core/popout.ts) ---
   isPoppedOut: boolean;
-  /** Document currently hosting the overlay — the game's or the pop-out's. */
+  canPopout: () => boolean;
   getMenuDocument: () => Document;
   openPopout: () => void;
   closePopout: (keepMenuOpen?: boolean) => void;
@@ -94,6 +94,7 @@ export type CheatMenuT = {
   currentMenuIndex: number | null;
   renderMainMenuGrid: () => void;
   appendBackButton: () => void;
+  appendTopBar: () => void;
 
   keyListeners: KeyListeners;
 
@@ -160,10 +161,7 @@ export type CheatMenuT = {
   appendCheatTitle: () => void;
 
   scrollActor: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  appendActorSelection: (
-    key1: string | number,
-    key2: string | number,
-  ) => void;
+  appendActorSelection: (key1: string | number, key2: string | number) => void;
 
   toggleGodMode: (event?: MouseEvent) => void;
   appendGodmodeStatus: () => void;
@@ -213,10 +211,7 @@ export type CheatMenuT = {
   ) => void;
 
   scrollAmount: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  appendAmountSelection: (
-    key1: string | number,
-    key2: string | number,
-  ) => void;
+  appendAmountSelection: (key1: string | number, key2: string | number) => void;
 
   scrollMoveAmount: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendMoveAmountSelection: (
@@ -257,10 +252,7 @@ export type CheatMenuT = {
   ) => void;
 
   scrollWeapon: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  applyCurrentWeapon: (
-    direction: 'left' | 'right',
-    event?: MouseEvent,
-  ) => void;
+  applyCurrentWeapon: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendWeaponSelection: (
     key1: string | number,
     key2: string | number,
@@ -269,10 +261,7 @@ export type CheatMenuT = {
   ) => void;
 
   scrollArmor: (direction: 'left' | 'right', event?: MouseEvent) => void;
-  applyCurrentArmor: (
-    direction: 'left' | 'right',
-    event?: MouseEvent,
-  ) => void;
+  applyCurrentArmor: (direction: 'left' | 'right', event?: MouseEvent) => void;
   appendArmorSelection: (
     key1: string | number,
     key2: string | number,

@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && eslint . && vitest run && vite build",
+    "typecheck": "tsc",
+    "build": "pnpm typecheck && eslint . && vitest run && vite build",
     "build:release": "pnpm build && node scripts/build-release.js",
     "preview": "vite preview",
     "lint": "eslint .",

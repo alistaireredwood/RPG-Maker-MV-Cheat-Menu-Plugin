@@ -33,6 +33,7 @@ export type InitialValues = {
   currentMenuIndex: number | null;
   forceMouseMovement: boolean;
   forceCtrlSkip: boolean;
+  saveSlotSelection: number;
 };
 
 export type CheatMenuT = {
@@ -67,6 +68,9 @@ export type CheatMenuT = {
   speed: number | null;
   speedUnlocked: boolean;
   speedInitialized: boolean;
+
+  gameSpeedIndex: number;
+  saveSlotSelection: number;
 
   godModeActors: number[];
 
@@ -113,7 +117,12 @@ export type CheatMenuT = {
   recoverPartyHp: (alive: boolean) => void;
   recoverPartyMp: (alive: boolean) => void;
   recoverPartyTp: (alive: boolean) => void;
+  halfPartyHp: (alive: boolean) => void;
+  halfPartyMp: (alive: boolean) => void;
+  halfPartyTp: (alive: boolean) => void;
   setEnemyHp: (hp: number, alive: boolean) => void;
+  halfEnemyHp: (alive: boolean) => void;
+  recoverEnemyHp: (alive: boolean) => void;
   giveExp: (actor: CheatMenu_Game_Actor | null, amount: number) => void;
   giveStat: (
     actor: CheatMenu_Game_Actor | null,
@@ -166,39 +175,13 @@ export type CheatMenuT = {
   toggleGodMode: (event?: MouseEvent) => void;
   appendGodmodeStatus: () => void;
 
-  appendEnemyCheats: (
-    key1: string | number,
-    key2: string | number,
-    key3: string | number,
-    key4: string | number,
-  ) => void;
+  appendEnemyCheats: (...keys: (string | number)[]) => void;
 
-  appendHpCheats: (
-    key1: string | number,
-    key2: string | number,
-    key3: string | number,
-    key4: string | number,
-    key5: string | number,
-    key6: string | number,
-  ) => void;
+  appendHpCheats: (...keys: (string | number)[]) => void;
 
-  appendMpCheats: (
-    key1: string | number,
-    key2: string | number,
-    key3: string | number,
-    key4: string | number,
-    key5: string | number,
-    key6: string | number,
-  ) => void;
+  appendMpCheats: (...keys: (string | number)[]) => void;
 
-  appendTpCheats: (
-    key1: string | number,
-    key2: string | number,
-    key3: string | number,
-    key4: string | number,
-    key5: string | number,
-    key6: string | number,
-  ) => void;
+  appendTpCheats: (...keys: (string | number)[]) => void;
 
   toggleNoClipStatus: (event?: MouseEvent) => void;
   appendNoClipStatus: (key1: string | number) => void;
@@ -236,6 +219,22 @@ export type CheatMenuT = {
 
   applySpeedChange: (direction: 'left' | 'right', event?: MouseEvent) => void;
   applySpeedLockToggle: () => void;
+
+  scrollGameSpeed: (direction: 'left' | 'right', event?: MouseEvent) => void;
+  resetGameSpeed: (event?: MouseEvent) => void;
+  appendGameSpeed: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+  ) => void;
+
+  scrollSaveSlot: (direction: 'left' | 'right', event?: MouseEvent) => void;
+  saveToSelectedSlot: (event?: MouseEvent) => void;
+  appendSaveGame: (
+    key1: string | number,
+    key2: string | number,
+    key3: string | number,
+  ) => void;
   appendSpeedStatus: (
     key1: string | number,
     key2: string | number,

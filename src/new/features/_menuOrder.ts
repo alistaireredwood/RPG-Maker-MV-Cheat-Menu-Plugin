@@ -3,6 +3,7 @@ import { menu as teleport } from './teleport.ts';
 import { menu as saveRecall } from './saveRecall.ts';
 import { menu as noClip } from './noClip.ts';
 import { menu as speed } from './speed.ts';
+import { menu as gameSpeed } from './gameSpeed.ts';
 import { menu as toggleSwitch } from './toggleSwitch.ts';
 import { menu as setVariable } from './setVariable.ts';
 import { menu as godMode } from './godMode.ts';
@@ -16,12 +17,14 @@ import { menu as giveArmor } from './giveArmor.ts';
 import { menu as clearStates } from './clearStates.ts';
 import { menu as giveStat } from './giveStat.ts';
 import { menu as unlockControls } from './unlockControls.ts';
+import { menu as saveGame } from './saveGame.ts';
 
 CheatMenu.menus.push(
   teleport,
   saveRecall,
   noClip,
   speed,
+  gameSpeed,
   toggleSwitch,
   setVariable,
   godMode,
@@ -35,4 +38,5 @@ CheatMenu.menus.push(
   clearStates,
   giveStat,
   unlockControls,
+  saveGame,
 );

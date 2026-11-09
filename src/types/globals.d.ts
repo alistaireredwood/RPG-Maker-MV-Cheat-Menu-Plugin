@@ -32,12 +32,13 @@ declare class CheatMenu_Game_Actor extends Game_Actor {
   gainTpBackup?: (value: number) => void;
   setTpBackup?: (tp: number) => void;
 
-  /** Backup of Game_BattlerBase.prototype.paySkillCost */
-  // paySkillCostBackup: (skill: DataSkill) => void;
+  canPaySkillCostBackup?: (skill: DataSkill) => boolean;
+  paySkillCostBackup?: (skill: number) => void;
 }
 
 declare class Game_System {
   CheatMenu?: ICheatMenu | {};
+  onBeforeSave(): void;
 }
 
 declare class DataManager {
@@ -48,6 +49,7 @@ declare class DataManager {
   static loadGame: ((saveFileId: number) => boolean) | undefined;
   static setupNewGame: () => void;
   static saveGame: ((saveFileId: number) => boolean) | undefined;
+  static maxSavefiles(): number;
 }
 
 // Minimal NW.js typings — only what core/popout.ts uses

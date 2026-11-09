@@ -15,45 +15,52 @@ CheatMenu.setPartyTp = (tp, alive) => setPartyResource(alive, (m) => m.setTp(tp)
 CheatMenu.recoverPartyHp = (alive) => setPartyResource(alive, (m) => m.setHp(m.mhp));
 CheatMenu.recoverPartyMp = (alive) => setPartyResource(alive, (m) => m.setMp(m.mmp));
 CheatMenu.recoverPartyTp = (alive) => setPartyResource(alive, (m) => m.setTp(m.maxTp()));
+CheatMenu.halfPartyHp = (alive) => setPartyResource(alive, (m) => m.setHp(Math.max(1, Math.floor(m.mhp / 2))));
+CheatMenu.halfPartyMp = (alive) => setPartyResource(alive, (m) => m.setMp(Math.floor(m.mmp / 2)));
+CheatMenu.halfPartyTp = (alive) => setPartyResource(alive, (m) => m.setTp(Math.floor(m.maxTp() / 2)));
 
 function appendPartyCheats(
   stat: string,
   setFn: (val: number, alive: boolean) => void,
+  halfFn: (alive: boolean) => void,
   recoverFn: (alive: boolean) => void,
-  key1: string | number, key2: string | number, key3: string | number,
-  key4: string | number, key5: string | number, key6: string | number,
+  keys: (string | number)[],
 ) {
   const sound = () => SoundManager.playSystemSound(1);
+  const appendGroup = (alive: boolean, groupKeys: (string | number)[]) => {
+    CheatMenu.appendCheat(`Party ${stat} to 0`, 'Activate', groupKeys[0], () => { setFn(0, alive); sound(); });
+    CheatMenu.appendCheat(`Party ${stat} to 1`, 'Activate', groupKeys[1], () => { setFn(1, alive); sound(); });
+    CheatMenu.appendCheat(`Party Half ${stat}`, 'Activate', groupKeys[2], () => { halfFn(alive); sound(); });
+    CheatMenu.appendCheat(`Party Full ${stat}`, 'Activate', groupKeys[3], () => { recoverFn(alive); sound(); });
+  };
   CheatMenu.appendTitle('Alive');
-  CheatMenu.appendCheat(`Party ${stat} to 0`, 'Activate', key1, () => { setFn(0, true); sound(); });
-  CheatMenu.appendCheat(`Party ${stat} to 1`, 'Activate', key2, () => { setFn(1, true); sound(); });
-  CheatMenu.appendCheat(`Party Full ${stat}`, 'Activate', key3, () => { recoverFn(true); sound(); });
+  appendGroup(true, keys.slice(0, 4));
   CheatMenu.appendTitle('All');
-  CheatMenu.appendCheat(`Party ${stat} to 0`, 'Activate', key4, () => { setFn(0, false); sound(); });
-  CheatMenu.appendCheat(`Party ${stat} to 1`, 'Activate', key5, () => { setFn(1, false); sound(); });
-  CheatMenu.appendCheat(`Party Full ${stat}`, 'Activate', key6, () => { recoverFn(false); sound(); });
+  appendGroup(false, keys.slice(4, 8));
 }
 
-CheatMenu.appendHpCheats = (key1, key2, key3, key4, key5, key6) =>
-  appendPartyCheats('HP', CheatMenu.setPartyHp, CheatMenu.recoverPartyHp, key1, key2, key3, key4, key5, key6);
+CheatMenu.appendHpCheats = (...keys) =>
+  appendPartyCheats('HP', CheatMenu.setPartyHp, CheatMenu.halfPartyHp, CheatMenu.recoverPartyHp, keys);
 
-CheatMenu.appendMpCheats = (key1, key2, key3, key4, key5, key6) =>
-  appendPartyCheats('MP', CheatMenu.setPartyMp, CheatMenu.recoverPartyMp, key1, key2, key3, key4, key5, key6);
+CheatMenu.appendMpCheats = (...keys) =>
+  appendPartyCheats('MP', CheatMenu.setPartyMp, CheatMenu.halfPartyMp, CheatMenu.recoverPartyMp, keys);
 
-CheatMenu.appendTpCheats = (key1, key2, key3, key4, key5, key6) =>
-  appendPartyCheats('TP', CheatMenu.setPartyTp, CheatMenu.recoverPartyTp, key1, key2, key3, key4, key5, key6);
+CheatMenu.appendTpCheats = (...keys) =>
+  appendPartyCheats('TP', CheatMenu.setPartyTp, CheatMenu.halfPartyTp, CheatMenu.recoverPartyTp, keys);
+
+const KEYS = [4, 5, 6, 7, 8, 9, 0, '-'];
 
 export const menus = [
   {
     name: 'Party HP',
-    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendHpCheats(4, 5, 6, 7, 8, 9); },
+    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendHpCheats(...KEYS); },
   },
   {
     name: 'Party MP',
-    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendMpCheats(4, 5, 6, 7, 8, 9); },
+    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendMpCheats(...KEYS); },
   },
   {
     name: 'Party TP',
-    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendTpCheats(4, 5, 6, 7, 8, 9); },
+    render: () => { CheatMenu.appendCheatTitle(); CheatMenu.appendTpCheats(...KEYS); },
   },
 ];

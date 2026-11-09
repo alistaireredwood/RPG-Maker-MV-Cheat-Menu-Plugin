@@ -30,6 +30,8 @@ const CheatMenu = {
   speed: null,
   speedUnlocked: true,
   speedInitialized: false,
+  gameSpeedIndex: 0,
+  saveSlotSelection: 1,
   godModeActors: [] as number[],
   forceMouseMovement: false,
   forceCtrlSkip: false,
@@ -63,6 +65,7 @@ if (!CheatMenu.initialValues) {
     currentMenuIndex: null,
     forceMouseMovement: false,
     forceCtrlSkip: false,
+    saveSlotSelection: 1,
   };
 }
 

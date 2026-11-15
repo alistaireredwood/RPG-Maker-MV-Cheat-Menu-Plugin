@@ -20,6 +20,7 @@ src/
     registry.ts        registered features, menu list, live state, emit(hook)
     persistence.ts     pure save-format logic (v2 format, v1 migration)
     session.ts         restore / save of core + feature state
+    preferences.ts     per-game settings in localStorage (definePreference)
     store.ts           menu runtime state (open, position, current menu, …)
     engine/            patchMethod, DataManager / Scene_Boot hooks, SceneManager.isGameActive
     input/             key map, key bindings, keyboard handling (1, `, F7, F8, F9)
@@ -126,6 +127,20 @@ export default defineFeature({
 - **v1 saves** (flat object, no `version`) are migrated on first restore: each feature maps its own old keys (`migrateV1`), and `V1_MENU_ORDER` in `features.ts` maps the old open-menu index to an id. `V1_MENU_ORDER` is frozen.
 - `src/features.test.ts` pins the migration of a full v1 save. Extend it when a feature that existed in v1 gains state.
 
+### Per-game preferences
+
+Settings that belong to the game rather than to a save slot (display names, menu layout) must survive a new game and loading another save, so they don't go into `state`. They use `definePreference(key, defaults)` from `core/preferences.ts`:
+
+```
+localStorage["Cheat_Menu.prefs.<gameTitle>"] = { version: 1, <key>: { … }, … }
+```
+
+- The game title is part of the key because many MV games keep the default `package.json` name, and NW.js shares `localStorage` between apps with the same name.
+- `definePreference` only declares; storage is read on the first `get()` / `update()`, so it may be called at module scope. Before `$dataSystem` exists, values are kept in memory only.
+- `get()` returns the live object; `update(fn)` mutates it and writes right away; `reset()` restores the defaults in place.
+- Reading takes only known keys whose value has the same kind as the default (`readPrefSlice`, `preferencesFormat.ts`), since `localStorage` is easy to edit by hand. Slices of preferences not defined right now are kept on write, and data from a newer format version is never overwritten.
+- Per-save state stays in the feature's `state`. Pick by the question "should a new game reset this?".
+
 ## UI
 
 ### Render model
@@ -142,7 +157,7 @@ The overlay (`<table id="cheat-menu-text">`) is **torn down and rebuilt on every
 `render(ui)` draws only through the `MenuBuilder` (`core/ui/builder.ts`):
 
 - `ui.cheatTitle()` draws the sub-menu switcher on keys 2 / 3. Every menu starts with it.
-- `ui.title`, `ui.description`, `ui.wideDescription`: plain rows.
+- `ui.title`, `ui.description`, `ui.wideDescription`: plain rows. `ui.title(text, side, { actions })` adds icon buttons (`core/ui/icons.ts`) on the right of the title. They are mouse only and take no keys, so adding or removing an icon never shifts the keys of later rows.
 - `ui.cheat(label, status, onActivate)` takes 1 key. `ui.scrollSelector(text, onScroll)` and `ui.valueInput(...)` take 2 keys (←/→) when they show arrows.
 - `ui.codeInput`, `ui.searchInput`: text inputs. They stop key propagation, so typing never triggers menu or game keys.
 

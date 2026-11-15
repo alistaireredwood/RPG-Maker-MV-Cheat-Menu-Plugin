@@ -129,6 +129,32 @@
   letter-spacing: normal;
 }
 
+.cheat-menu-title-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0;
+  vertical-align: middle;
+  background: transparent;
+  color: var(--cm-dim);
+  border: 1px solid var(--cm-border);
+  cursor: pointer;
+}
+
+.cheat-menu-title-action:hover {
+  color: var(--cm-cyan);
+  border-color: var(--cm-cyan);
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.35);
+}
+
+.cheat-menu-title-action.active {
+  color: var(--cm-cyan);
+  border-color: var(--cm-cyan);
+}
+
 .status-on {
   color: var(--cm-green);
   text-shadow: 0 0 4px rgba(0, 232, 136, 0.5);

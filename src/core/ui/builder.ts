@@ -12,6 +12,7 @@ import {
   appendDescription,
   appendTitle,
   appendWideDescription,
+  type TitleOptions,
 } from './widgets/text.ts';
 import { appendValueInput } from './widgets/valueInput.ts';
 
@@ -26,7 +27,8 @@ export type MenuBuilder = {
 
   /** "Cheat" title + sub-menu switcher (keys 2/3, not allocated). */
   cheatTitle: () => void;
-  title: (text: string, sideText?: string) => void;
+  /** Section title. `actions`: icon buttons on the right, mouse only, no keys. */
+  title: (text: string, sideText?: string, options?: TitleOptions) => void;
   description: (html: string) => void;
   wideDescription: (html: string) => void;
   /** Label + clickable status button. Takes 1 key. */

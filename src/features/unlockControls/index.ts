@@ -78,6 +78,7 @@ export default defineFeature({
     {
       id: 'unlockControls',
       name: 'Unlock Controls',
+      tier: 'advanced',
       render(ui) {
         ui.cheatTitle();
         ui.cheat(

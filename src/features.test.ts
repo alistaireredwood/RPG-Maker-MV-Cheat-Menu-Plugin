@@ -12,6 +12,24 @@ describe('feature list', () => {
     expect(new Set(menuIds).size).toBe(menuIds.length);
   });
 
+  it('default grid groups: the risky tools are Advanced, the rest Basic', () => {
+    const advanced = features
+      .flatMap((f) => f.menus)
+      .filter((m) => m.tier === 'advanced')
+      .map((m) => m.id);
+    expect(advanced.sort()).toEqual(
+      [
+        'evaluate',
+        'saveGame',
+        'saveRecall',
+        'switches',
+        'teleport',
+        'unlockControls',
+        'variables',
+      ].sort(),
+    );
+  });
+
   it('every v1 menu id still exists', () => {
     const menuIds = features.flatMap((f) => f.menus.map((m) => m.id));
     expect(menuIds).toEqual(expect.arrayContaining([...V1_MENU_ORDER]));

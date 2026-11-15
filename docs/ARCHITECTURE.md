@@ -20,10 +20,12 @@ src/
     registry.ts        registered features, menu list, live state, emit(hook)
     persistence.ts     pure save-format logic (v2 format, v1 migration)
     session.ts         restore / save of core + feature state
+    preferences.ts     per-game settings in localStorage (definePreference)
     store.ts           menu runtime state (open, position, current menu, …)
     engine/            patchMethod, DataManager / Scene_Boot hooks, SceneManager.isGameActive
     input/             key map, key bindings, keyboard handling (1, `, F7, F8, F9)
-    ui/                overlay, renderer, MenuBuilder, widgets, pop-out window, CSS
+    ui/                overlay, renderer, MenuBuilder, widgets, pop-out window, CSS,
+                       main grid + its layout (grid.ts, layout.ts, menuLayout.ts)
 
   shared/              building blocks used by several features
     state.ts           selected actor + amount (persisted as the `shared` slice)
@@ -110,6 +112,7 @@ export default defineFeature({
 - **Ids** (`feature.id`, `menu.id`) are persisted: the feature id is the save slice key, and the menu id is stored as the open menu. Renaming one loses saved data.
 - **A feature may have several menus** (Party HP / MP / TP) or none (`sharedFeature`).
 - **`after`** (optional) places the feature's menus right after the given menu id in the grid. Meant for extensions; built-ins are ordered by `features.ts`.
+- **`menu.tier`** (optional, `'advanced'`) is the menu's default group in the grid; omitted means Basic, or for a feature with `after`, the group of that menu. Advanced is for tools that act on the game's internals and can break events or a save when used carelessly (Switches, Variables, Evaluate, Teleport, …). `features.test.ts` pins the built-in split.
 - **`migrateV1`** exists only for state that already lived in the pre-v2 flat save format. New features don't need it.
 
 ## Persistence
@@ -125,6 +128,20 @@ export default defineFeature({
 - **Writing** carries over slices of features that are not registered, so removing a feature and adding it back doesn't lose its data.
 - **v1 saves** (flat object, no `version`) are migrated on first restore: each feature maps its own old keys (`migrateV1`), and `V1_MENU_ORDER` in `features.ts` maps the old open-menu index to an id. `V1_MENU_ORDER` is frozen.
 - `src/features.test.ts` pins the migration of a full v1 save. Extend it when a feature that existed in v1 gains state.
+
+### Per-game preferences
+
+Settings that belong to the game rather than to a save slot (display names, menu layout) must survive a new game and loading another save, so they don't go into `state`. They use `definePreference(key, defaults)` from `core/preferences.ts`:
+
+```
+localStorage["Cheat_Menu.prefs.<gameTitle>"] = { version: 1, <key>: { … }, … }
+```
+
+- The game title is part of the key because many MV games keep the default `package.json` name, and NW.js shares `localStorage` between apps with the same name.
+- `definePreference` only declares; storage is read on the first `get()` / `update()`, so it may be called at module scope. Before `$dataSystem` exists, values are kept in memory only.
+- `get()` returns the live object; `update(fn)` mutates it and writes right away; `reset()` restores the defaults in place.
+- Reading takes only known keys whose value has the same kind as the default (`readPrefSlice`, `preferencesFormat.ts`), since `localStorage` is easy to edit by hand. Slices of preferences not defined right now are kept on write, and data from a newer format version is never overwritten.
+- Per-save state stays in the feature's `state`. Pick by the question "should a new game reset this?".
 
 ## UI
 
@@ -142,13 +159,27 @@ The overlay (`<table id="cheat-menu-text">`) is **torn down and rebuilt on every
 `render(ui)` draws only through the `MenuBuilder` (`core/ui/builder.ts`):
 
 - `ui.cheatTitle()` draws the sub-menu switcher on keys 2 / 3. Every menu starts with it.
-- `ui.title`, `ui.description`, `ui.wideDescription`: plain rows.
+- `ui.title`, `ui.description`, `ui.wideDescription`: plain rows. `ui.title(text, side, { actions })` adds icon buttons (`core/ui/icons.ts`) on the right of the title. They are mouse only and take no keys, so adding or removing an icon never shifts the keys of later rows.
 - `ui.cheat(label, status, onActivate)` takes 1 key. `ui.scrollSelector(text, onScroll)` and `ui.valueInput(...)` take 2 keys (←/→) when they show arrows.
+- `ui.button(button)`: one full-width button, 1 key. `ui.buttons(main, side)`: a wide main button and a side button in one row (Evaluate: Run / Clear), 2 keys.
+- `ui.section(className, render)` adds a class to every row `render` draws (plus `cheat-menu-section-first` / `-last`), e.g. to space out and frame a block such as Evaluate's help.
 - `ui.codeInput`, `ui.searchInput`: text inputs. They stop key propagation, so typing never triggers menu or game keys.
 
-Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-codes key numbers. Changing the order of rows changes their keys, and `ui.skipKeys(n)` keeps later keys stable when a row is conditionally hidden. Fixed keys are 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
+Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-codes key numbers. Changing the order of rows changes their keys, and `ui.skipKeys(n)` keeps later keys stable when a row is conditionally hidden. A row drawn *below* optional rows can keep its key by reserving it first: `const key = ui.nextKey()` at the top of `render`, then `ui.cheat(…, { key })` / `ui.buttons(…, { keys })`. Fixed keys are 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
 
 The `core/ui/widgets/append*(…, key1, key2)` functions with explicit keys are the builder's building blocks. Features don't call them.
+
+### Main grid layout
+
+The grid shows the menus in groups: **Favourites**, **Basic**, **Advanced** and **Hidden**. Every group can be collapsed, and Advanced starts collapsed. Outside edit mode, Hidden and empty groups (so Favourites at first) are not drawn.
+
+- The registry order never changes, because extensions' `after` relies on it. The user's layout is computed on top of it by pure functions in `core/ui/layout.ts` (`getLayout`, `moveInGroup`, `setGroup`, `toggleCollapsed`), which are unit-tested.
+- `core/ui/menuLayout.ts` connects them to the registry and to the per-game preference `layout`: `{ order, groups, collapsed }`. `groups` holds only menus moved out of their default group (`tier`), so a later change of a default still reaches them.
+- A menu missing from the saved order (a new feature or extension) appears after its registry predecessor, in its default group. Unknown ids are ignored.
+- **Extensions:** the extension decides. A menu placed with `after` inherits the group of that menu, including a group the user moved it to, and sits right after it. Chains of `after` are followed. An explicit `tier` wins over `after`. An extension menu without `after` (or with an unknown one) goes to the end of Basic, whatever the saved order. The registry reports anchors through `getMenuPlacements()`.
+- Edit mode is the pencil in the top bar, shown on the grid only. Each menu gets ↑/↓ within its group and a group picker (★ / B / A / H). Favourites can only be filled here. "Reset layout" restores the defaults.
+- Keys 2/3 step through `navigationMenuIds()`: Favourites → Basic → Advanced, skipping Hidden. Collapsing is visual only.
+- The grid is rebuilt on every click, so focus is restored by a per-button key (`data-focus-key`), not by index. A button keeps focus even after ↑/↓ moved its row.
 
 ### Pop-out window
 
@@ -180,7 +211,7 @@ When a second feature needs something a feature folder has, move it to `shared/`
 
 ## Game-specific extensions
 
-Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. Background and decisions: [`game-specific-extensions.md`](game-specific-extensions.md); a working example: `examples/extension-template/`.
+Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. A working example: `examples/extension-template/`.
 
 - An extension pushes `{ name, apiVersion, setup(api) => features[] }` onto `window.CheatMenuExtensions`. Before Cheat Menu loads that is a plain array. `bootstrap()` drains it and replaces it with a queue that registers on `push`, so `plugins.js` order doesn't matter.
 - **Registration window:** pushes are accepted until the first `Scene_Boot.start` (`core/engine/bootHook.ts`), which runs *before* the original start because it calls `DataManager.setupNewGame` itself, and the menu can be opened on the title screen after that. At that point all plugin scripts have run, the menu can't be open and nothing has been restored from a save yet. Later pushes are ignored with a warning, because a feature registered after a restore would start from defaults and overwrite its saved slice.
@@ -189,6 +220,8 @@ Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding th
 - Bump `API_VERSION` only on a breaking change of `CheatMenuApi`. Additions keep it.
 
 ## Code style
+
+- **Target is Chromium 65** (MV 1.6's NW.js; `build.target: chrome66`). Vite transpiles syntax but adds no polyfills, so newer built-ins (`Array.prototype.flatMap` / `flat` / `at`, `Object.fromEntries`, `structuredClone`, …) must not be used outside tests. `tsconfig` `lib` is ES2020, so the type checker does not catch all of them.
 
 - **Comments explain why, never what.** Engine quirks, MV / MZ differences, save-compatibility reasons and rejected alternatives deserve a comment. What the code does should be readable from names and small functions.
 - Pure logic goes in its own file (`format.ts`, `parseVariableInput.ts`, `resources.ts`) so it can be unit-tested without the engine.

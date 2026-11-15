@@ -3,6 +3,7 @@ import { defineFeature } from './feature.ts';
 import {
   emit,
   findMenu,
+  getMenuPlacements,
   getMenus,
   registerFeatures,
   restoreStates,
@@ -205,5 +206,15 @@ describe('menu placement (after)', () => {
     expect(ids().slice(-1)).toEqual(['lost']);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('"nope"'));
     warn.mockRestore();
+  });
+  it('reports the anchor each menu was placed by (none when unknown)', () => {
+    const anchors = Object.fromEntries(
+      getMenuPlacements().map(({ entry, anchor }) => [entry.id, anchor]),
+    );
+    expect(anchors['pa-1']).toBe('alpha-1');
+    expect(anchors['pa-2']).toBe('alpha-1');
+    expect(anchors['follower']).toBe('anchor');
+    expect(anchors['alpha-1']).toBeUndefined();
+    expect(anchors['lost']).toBeUndefined();
   });
 });

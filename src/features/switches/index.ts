@@ -62,6 +62,7 @@ export default defineFeature({
     {
       id: 'switches',
       name: 'Switches',
+      tier: 'advanced',
       render(ui) {
         const id = state.selection;
         const { index, total } = getIndexInfo(

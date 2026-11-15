@@ -45,6 +45,7 @@ export default defineFeature({
     {
       id: 'saveRecall',
       name: 'Save and Recall',
+      tier: 'advanced',
       render(ui) {
         ui.cheatTitle();
         ui.title('Current Position: ');

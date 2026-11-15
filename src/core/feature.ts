@@ -4,6 +4,12 @@ export type MenuEntry<S extends object = object> = {
   /** Stable id — persisted as the currently open menu, so never reuse/rename it lightly. */
   id: string;
   name: string;
+  /**
+   * Default group in the main grid (Basic when omitted). Advanced is for tools
+   * that act on the game's internals and can break events or a save when used
+   * carelessly. Users can regroup menus; this is only the starting point.
+   */
+  tier?: 'advanced';
   render(ui: MenuBuilder, state: S): void;
 };
 

@@ -1,26 +1,22 @@
 import { KEYS } from '@src/core/input/keymap.ts';
-import { findMenu, getMenus } from '@src/core/registry.ts';
+import { findMenu } from '@src/core/registry.ts';
 import { store } from '@src/core/store.ts';
+import { navigationMenuIds } from '@src/core/ui/menuLayout.ts';
 import { updateMenu } from '@src/core/ui/render.ts';
 import type { Direction } from './scrollSelector.ts';
 import { appendScrollSelector } from './scrollSelector.ts';
 import { appendTitle } from './text.ts';
 
 export function scrollCheat(direction: Direction): void {
-  const menus = getMenus();
-  const len = menus.length;
+  const ids = navigationMenuIds();
+  const len = ids.length;
   if (len === 0) return;
-  const found = menus.findIndex((m) => m.id === store.currentMenuId);
-  const current = found === -1 ? 0 : found;
+  const step = direction === 'left' ? -1 : 1;
+  // a Hidden menu can still be open (hidden while it was open)
+  const found = ids.indexOf(store.currentMenuId ?? '');
   const next =
-    direction === 'left'
-      ? current <= 0
-        ? len - 1
-        : current - 1
-      : current >= len - 1
-        ? 0
-        : current + 1;
-  store.currentMenuId = menus[next].id;
+    found === -1 ? (step > 0 ? 0 : len - 1) : (found + step + len) % len;
+  store.currentMenuId = ids[next];
   SoundManager.playSystemSound(0);
   updateMenu();
 }

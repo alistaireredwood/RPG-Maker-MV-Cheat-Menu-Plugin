@@ -129,6 +129,82 @@
   letter-spacing: normal;
 }
 
+.cheat-menu-title-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0;
+  vertical-align: middle;
+  background: transparent;
+  color: var(--cm-dim);
+  border: 1px solid var(--cm-border);
+  cursor: pointer;
+}
+
+.cheat-menu-title-action:hover {
+  color: var(--cm-cyan);
+  border-color: var(--cm-cyan);
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.35);
+}
+
+.cheat-menu-title-action.active {
+  color: var(--cm-cyan);
+  border-color: var(--cm-cyan);
+}
+
+.cheat-menu-cell.cheat-menu-button-cell {
+  border-bottom: none;
+}
+
+.cheat-menu-cell.cheat-menu-button-cell-wide {
+  max-width: none;
+  width: auto;
+}
+
+.cheat-menu-row-button {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--cm-border);
+}
+
+.cheat-menu-buttons:hover .cheat-menu-row-button {
+  border-color: var(--cm-cyan);
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.35);
+}
+
+/* --- EVALUATE --- */
+.cheat-menu-eval-result-section.cheat-menu-section-first > td {
+  padding-top: 14px;
+}
+
+.cheat-menu-eval-result-section > td.cheat-menu-search-cell {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.cheat-menu-eval-result-section.cheat-menu-section-last > td {
+  padding-top: 5px;
+}
+
+.cheat-menu-help-section > td {
+  background: rgba(0, 200, 240, 0.04);
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.cheat-menu-help-section.cheat-menu-section-first > td {
+  padding-top: 8px;
+  border-top: 1px solid var(--cm-dim);
+}
+
+.cheat-menu-help-section.cheat-menu-section-last > td {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--cm-dim);
+}
+
 .status-on {
   color: var(--cm-green);
   text-shadow: 0 0 4px rgba(0, 232, 136, 0.5);
@@ -183,6 +259,121 @@
   text-shadow: 0 0 8px rgba(0, 200, 240, 0.6);
 }
 
+.cheat-menu-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cheat-menu-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 3px 2px;
+  background: transparent;
+  color: var(--cm-dim);
+  border: none;
+  border-bottom: 1px solid var(--cm-border);
+  font-family: var(--cm-font);
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cheat-menu-group-header:first-child {
+  margin-top: 0;
+}
+
+.cheat-menu-group-header:hover,
+.cheat-menu-group-header:focus {
+  color: var(--cm-cyan);
+}
+
+.cheat-menu-group-count {
+  font-weight: normal;
+  letter-spacing: normal;
+  opacity: 0.7;
+}
+
+/* --- GRID: EDIT LAYOUT --- */
+.cheat-menu-layout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cheat-menu-layout-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 0;
+}
+
+.cheat-menu-layout-name {
+  flex: 1;
+  min-width: 110px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cheat-menu-layout-picker {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 6px;
+}
+
+.cheat-menu-layout-button {
+  width: 20px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  color: var(--cm-text);
+  border: 1px solid var(--cm-border);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.cheat-menu-layout-button:hover:not(:disabled),
+.cheat-menu-layout-button:focus {
+  color: var(--cm-cyan);
+  border-color: var(--cm-cyan);
+}
+
+.cheat-menu-layout-button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.cheat-menu-layout-button.active:disabled {
+  opacity: 1;
+  color: var(--cm-gold);
+  border-color: var(--cm-gold);
+}
+
+.cheat-menu-layout-reset {
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: transparent;
+  color: var(--cm-red);
+  border: 1px solid var(--cm-border);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.cheat-menu-layout-reset:hover,
+.cheat-menu-layout-reset:focus {
+  border-color: var(--cm-red);
+}
+
 /* --- BACK BUTTON --- */
 .cheat-menu-back-button {
   cursor: pointer;
@@ -230,6 +421,16 @@
   color: var(--cm-cyan);
   border: 1px solid var(--cm-border);
   cursor: pointer;
+}
+
+.cheat-menu-topbar-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.cheat-menu-topbar-button.active {
+  color: var(--cm-gold);
+  border-color: var(--cm-gold);
 }
 
 .cheat-menu-topbar-button:hover {

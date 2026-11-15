@@ -73,6 +73,7 @@ export default defineFeature({
     {
       id: 'teleport',
       name: 'Teleport',
+      tier: 'advanced',
       render(ui) {
         const { m, x, y } = state.location;
         ui.cheatTitle();

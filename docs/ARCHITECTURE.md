@@ -125,7 +125,7 @@ export default defineFeature({
 ```
 
 - `persistence.ts` is pure and unit-tested. `session.ts` connects it to `$gameSystem`.
-- **Reading** takes only the keys present in the feature's defaults (`readSlice`), so a save from another plugin version can't inject fields.
+- **Reading** takes only the keys present in the feature's defaults (`readSlice`), so a save from another plugin version can't inject fields. Values are copied as they are, though: a feature whose state holds a nested object (Variables' `filter`) validates it in `onStateRestored` (`normalizeFilter`).
 - **Writing** carries over slices of features that are not registered, so removing a feature and adding it back doesn't lose its data.
 - **v1 saves** (flat object, no `version`) are migrated on first restore: each feature maps its own old keys (`migrateV1`), and `V1_MENU_ORDER` in `features.ts` maps the old open-menu index to an id. `V1_MENU_ORDER` is frozen.
 - `src/features.test.ts` pins the migration of a full v1 save. Extend it when a feature that existed in v1 gains state.
@@ -149,7 +149,7 @@ localStorage["Cheat_Menu.prefs.<gameTitle>"] = { version: 1, <key>: { … }, …
 
 ### Render model
 
-The overlay (`<table id="cheat-menu-text">`) is **torn down and rebuilt on every `updateMenu()`**:
+The overlay (`<table id="cheat-menu">`) is **torn down and rebuilt on every `updateMenu()`**:
 
 - No DOM references survive a render. State that must survive (focus, caret, typed drafts, search terms) lives in `core/ui/widgetState.ts`.
 - Key bindings are cleared and re-bound by the widgets on every render.
@@ -163,8 +163,9 @@ The overlay (`<table id="cheat-menu-text">`) is **torn down and rebuilt on every
 - `ui.cheatTitle()` draws the sub-menu switcher on keys 2 / 3. Every menu starts with it.
 - `ui.title`, `ui.description`, `ui.wideDescription`: plain rows. `ui.title(text, side, { actions })` adds icon buttons (`core/ui/icons.ts`) on the right of the title. They are mouse only and take no keys, so adding or removing an icon never shifts the keys of later rows.
 - `ui.cheat(label, status, onActivate)` takes 1 key. `ui.scrollSelector(text, onScroll)` and `ui.valueInput(...)` take 2 keys (←/→) when they show arrows.
-- `ui.button(button)`: one full-width button, 1 key. `ui.buttons(main, side)`: a wide main button and a side button in one row (Evaluate: Run / Clear), 2 keys.
-- `ui.section(className, render)` adds a class to every row `render` draws (plus `cheat-menu-section-first` / `-last`), e.g. to space out and frame a block such as Evaluate's help.
+- `ui.button(button)`: one full-width button, 1 key. `ui.buttons(main, side)`: a wide main button and a side button in one row (Evaluate: Run / Clear), 2 keys. `ui.buttonRow([left, right])` / `ui.buttonRow([left, middle, right])`: equal buttons, one per column, the outer ones at the menu's edges (Variables filters: Apply / Reset / Cancel), 1 key each.
+- `ui.section(className, render)` adds a class to every row `render` draws (plus `cheat-menu-section-first` / `-last`), e.g. to space out and frame a block such as Evaluate's help. `cheat-menu-buttons-section` puts 8px above a row of buttons.
+- `ui.valueInput(…, { accept: 'integer' | 'decimal' })` lets only the characters of a number be typed or pasted (Gold, Items, Stats, Variables' range); `onCommit` still validates. `ui.valueInputPair(left, right)` puts two inputs in one row (a min – max range), no keys. Drafts of every input on screen survive the 1 s refresh; a draft is dropped once its input is no longer drawn.
 - `ui.codeInput`, `ui.searchInput`: text inputs. They stop key propagation, so typing never triggers menu or game keys.
 
 Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-codes key numbers. Changing the order of rows changes their keys, and `ui.skipKeys(n)` keeps later keys stable when a row is conditionally hidden. A row drawn *below* optional rows can keep its key by reserving it first: `const key = ui.nextKey()` at the top of `render`, then `ui.cheat(…, { key })` / `ui.buttons(…, { keys })`. Fixed keys are 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
@@ -204,6 +205,8 @@ Prefer these over re-implementing:
 | amount picker + apply ±amount | `amountSelector(ui)` + `makeApplyAmount(fn)` |
 | typed exact value for a counter | `ui.valueInput(…, makeSetExact(get, applyDelta), …)` |
 | scroll / search an RPG Maker data array | `makeScroll`, `getIndexInfo`, `nameMatches` + `ui.searchInput` |
+| list filtered by more than the item (e.g. its value) | an `IdMatcher` (`(item, keyword, id)`) passed to `makeScroll` / `getIndexInfo`, so `index/total` counts the filtered list |
+| labels for `$dataSystem.variables` / `switches` | `systemNameLabels(names)`: `#0042` when the game names nothing; `{ autoIdLabels: false }` keeps unnamed ids `null` |
 | item / weapon / armor style feature | `defineInventoryFeature({...})` |
 | HP / MP / TP to 0 / 1 / half / full | `resourceCheats(ui, who, resource, apply)` + `changeResource` |
 | on/off status + toggle sound | `onOffLabel(on)`, `playToggleSound(on)` |

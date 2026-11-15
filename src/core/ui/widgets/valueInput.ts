@@ -2,47 +2,44 @@ import type { ActionKey } from '@src/core/input/keymap.ts';
 import { getOverlay } from '@src/core/ui/dom.ts';
 import { getMenuWindow } from '@src/core/ui/popout.ts';
 import { isUpdatingMenu, updateMenu } from '@src/core/ui/render.ts';
-import { widgetState } from '@src/core/ui/widgetState.ts';
+import {
+  markValueInputRendered,
+  widgetState,
+} from '@src/core/ui/widgetState.ts';
+import { sanitizeNumberText, type NumberAccept } from './numberText.ts';
 import { bindArrows, type ScrollHandler } from './scrollSelector.ts';
 
-/**
- * The draft survives re-renders under `inputKey` — scope the key to the
- * edited entity (e.g. `variable:12`) so a draft never leaks onto another one.
- */
-export function appendValueInput(
-  value: string,
-  inputKey: string,
-  onCommit: (text: string) => boolean | void,
-  key1: ActionKey,
-  key2: ActionKey,
-  scrollHandler: ScrollHandler,
-  showArrows = true,
-): void {
+export type ValueField = {
+  value: string;
+  /**
+   * The draft survives re-renders under this key — scope it to the edited
+   * entity (e.g. `variable:12`) so a draft never leaks onto another one.
+   */
+  inputKey: string;
+  /** `false` = rejected: the draft and focus stay so the user can fix it */
+  onCommit: (text: string) => boolean | void;
+  /** only characters of such a number can be typed or pasted */
+  accept?: NumberAccept;
+  placeholder?: string;
+};
+
+export type ValueInputOptions = {
+  showArrows?: boolean;
+  accept?: NumberAccept;
+};
+
+function createValueInput(field: ValueField): HTMLInputElement {
+  const { value, inputKey, onCommit, accept } = field;
   const drafts = widgetState.valueInputDrafts;
-  const row = getOverlay().insertRow();
-  row.className = 'scroll-selector-row';
-
-  const leftButton = row.insertCell();
-  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
-
-  const cell = row.insertCell();
-  cell.className = 'cheat-menu-cell';
-
-  const rightButton = row.insertCell();
-  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
-
-  // a draft for another entity (selection changed) is dropped
-  if (widgetState.activeValueInputKey !== inputKey) {
-    for (const key in drafts) {
-      if (key !== inputKey) delete drafts[key];
-    }
-  }
+  markValueInputRendered(inputKey);
   const draft = drafts[inputKey];
 
   const input = document.createElement('input');
   input.type = 'text';
   input.autocomplete = 'off';
   input.spellcheck = false;
+  if (accept) input.inputMode = accept === 'integer' ? 'numeric' : 'decimal';
+  if (field.placeholder) input.placeholder = field.placeholder;
   input.className = 'cheat-menu-amount-input cheat-menu-value-input';
   input.title = 'Enter: apply, Esc: cancel';
   input.value = draft ? draft.text : value;
@@ -56,10 +53,7 @@ export function appendValueInput(
   input.addEventListener('keydown', (e) => {
     e.stopPropagation();
     if (e.key === 'Enter') {
-      const text = input.value;
-      // onCommit returning false = rejected input: keep the draft and focus
-      // so the user can fix it
-      if (onCommit(text) === false) {
+      if (onCommit(input.value) === false) {
         SoundManager.playBuzzer();
         input.classList.add('is-invalid');
         return;
@@ -91,6 +85,20 @@ export function appendValueInput(
   });
 
   input.addEventListener('input', () => {
+    // filtered on `input` rather than `keydown`, so paste, drag-and-drop and
+    // IME text are covered too
+    if (accept) {
+      const caret = input.selectionStart ?? input.value.length;
+      const clean = sanitizeNumberText(input.value, accept);
+      if (clean !== input.value) {
+        const pos = sanitizeNumberText(
+          input.value.slice(0, caret),
+          accept,
+        ).length;
+        input.value = clean;
+        input.setSelectionRange(pos, pos);
+      }
+    }
     drafts[inputKey] = {
       text: input.value,
       caret: input.selectionStart ?? input.value.length,
@@ -106,8 +114,6 @@ export function appendValueInput(
     });
   });
 
-  cell.appendChild(input);
-
   if (widgetState.activeValueInputKey === inputKey) {
     getMenuWindow().requestAnimationFrame(() => {
       input.focus();
@@ -119,7 +125,56 @@ export function appendValueInput(
     });
   }
 
-  if (!showArrows) return;
+  return input;
+}
 
-  bindArrows(leftButton, rightButton, key1, key2, scrollHandler);
+export function appendValueInput(
+  value: string,
+  inputKey: string,
+  onCommit: (text: string) => boolean | void,
+  key1: ActionKey,
+  key2: ActionKey,
+  scrollHandler: ScrollHandler,
+  options: ValueInputOptions = {},
+): void {
+  const row = getOverlay().insertRow();
+  row.className = 'scroll-selector-row';
+
+  const leftButton = row.insertCell();
+  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
+
+  const cell = row.insertCell();
+  cell.className = 'cheat-menu-cell';
+  cell.appendChild(
+    createValueInput({ value, inputKey, onCommit, accept: options.accept }),
+  );
+
+  const rightButton = row.insertCell();
+  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
+
+  if (options.showArrows ?? true) {
+    bindArrows(leftButton, rightButton, key1, key2, scrollHandler);
+  }
+}
+
+/** Two inputs in the outer columns of one row, e.g. a min – max range. */
+export function appendValueInputPair(
+  left: ValueField,
+  right: ValueField,
+  separator: string,
+): void {
+  const row = getOverlay().insertRow();
+  row.className = 'scroll-selector-row';
+
+  const leftCell = row.insertCell();
+  leftCell.className = 'cheat-menu-cell';
+  leftCell.appendChild(createValueInput(left));
+
+  const middle = row.insertCell();
+  middle.className = 'cheat-menu-cell';
+  middle.innerHTML = separator;
+
+  const rightCell = row.insertCell();
+  rightCell.className = 'cheat-menu-cell';
+  rightCell.appendChild(createValueInput(right));
 }

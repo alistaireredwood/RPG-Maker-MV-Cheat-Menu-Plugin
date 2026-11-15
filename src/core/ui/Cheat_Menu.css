@@ -11,8 +11,9 @@
   --cm-font: 'Courier New', Courier, monospace;
 }
 
-#cheat-menu-text {
+#cheat-menu {
   position: fixed;
+  min-width: 300px;
   z-index: 1000;
   background: var(--cm-bg);
   border: 1px solid var(--cm-border);
@@ -94,7 +95,6 @@
 }
 
 .cheat-menu-name {
-  width: 100px;
   height: 26px; /* always 2 lines, so the menu doesn't jump */
   margin: 0 auto;
   display: flex;
@@ -165,9 +165,13 @@
 }
 
 .cheat-menu-row-button {
-  display: inline-block;
+  display: block;
   padding: 2px 8px;
   border: 1px solid var(--cm-border);
+}
+
+.cheat-menu-buttons-section.cheat-menu-section-first > td {
+  padding-top: 8px;
 }
 
 .cheat-menu-buttons:hover .cheat-menu-row-button {
@@ -221,10 +225,6 @@
 .error-text {
   color: var(--cm-red);
   font-style: italic;
-}
-
-.cheat-menu-text {
-  /* table sub-menu container */
 }
 
 /* --- GRID --- */
@@ -528,7 +528,7 @@ body.cheat-menu-popout {
   overflow-y: auto;
 }
 
-body.cheat-menu-popout #cheat-menu-text {
+body.cheat-menu-popout #cheat-menu {
   position: static;
   width: 100%;
   box-sizing: border-box;

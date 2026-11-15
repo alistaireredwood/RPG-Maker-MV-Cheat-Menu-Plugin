@@ -76,6 +76,7 @@ export default defineFeature({
               (delta) => giveStat(actor, paramId, delta),
             ),
             applyAmount,
+            { accept: 'integer' },
           );
         } else {
           ui.scrollSelector('NULL', applyAmount);

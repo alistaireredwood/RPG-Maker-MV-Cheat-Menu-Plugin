@@ -15,5 +15,32 @@ export const widgetState = {
   activeCodeInput: null as CodeInputFocus | null,
 };
 
+const renderedValueInputs = new Set<string>();
+
+export function beginValueInputPass(): void {
+  renderedValueInputs.clear();
+}
+
+export function markValueInputRendered(inputKey: string): void {
+  renderedValueInputs.add(inputKey);
+}
+
+/**
+ * After a render, drop the drafts of value inputs that are not on screen any
+ * more (e.g. the selection moved to another variable). Pruning per render
+ * rather than while drawing one input lets several inputs coexist: the 1 s
+ * refresh used to wipe the text typed into one while it drew another.
+ */
+export function endValueInputPass(): void {
+  const drafts = widgetState.valueInputDrafts;
+  for (const key of Object.keys(drafts)) {
+    if (!renderedValueInputs.has(key)) delete drafts[key];
+  }
+  const active = widgetState.activeValueInputKey;
+  if (active !== null && !renderedValueInputs.has(active)) {
+    widgetState.activeValueInputKey = null;
+  }
+}
+
 export const getSearchKeyword = (stateKey: string): string =>
   (widgetState.searchKeywords[stateKey] || '').toLowerCase();

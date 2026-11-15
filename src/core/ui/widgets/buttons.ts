@@ -43,3 +43,25 @@ export function appendButtons(
     'cheat-menu-cell cheat-menu-buttons cheat-menu-button-cell';
   fillButton(sideCell, side, sideKey);
 }
+
+export type ButtonRow =
+  readonly [RowButton, RowButton] | readonly [RowButton, RowButton, RowButton];
+
+/**
+ * Equal buttons, one per column: two sit at the left and right edge, a third
+ * goes in the middle (Apply / Reset / Cancel). `keys` are in button order.
+ */
+export function appendButtonRow(
+  buttons: ButtonRow,
+  keys: readonly ActionKey[],
+): void {
+  const row = getOverlay().insertRow();
+  const cells = buttons.length === 2 ? [0, null, 1] : [0, 1, 2];
+  for (const index of cells) {
+    const cell = row.insertCell();
+    cell.className = 'cheat-menu-cell cheat-menu-button-cell';
+    if (index === null) continue;
+    cell.classList.add('cheat-menu-buttons');
+    fillButton(cell, buttons[index], keys[index]);
+  }
+}

@@ -3,7 +3,9 @@ import { getOverlay } from './dom.ts';
 import { createKeyAllocator } from './keyAllocator.ts';
 import {
   appendButton,
+  appendButtonRow,
   appendButtons,
+  type ButtonRow,
   type RowButton,
 } from './widgets/buttons.ts';
 import { appendCheat } from './widgets/cheat.ts';
@@ -20,7 +22,12 @@ import {
   appendWideDescription,
   type TitleOptions,
 } from './widgets/text.ts';
-import { appendValueInput } from './widgets/valueInput.ts';
+import type { NumberAccept } from './widgets/numberText.ts';
+import {
+  appendValueInput,
+  appendValueInputPair,
+  type ValueField,
+} from './widgets/valueInput.ts';
 
 /**
  * What a sub-menu's `render` draws with. Widgets that react to keys take the
@@ -47,13 +54,21 @@ export type MenuBuilder = {
     onActivate: (event?: MouseEvent) => void,
     options?: { key?: ActionKey },
   ) => ActionKey;
-  /** A wide main button + a side button in one row. Takes 2 keys (or `keys`). */
   /** One full-width button. Takes 1 key (or `key`). */
   button: (button: RowButton, options?: { key?: ActionKey }) => void;
+  /** A wide main button + a side button in one row. Takes 2 keys (or `keys`). */
   buttons: (
     main: RowButton,
     side: RowButton,
     options?: { keys?: readonly [ActionKey, ActionKey] },
+  ) => void;
+  /**
+   * 2 or 3 equal buttons, one per column, the outer ones at the menu's edges.
+   * Takes 1 key per button, in order (or `keys`).
+   */
+  buttonRow: (
+    buttons: ButtonRow,
+    options?: { keys?: readonly ActionKey[] },
   ) => void;
   /** Adds `className` to every row drawn by `render`, e.g. for spacing. */
   section: (className: string, render: () => void) => void;
@@ -63,13 +78,22 @@ export type MenuBuilder = {
     onScroll: ScrollHandler,
     options?: { selectable?: boolean; showArrows?: boolean },
   ) => void;
-  /** Editable value with ←/→. Takes 2 keys when it shows arrows. */
+  /**
+   * Editable value with ←/→. Takes 2 keys when it shows arrows. `accept`
+   * limits typing to the characters of a number.
+   */
   valueInput: (
     value: string,
     inputKey: string,
     onCommit: (text: string) => boolean | void,
     onScroll: ScrollHandler,
-    options?: { showArrows?: boolean },
+    options?: { showArrows?: boolean; accept?: NumberAccept },
+  ) => void;
+  /** Two inputs in one row, e.g. a min – max range. Takes no keys. */
+  valueInputPair: (
+    left: ValueField,
+    right: ValueField,
+    separator?: string,
   ) => void;
   codeInput: (
     inputKey: string,
@@ -112,6 +136,10 @@ export function createMenuBuilder(): MenuBuilder {
       appendButtons(main, side, mainKey, sideKey);
     },
 
+    buttonRow(buttons, options = {}) {
+      appendButtonRow(buttons, options.keys ?? buttons.map(() => keys.next()));
+    },
+
     section(className, render) {
       const rows = getOverlay().rows;
       const first = rows.length;
@@ -141,15 +169,14 @@ export function createMenuBuilder(): MenuBuilder {
     valueInput(value, inputKey, onCommit, onScroll, options = {}) {
       const showArrows = options.showArrows ?? true;
       const [left, right] = showArrows ? [keys.next(), keys.next()] : ['', ''];
-      appendValueInput(
-        value,
-        inputKey,
-        onCommit,
-        left,
-        right,
-        onScroll,
+      appendValueInput(value, inputKey, onCommit, left, right, onScroll, {
         showArrows,
-      );
+        accept: options.accept,
+      });
+    },
+
+    valueInputPair(left, right, separator = '–') {
+      appendValueInputPair(left, right, separator);
     },
 
     codeInput: appendCodeInput,

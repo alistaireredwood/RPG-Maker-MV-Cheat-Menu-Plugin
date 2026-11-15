@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { escapeHtml, formatError, formatValue, truncate } from './format.ts';
+import { formatError, formatValue, truncate } from './format.ts';
 
 describe('evaluate result formatting', () => {
   it('formats primitives, strings and functions', () => {
@@ -25,10 +25,7 @@ describe('evaluate result formatting', () => {
     expect(formatError('plain')).toBe('"plain"');
   });
 
-  it('escapes HTML and truncates long results', () => {
-    expect(escapeHtml('<b a="1">&</b>')).toBe(
-      '&lt;b a=&quot;1&quot;&gt;&amp;&lt;/b&gt;',
-    );
+  it('truncates long results', () => {
     expect(truncate('x'.repeat(2005))).toMatch(/^x{2000}\n… \(5 more chars/);
     expect(truncate('short')).toBe('short');
   });

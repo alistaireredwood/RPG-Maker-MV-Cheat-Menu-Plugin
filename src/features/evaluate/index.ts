@@ -4,7 +4,8 @@ import type { MenuBuilder } from '@src/core/ui/builder.ts';
 import { ICON_INFO } from '@src/core/ui/icons.ts';
 import { updateMenu } from '@src/core/ui/render.ts';
 import type { ScrollHandler } from '@src/core/ui/widgets/scrollSelector.ts';
-import { escapeHtml, formatError, formatValue, truncate } from './format.ts';
+import { escapeHtml } from '@src/shared/html.ts';
+import { formatError, formatValue, truncate } from './format.ts';
 import {
   activePlugins,
   insertSnippet,

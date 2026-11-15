@@ -9,6 +9,7 @@ import {
 } from '@src/shared/controls/listSelector.ts';
 import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import { playToggleSound } from '@src/shared/controls/status.ts';
+import { escapeHtml } from '@src/shared/html.ts';
 
 const SEARCH_KEY = 'switch';
 
@@ -76,7 +77,8 @@ export default defineFeature({
         ui.cheatTitle();
         ui.searchInput('Search switches...', SEARCH_KEY, jumpToFirstMatch);
         ui.title('Switch', `${index}/${total}`);
-        ui.scrollSelector(labels()[id] ?? 'NULL', scroll, {
+        const label = labels()[id];
+        ui.scrollSelector(label ? escapeHtml(label) : 'NULL', scroll, {
           selectable: true,
         });
         ui.cheat(

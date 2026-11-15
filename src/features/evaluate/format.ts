@@ -1,13 +1,5 @@
 const MAX_RESULT_LENGTH = 2000;
 
-export function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 export function formatValue(value: unknown): string {
   if (value === undefined) return 'undefined';
   if (typeof value === 'string') return JSON.stringify(value);

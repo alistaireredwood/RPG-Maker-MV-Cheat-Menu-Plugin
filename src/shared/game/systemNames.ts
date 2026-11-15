@@ -20,12 +20,17 @@ export function systemNameLabels(
   return labels;
 }
 
+/** `#0042`, zero-padded to the widest id of a list of `count` entries. */
+export function idLabel(id: number, count: number): string {
+  const width = String(count - 1).length;
+  return `#${String(id).padStart(width, '0')}`;
+}
+
 function buildLabels(names: readonly string[]): (string | null)[] {
   const anyNamed = names.some((name, i) => i > 0 && !!name);
-  const width = String(names.length - 1).length;
   return names.map((name, i) => {
     if (i === 0) return null;
     if (anyNamed) return name || null;
-    return `#${String(i).padStart(width, '0')}`;
+    return idLabel(i, names.length);
   });
 }

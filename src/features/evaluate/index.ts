@@ -204,6 +204,7 @@ export default defineFeature({
     {
       id: 'evaluate',
       name: 'Evaluate',
+      tier: 'advanced',
       render(ui) {
         // reserved before the help is drawn above them, so they never move
         const runKey = ui.nextKey();

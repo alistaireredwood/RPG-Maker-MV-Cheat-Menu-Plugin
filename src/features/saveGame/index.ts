@@ -89,6 +89,7 @@ export default defineFeature({
     {
       id: 'saveGame',
       name: 'Save Game',
+      tier: 'advanced',
       render(ui) {
         const max = maxSlot();
         if (state.slot < 1 || state.slot > max) state.slot = 1;

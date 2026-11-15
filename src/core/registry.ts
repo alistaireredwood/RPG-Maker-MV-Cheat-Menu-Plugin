@@ -87,6 +87,12 @@ export const getFeatures = (): readonly Feature<object>[] =>
 export const getMenus = (): readonly MenuEntry<object>[] =>
   menus.map((m) => m.entry);
 
+/** Menus with the anchor they were placed by — the grid layout needs both. */
+export const getMenuPlacements = (): readonly {
+  entry: MenuEntry<object>;
+  anchor?: string;
+}[] => menus.map(({ entry, anchor }) => ({ entry, anchor }));
+
 export const findMenu = (id: string | null) =>
   id === null ? undefined : menus.find((m) => m.entry.id === id);
 

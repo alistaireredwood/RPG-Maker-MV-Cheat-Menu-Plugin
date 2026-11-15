@@ -24,7 +24,8 @@ src/
     store.ts           menu runtime state (open, position, current menu, …)
     engine/            patchMethod, DataManager / Scene_Boot hooks, SceneManager.isGameActive
     input/             key map, key bindings, keyboard handling (1, `, F7, F8, F9)
-    ui/                overlay, renderer, MenuBuilder, widgets, pop-out window, CSS
+    ui/                overlay, renderer, MenuBuilder, widgets, pop-out window, CSS,
+                       main grid + its layout (grid.ts, layout.ts, menuLayout.ts)
 
   shared/              building blocks used by several features
     state.ts           selected actor + amount (persisted as the `shared` slice)
@@ -111,6 +112,7 @@ export default defineFeature({
 - **Ids** (`feature.id`, `menu.id`) are persisted: the feature id is the save slice key, and the menu id is stored as the open menu. Renaming one loses saved data.
 - **A feature may have several menus** (Party HP / MP / TP) or none (`sharedFeature`).
 - **`after`** (optional) places the feature's menus right after the given menu id in the grid. Meant for extensions; built-ins are ordered by `features.ts`.
+- **`menu.tier`** (optional, `'advanced'`) is the menu's default group in the grid; omitted means Basic, or for a feature with `after`, the group of that menu. Advanced is for tools that act on the game's internals and can break events or a save when used carelessly (Switches, Variables, Evaluate, Teleport, …). `features.test.ts` pins the built-in split.
 - **`migrateV1`** exists only for state that already lived in the pre-v2 flat save format. New features don't need it.
 
 ## Persistence
@@ -167,6 +169,18 @@ Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-co
 
 The `core/ui/widgets/append*(…, key1, key2)` functions with explicit keys are the builder's building blocks. Features don't call them.
 
+### Main grid layout
+
+The grid shows the menus in groups: **Favourites**, **Basic**, **Advanced** and **Hidden**. Every group can be collapsed, and Advanced starts collapsed. Outside edit mode, Hidden and empty groups (so Favourites at first) are not drawn.
+
+- The registry order never changes, because extensions' `after` relies on it. The user's layout is computed on top of it by pure functions in `core/ui/layout.ts` (`getLayout`, `moveInGroup`, `setGroup`, `toggleCollapsed`), which are unit-tested.
+- `core/ui/menuLayout.ts` connects them to the registry and to the per-game preference `layout`: `{ order, groups, collapsed }`. `groups` holds only menus moved out of their default group (`tier`), so a later change of a default still reaches them.
+- A menu missing from the saved order (a new feature or extension) appears after its registry predecessor, in its default group. Unknown ids are ignored.
+- **Extensions:** the extension decides. A menu placed with `after` inherits the group of that menu, including a group the user moved it to, and sits right after it. Chains of `after` are followed. An explicit `tier` wins over `after`. An extension menu without `after` (or with an unknown one) goes to the end of Basic, whatever the saved order. The registry reports anchors through `getMenuPlacements()`.
+- Edit mode is the pencil in the top bar, shown on the grid only. Each menu gets ↑/↓ within its group and a group picker (★ / B / A / H). Favourites can only be filled here. "Reset layout" restores the defaults.
+- Keys 2/3 step through `navigationMenuIds()`: Favourites → Basic → Advanced, skipping Hidden. Collapsing is visual only.
+- The grid is rebuilt on every click, so focus is restored by a per-button key (`data-focus-key`), not by index. A button keeps focus even after ↑/↓ moved its row.
+
 ### Pop-out window
 
 F7 moves the overlay into an always-on-top NW.js window that shares the game's JS context. Code touching the overlay's document (focus, selection, `requestAnimationFrame`) must use `getMenuDocument()` / `getMenuWindow()` from `core/ui/popout.ts`, never the global `document` / `window`.
@@ -206,6 +220,8 @@ Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding th
 - Bump `API_VERSION` only on a breaking change of `CheatMenuApi`. Additions keep it.
 
 ## Code style
+
+- **Target is Chromium 65** (MV 1.6's NW.js; `build.target: chrome66`). Vite transpiles syntax but adds no polyfills, so newer built-ins (`Array.prototype.flatMap` / `flat` / `at`, `Object.fromEntries`, `structuredClone`, …) must not be used outside tests. `tsconfig` `lib` is ES2020, so the type checker does not catch all of them.
 
 - **Comments explain why, never what.** Engine quirks, MV / MZ differences, save-compatibility reasons and rejected alternatives deserve a comment. What the code does should be readable from names and small functions.
 - Pure logic goes in its own file (`format.ts`, `parseVariableInput.ts`, `resources.ts`) so it can be unit-tested without the engine.

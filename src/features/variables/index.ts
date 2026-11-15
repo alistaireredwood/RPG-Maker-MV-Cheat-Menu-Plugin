@@ -65,6 +65,7 @@ export default defineFeature({
     {
       id: 'variables',
       name: 'Variables',
+      tier: 'advanced',
       render(ui) {
         const id = state.selection;
         const { index, total } = getIndexInfo(

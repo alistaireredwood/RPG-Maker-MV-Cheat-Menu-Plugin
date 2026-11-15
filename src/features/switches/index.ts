@@ -7,6 +7,7 @@ import {
   makeScroll,
   type Matcher,
 } from '@src/shared/controls/listSelector.ts';
+import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import { playToggleSound } from '@src/shared/controls/status.ts';
 
 const SEARCH_KEY = 'switch';
@@ -15,12 +16,14 @@ const state = {
   selection: 1,
 };
 
-const switchMatches: Matcher<string> = (name, keyword) =>
-  name !== '' && name.toLowerCase().includes(keyword);
+const switchMatches: Matcher<string> = (label, keyword) =>
+  label.toLowerCase().includes(keyword);
+
+const labels = () => systemNameLabels($dataSystem.switches);
 
 const scroll = makeScroll({
   stateKey: SEARCH_KEY,
-  getData: () => $dataSystem.switches,
+  getData: labels,
   getIdx: () => state.selection,
   setIdx: (idx) => {
     state.selection = idx;
@@ -30,8 +33,8 @@ const scroll = makeScroll({
 });
 
 function jumpToFirstMatch(keyword: string): void {
-  const idx = $dataSystem.switches.findIndex(
-    (name, i) => i > 0 && !!name && name.toLowerCase().includes(keyword),
+  const idx = labels().findIndex(
+    (label) => label !== null && switchMatches(label, keyword),
   );
   if (idx > 0) state.selection = idx;
 }
@@ -62,7 +65,7 @@ export default defineFeature({
       render(ui) {
         const id = state.selection;
         const { index, total } = getIndexInfo(
-          $dataSystem.switches,
+          labels(),
           id,
           switchMatches,
           getSearchKeyword(SEARCH_KEY),
@@ -72,7 +75,7 @@ export default defineFeature({
         ui.cheatTitle();
         ui.searchInput('Search switches...', SEARCH_KEY, jumpToFirstMatch);
         ui.title('Switch', `${index}/${total}`);
-        ui.scrollSelector($dataSystem.switches[id] || 'NULL', scroll, {
+        ui.scrollSelector(labels()[id] ?? 'NULL', scroll, {
           selectable: true,
         });
         ui.cheat(

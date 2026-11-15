@@ -10,6 +10,7 @@ import {
   makeScroll,
   type Matcher,
 } from '@src/shared/controls/listSelector.ts';
+import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import { parseVariableInput } from './parseVariableInput.ts';
 
 const SEARCH_KEY = 'variable';
@@ -18,14 +19,16 @@ const state = {
   selection: 1,
 };
 
-const variableMatches: Matcher<string> = (name, keyword) =>
-  name !== '' && name.toLowerCase().includes(keyword);
+const variableMatches: Matcher<string> = (label, keyword) =>
+  label.toLowerCase().includes(keyword);
+
+const labels = () => systemNameLabels($dataSystem.variables);
 
 const exists = (id: number) => $dataSystem.variables[id] != undefined;
 
 const scroll = makeScroll({
   stateKey: SEARCH_KEY,
-  getData: () => $dataSystem.variables,
+  getData: labels,
   getIdx: () => state.selection,
   setIdx: (idx) => {
     state.selection = idx;
@@ -47,8 +50,8 @@ function setTypedValue(id: number, text: string): void {
 }
 
 function jumpToFirstMatch(keyword: string): void {
-  const idx = $dataSystem.variables.findIndex(
-    (name, i) => i > 0 && !!name && name.toLowerCase().includes(keyword),
+  const idx = labels().findIndex(
+    (label) => label !== null && variableMatches(label, keyword),
   );
   if (idx > 0) state.selection = idx;
 }
@@ -65,7 +68,7 @@ export default defineFeature({
       render(ui) {
         const id = state.selection;
         const { index, total } = getIndexInfo(
-          $dataSystem.variables,
+          labels(),
           id,
           variableMatches,
           getSearchKeyword(SEARCH_KEY),
@@ -76,7 +79,7 @@ export default defineFeature({
         amountSelector(ui);
         ui.searchInput('Search variables...', SEARCH_KEY, jumpToFirstMatch);
         ui.title('Variable', `${index}/${total}`);
-        ui.scrollSelector($dataSystem.variables[id] || 'NULL', scroll, {
+        ui.scrollSelector(labels()[id] ?? 'NULL', scroll, {
           selectable: true,
         });
 

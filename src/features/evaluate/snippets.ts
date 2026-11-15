@@ -1,12 +1,13 @@
+import { ACTION_KEYS } from '@src/core/ui/keyAllocator.ts';
+
 // Every snippet uses APIs that MV and MZ share with the same signatures, so
 // one list serves both.
 
 export type Snippet = { label: string; code: string };
 export type SnippetGroup = { name: string; snippets: readonly Snippet[] };
 
-// 9 action keys: Run, Clear result, the group selector (2), and the rest is
-// one key per snippet of the open group.
-export const MAX_SNIPPETS_PER_GROUP = 5;
+export const RESERVED_KEYS = 3;
+export const MAX_SNIPPETS_PER_GROUP = ACTION_KEYS.length - RESERVED_KEYS - 2;
 
 export const SNIPPET_GROUPS: readonly SnippetGroup[] = [
   {
@@ -51,7 +52,10 @@ export const SNIPPET_GROUPS: readonly SnippetGroup[] = [
   {
     name: 'Actors',
     snippets: [
-      { label: 'Party names', code: '$gameParty.members().map(a => a.name())' },
+      {
+        label: 'Party ids & names',
+        code: '$gameParty.members().map(a => [a.actorId(), a.name()])',
+      },
       {
         label: 'Recover all',
         code: '$gameParty.members().forEach(a => a.recoverAll())',
@@ -61,7 +65,6 @@ export const SNIPPET_GROUPS: readonly SnippetGroup[] = [
         code: '$gameActors.actor(1).changeLevel(50, false)',
       },
       { label: 'Learn skill', code: '$gameActors.actor(1).learnSkill(1)' },
-      { label: 'Add actor', code: '$gameParty.addActor(2)' },
     ],
   },
   {

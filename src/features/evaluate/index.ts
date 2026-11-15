@@ -1,4 +1,5 @@
 import { defineFeature } from '@src/core/feature.ts';
+import type { ActionKey } from '@src/core/input/keymap.ts';
 import type { MenuBuilder } from '@src/core/ui/builder.ts';
 import { ICON_INFO } from '@src/core/ui/icons.ts';
 import { updateMenu } from '@src/core/ui/render.ts';
@@ -92,6 +93,16 @@ function editScript(text: string): void {
   saveScript(text);
 }
 
+function clearScript(): void {
+  if (!currentScript()) {
+    SoundManager.playBuzzer();
+    return;
+  }
+  editScript('');
+  SoundManager.playSystemSound(2);
+  updateMenu();
+}
+
 function insert(code: string): void {
   editScript(insertSnippet(currentScript(), code));
   SoundManager.playSystemSound(1);
@@ -128,15 +139,24 @@ const makePluginScroll =
     updateMenu();
   };
 
-function renderResult(ui: MenuBuilder, result: Result): void {
+function renderResult(
+  ui: MenuBuilder,
+  result: Result,
+  clearKey: ActionKey,
+): void {
   const cls = result.ok
     ? 'cheat-menu-eval-result'
     : 'cheat-menu-eval-result error-text';
-  ui.title('Result');
-  ui.cheat('Clear result', 'Activate', clearResult);
-  ui.wideDescription(
-    `<span class="${cls}">${escapeHtml(truncate(result.text))}</span>`,
-  );
+  ui.section('cheat-menu-eval-result-section', () => {
+    ui.title('Result');
+    ui.wideDescription(
+      `<span class="${cls}">${escapeHtml(truncate(result.text))}</span>`,
+    );
+    ui.button(
+      { label: 'Clear result', onActivate: clearResult },
+      { key: clearKey },
+    );
+  });
 }
 
 function renderPlugins(ui: MenuBuilder): void {
@@ -185,6 +205,11 @@ export default defineFeature({
       id: 'evaluate',
       name: 'Evaluate',
       render(ui) {
+        // reserved before the help is drawn above them, so they never move
+        const runKey = ui.nextKey();
+        const clearScriptKey = ui.nextKey();
+        const clearResultKey = ui.nextKey();
+
         ui.cheatTitle();
         ui.title('Script', undefined, {
           actions: [
@@ -196,14 +221,17 @@ export default defineFeature({
             },
           ],
         });
+        if (helpOpen) {
+          ui.section('cheat-menu-help-section', () => renderHelp(ui));
+        }
         ui.codeInput('evaluate', currentScript(), editScript, run);
-        ui.cheat('Run (Ctrl+Enter in editor)', 'Activate', run);
+        ui.buttons(
+          { label: 'Run (Ctrl+Enter)', onActivate: run },
+          { label: 'Clear', onActivate: clearScript },
+          { keys: [runKey, clearScriptKey] },
+        );
 
-        if (lastResult) renderResult(ui, lastResult);
-        // help keys stay the same whether a result is shown or not
-        else ui.skipKeys(1);
-
-        if (helpOpen) renderHelp(ui);
+        if (lastResult) renderResult(ui, lastResult, clearResultKey);
       },
     },
   ],

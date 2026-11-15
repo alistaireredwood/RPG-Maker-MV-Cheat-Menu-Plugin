@@ -1,5 +1,11 @@
 import type { ActionKey } from '@src/core/input/keymap.ts';
+import { getOverlay } from './dom.ts';
 import { createKeyAllocator } from './keyAllocator.ts';
+import {
+  appendButton,
+  appendButtons,
+  type RowButton,
+} from './widgets/buttons.ts';
 import { appendCheat } from './widgets/cheat.ts';
 import { appendCheatTitle } from './widgets/cheatTitle.ts';
 import { appendCodeInput } from './widgets/codeInput.ts';
@@ -31,12 +37,26 @@ export type MenuBuilder = {
   title: (text: string, sideText?: string, options?: TitleOptions) => void;
   description: (html: string) => void;
   wideDescription: (html: string) => void;
-  /** Label + clickable status button. Takes 1 key. */
+  /**
+   * Label + clickable status button. Takes 1 key, or `key` reserved earlier
+   * with `nextKey()` (keeps it stable when rows above it come and go).
+   */
   cheat: (
     label: string,
     status: string | number | boolean | null,
     onActivate: (event?: MouseEvent) => void,
+    options?: { key?: ActionKey },
   ) => ActionKey;
+  /** A wide main button + a side button in one row. Takes 2 keys (or `keys`). */
+  /** One full-width button. Takes 1 key (or `key`). */
+  button: (button: RowButton, options?: { key?: ActionKey }) => void;
+  buttons: (
+    main: RowButton,
+    side: RowButton,
+    options?: { keys?: readonly [ActionKey, ActionKey] },
+  ) => void;
+  /** Adds `className` to every row drawn by `render`, e.g. for spacing. */
+  section: (className: string, render: () => void) => void;
   /** `←  text  →` row. Takes 2 keys when it shows arrows. */
   scrollSelector: (
     text: string | number,
@@ -77,10 +97,32 @@ export function createMenuBuilder(): MenuBuilder {
     description: appendDescription,
     wideDescription: appendWideDescription,
 
-    cheat(label, status, onActivate) {
-      const key = keys.next();
+    cheat(label, status, onActivate, options = {}) {
+      const key = options.key ?? keys.next();
       appendCheat(label, status, key, onActivate);
       return key;
+    },
+
+    button(button, options = {}) {
+      appendButton(button, options.key ?? keys.next());
+    },
+
+    buttons(main, side, options = {}) {
+      const [mainKey, sideKey] = options.keys ?? [keys.next(), keys.next()];
+      appendButtons(main, side, mainKey, sideKey);
+    },
+
+    section(className, render) {
+      const rows = getOverlay().rows;
+      const first = rows.length;
+      render();
+      for (let i = first; i < rows.length; i++) {
+        rows[i].classList.add(className);
+        if (i === first) rows[i].classList.add('cheat-menu-section-first');
+        if (i === rows.length - 1) {
+          rows[i].classList.add('cheat-menu-section-last');
+        }
+      }
     },
 
     scrollSelector(text, onScroll, options = {}) {

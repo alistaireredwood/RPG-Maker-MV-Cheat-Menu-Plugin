@@ -155,6 +155,56 @@
   border-color: var(--cm-cyan);
 }
 
+.cheat-menu-cell.cheat-menu-button-cell {
+  border-bottom: none;
+}
+
+.cheat-menu-cell.cheat-menu-button-cell-wide {
+  max-width: none;
+  width: auto;
+}
+
+.cheat-menu-row-button {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--cm-border);
+}
+
+.cheat-menu-buttons:hover .cheat-menu-row-button {
+  border-color: var(--cm-cyan);
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.35);
+}
+
+/* --- EVALUATE --- */
+.cheat-menu-eval-result-section.cheat-menu-section-first > td {
+  padding-top: 14px;
+}
+
+.cheat-menu-eval-result-section > td.cheat-menu-search-cell {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.cheat-menu-eval-result-section.cheat-menu-section-last > td {
+  padding-top: 5px;
+}
+
+.cheat-menu-help-section > td {
+  background: rgba(0, 200, 240, 0.04);
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.cheat-menu-help-section.cheat-menu-section-first > td {
+  padding-top: 8px;
+  border-top: 1px solid var(--cm-dim);
+}
+
+.cheat-menu-help-section.cheat-menu-section-last > td {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--cm-dim);
+}
+
 .status-on {
   color: var(--cm-green);
   text-shadow: 0 0 4px rgba(0, 232, 136, 0.5);

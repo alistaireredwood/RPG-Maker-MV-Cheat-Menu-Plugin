@@ -159,9 +159,11 @@ The overlay (`<table id="cheat-menu-text">`) is **torn down and rebuilt on every
 - `ui.cheatTitle()` draws the sub-menu switcher on keys 2 / 3. Every menu starts with it.
 - `ui.title`, `ui.description`, `ui.wideDescription`: plain rows. `ui.title(text, side, { actions })` adds icon buttons (`core/ui/icons.ts`) on the right of the title. They are mouse only and take no keys, so adding or removing an icon never shifts the keys of later rows.
 - `ui.cheat(label, status, onActivate)` takes 1 key. `ui.scrollSelector(text, onScroll)` and `ui.valueInput(...)` take 2 keys (←/→) when they show arrows.
+- `ui.button(button)`: one full-width button, 1 key. `ui.buttons(main, side)`: a wide main button and a side button in one row (Evaluate: Run / Clear), 2 keys.
+- `ui.section(className, render)` adds a class to every row `render` draws (plus `cheat-menu-section-first` / `-last`), e.g. to space out and frame a block such as Evaluate's help.
 - `ui.codeInput`, `ui.searchInput`: text inputs. They stop key propagation, so typing never triggers menu or game keys.
 
-Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-codes key numbers. Changing the order of rows changes their keys, and `ui.skipKeys(n)` keeps later keys stable when a row is conditionally hidden. Fixed keys are 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
+Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-codes key numbers. Changing the order of rows changes their keys, and `ui.skipKeys(n)` keeps later keys stable when a row is conditionally hidden. A row drawn *below* optional rows can keep its key by reserving it first: `const key = ui.nextKey()` at the top of `render`, then `ui.cheat(…, { key })` / `ui.buttons(…, { keys })`. Fixed keys are 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
 
 The `core/ui/widgets/append*(…, key1, key2)` functions with explicit keys are the builder's building blocks. Features don't call them.
 
@@ -195,7 +197,7 @@ When a second feature needs something a feature folder has, move it to `shared/`
 
 ## Game-specific extensions
 
-Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. Background and decisions: [`game-specific-extensions.md`](game-specific-extensions.md); a working example: `examples/extension-template/`.
+Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. A working example: `examples/extension-template/`.
 
 - An extension pushes `{ name, apiVersion, setup(api) => features[] }` onto `window.CheatMenuExtensions`. Before Cheat Menu loads that is a plain array. `bootstrap()` drains it and replaces it with a queue that registers on `push`, so `plugins.js` order doesn't matter.
 - **Registration window:** pushes are accepted until the first `Scene_Boot.start` (`core/engine/bootHook.ts`), which runs *before* the original start because it calls `DataManager.setupNewGame` itself, and the menu can be opened on the title screen after that. At that point all plugin scripts have run, the menu can't be open and nothing has been restored from a save yet. Later pushes are ignored with a warning, because a feature registered after a restore would start from defaults and overwrite its saved slice.

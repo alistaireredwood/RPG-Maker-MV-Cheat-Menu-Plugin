@@ -14,8 +14,10 @@ export function defineInventoryFeature(config: {
   searchKey: string;
   searchPlaceholder: string;
   getData: () => (InventoryItem | null)[];
-  v1SelectionKey: string;
+  /** Only for the built-in features whose selection existed in v1 saves. */
+  v1SelectionKey?: string;
 }) {
+  const { v1SelectionKey } = config;
   const state = { selection: 1 };
   const getIdx = () => state.selection;
   const setIdx = (idx: number) => {
@@ -39,8 +41,9 @@ export function defineInventoryFeature(config: {
   return defineFeature({
     id: config.id,
     state,
-    migrateV1: (v1) =>
-      renameV1Keys<typeof state>(v1, { selection: config.v1SelectionKey }),
+    migrateV1: v1SelectionKey
+      ? (v1) => renameV1Keys<typeof state>(v1, { selection: v1SelectionKey })
+      : undefined,
     menus: [
       {
         id: config.id,

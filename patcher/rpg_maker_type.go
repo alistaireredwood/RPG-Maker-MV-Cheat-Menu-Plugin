@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path"
-
 	"github.com/robertkrimen/otto/ast"
 	"github.com/robertkrimen/otto/parser"
 )
@@ -219,6 +218,12 @@ func copyPluginFile(pwd string, fileName string, required bool) {
 
 	reader, err := os.Open(srcPath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			// put straight into js/plugins, there is nothing to copy
+			if _, dstErr := os.Stat(dstPath); dstErr == nil {
+				return
+			}
+		}
 		if required || !os.IsNotExist(err) {
 			_, _ = RedUnderline.Printf("failed to open \"%s\"\n", srcPath)
 		}

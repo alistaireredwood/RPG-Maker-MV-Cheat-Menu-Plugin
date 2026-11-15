@@ -22,6 +22,12 @@ export type Feature<S extends object = object> = {
   /** Live persisted state (initial values = defaults). Must be JSON-serializable. */
   state?: S;
   menus: MenuEntry<S>[];
+  /**
+   * Menu id to place this feature's menus right after in the main grid
+   * (unknown id = end). Meant for extensions — built-ins are ordered by
+   * `features.ts`.
+   */
+  after?: string;
 
   /** Once, when the plugin boots (install engine patches here). */
   onInit?(state: S): void;

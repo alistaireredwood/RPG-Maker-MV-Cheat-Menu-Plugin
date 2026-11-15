@@ -3,17 +3,12 @@ import tseslint from 'typescript-eslint';
 import boundaries from 'eslint-plugin-boundaries';
 import prettier from 'eslint-config-prettier';
 
-// Dependencies only point towards core, and a feature never reaches into
-// another one, so removing a feature folder (plus its line in features.ts)
-// can't break anything else.
 export default tseslint.config(
   {
     ignores: ['release/**', 'patcher/**', 'node_modules/**', 'src/types/**'],
   },
-
   js.configs.recommended,
   ...tseslint.configs.recommended,
-
   {
     files: ['scripts/**/*.js', 'eslint.config.js', '.pnpmfile.cjs'],
     languageOptions: {
@@ -25,7 +20,6 @@ export default tseslint.config(
       },
     },
   },
-
   {
     files: ['src/**/*.ts'],
     plugins: { boundaries },
@@ -36,7 +30,15 @@ export default tseslint.config(
       'boundaries/include': ['src/**/*.ts'],
       'boundaries/ignore': ['src/types/**', 'src/**/*.test.ts'],
       'boundaries/files': [
-        { category: 'app', pattern: ['src/main.ts', 'src/features.ts'] },
+        {
+          category: 'app',
+          pattern: [
+            'src/main.ts',
+            'src/features.ts',
+            'src/api.ts',
+            'src/createApi.ts',
+          ],
+        },
       ],
       'boundaries/elements': [
         { type: 'core', pattern: 'src/core' },
@@ -98,6 +100,5 @@ export default tseslint.config(
       ],
     },
   },
-
   prettier,
 );

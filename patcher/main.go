@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"strings"
-
 	"github.com/manifoldco/promptui"
 )
 
@@ -73,10 +72,7 @@ func promptTypes() {
 	// so the backup keeps the original unpatched content
 	backupDone := false
 	for i := 0; i < len(pluginNames); i++ {
-		trimmedPluginName := strings.TrimSpace(pluginNames[i])
-		if trimmedPluginName == "" {
-			continue
-		}
+		trimmedPluginName := pluginNames[i]
 		result := InjectPatchPlugin(pluginsJsPath, trimmedPluginName, shouldBackupPluginsJs && !backupDone)
 		if result == Patched {
 			backupDone = true

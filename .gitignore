@@ -29,3 +29,5 @@ release/
 .claude/settings.local.json
 
 test-game/
+
+examples/*/dist/

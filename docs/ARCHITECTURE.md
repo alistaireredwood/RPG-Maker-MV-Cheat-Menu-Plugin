@@ -8,17 +8,20 @@ The design has one goal: **every cheat is a self-contained feature folder**. Rem
 
 ```
 src/
-  main.ts              entry: bootstrap(features, { v1MenuOrder })
+  main.ts              entry: bootstrap(features, { v1MenuOrder, extensions })
   features.ts          the only list of features (array order = grid order)
+  api.ts               public contract for game-specific extensions (types + API_VERSION)
+  createApi.ts         builds the frozen `api` object handed to extensions
 
   core/                the menu itself; knows no concrete feature
     bootstrap.ts       registers features, installs UI / input / engine hooks
+    extensions.ts      window.CheatMenuExtensions queue, extension validation
     feature.ts         defineFeature(), Feature / MenuEntry types, lifecycle hooks
     registry.ts        registered features, menu list, live state, emit(hook)
     persistence.ts     pure save-format logic (v2 format, v1 migration)
     session.ts         restore / save of core + feature state
     store.ts           menu runtime state (open, position, current menu, …)
-    engine/            patchMethod, DataManager hooks, SceneManager.isGameActive
+    engine/            patchMethod, DataManager / Scene_Boot hooks, SceneManager.isGameActive
     input/             key map, key bindings, keyboard handling (1, `, F7, F8, F9)
     ui/                overlay, renderer, MenuBuilder, widgets, pop-out window, CSS
 
@@ -39,7 +42,7 @@ src/
 ## Layers and dependency rules
 
 ```
-app (main.ts, features.ts) ──► features/<name>/index.ts ──► shared ──► core
+app (main.ts, features.ts, api.ts, createApi.ts) ──► features/<name>/index.ts ──► shared ──► core
                                          └──────────────────────────────►┘
 ```
 
@@ -71,6 +74,7 @@ app (main.ts, features.ts) ──► features/<name>/index.ts ──► shared �
 1. `registerFeatures(features)`: validates unique feature / menu ids and snapshots each `state` as its defaults.
 2. Installs the UI (overlay, stylesheet, `[1]` indicator), the pop-out support, keyboard handling and the `DataManager` hooks.
 3. `emit('onInit')`: features install their engine patches.
+4. Extensions: `window.CheatMenuExtensions` is drained and replaced by a queue that registers on `push` (see [Extensions](#game-specific-extensions)).
 
 At runtime:
 
@@ -105,6 +109,7 @@ export default defineFeature({
 - **Runtime-only data** (timers, caches, "lock installed" flags, the Game Speed multiplier) lives in module variables, not in `state`, and is reset in `onLoad` / `onNewGame` when it is tied to game objects.
 - **Ids** (`feature.id`, `menu.id`) are persisted: the feature id is the save slice key, and the menu id is stored as the open menu. Renaming one loses saved data.
 - **A feature may have several menus** (Party HP / MP / TP) or none (`sharedFeature`).
+- **`after`** (optional) places the feature's menus right after the given menu id in the grid. Meant for extensions; built-ins are ordered by `features.ts`.
 - **`migrateV1`** exists only for state that already lived in the pre-v2 flat save format. New features don't need it.
 
 ## Persistence
@@ -172,6 +177,16 @@ Prefer these over re-implementing:
 | move the player | `teleport(mapId, x, y)` |
 
 When a second feature needs something a feature folder has, move it to `shared/` (`controls/` for UI, `game/` for engine logic) instead of importing across features.
+
+## Game-specific extensions
+
+Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. Background and decisions: [`game-specific-extensions.md`](game-specific-extensions.md); a working example: `examples/extension-template/`.
+
+- An extension pushes `{ name, apiVersion, setup(api) => features[] }` onto `window.CheatMenuExtensions`. Before Cheat Menu loads that is a plain array. `bootstrap()` drains it and replaces it with a queue that registers on `push`, so `plugins.js` order doesn't matter.
+- **Registration window:** pushes are accepted until the first `Scene_Boot.start` (`core/engine/bootHook.ts`), which runs *before* the original start because it calls `DataManager.setupNewGame` itself, and the menu can be opened on the title screen after that. At that point all plugin scripts have run, the menu can't be open and nothing has been restored from a save yet. Later pushes are ignored with a warning, because a feature registered after a restore would start from defaults and overwrite its saved slice.
+- `core/extensions.ts` validates before registering: matching `apiVersion` (otherwise skipped with a warning), `setup` returns an array, every feature and menu id starts with `ext.`, no `migrateV1`. Any error rejects the whole extension and is logged with its `name`. `registerFeatures` is all-or-nothing, so a rejected extension leaves no trace. Registered extension features get `onInit` right away.
+- `api` (`src/api.ts` + `src/createApi.ts`) is the only surface extensions see. It is frozen, and `createApi.test.ts` pins its keys, so growing it is a deliberate change. `api.ts` imports implementation modules as types only. It is the entry of `release/types/Cheat_Menu.d.ts` (`scripts/build-types.js`, rolldown + `rolldown-plugin-dts`), shipped together with the engine typings in `release/types/engine/`.
+- Bump `API_VERSION` only on a breaking change of `CheatMenuApi`. Additions keep it.
 
 ## Code style
 

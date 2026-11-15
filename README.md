@@ -77,6 +77,17 @@ window.onload = function() {
 
 ```
 
+Game-specific extensions
+------------------------
+
+A game can get its own cheats (a custom currency, story variables as toggles, …) from a separate script, without rebuilding Cheat Menu.
+
+* Put the extension next to the plugin as `www/js/plugins/Cheat_Menu.<name>.js` (or `js/plugins/` for MZ)
+* Run patcher.exe: it finds `Cheat_Menu.*.js` files by itself. Patching by hand works the same way as for Cheat_Menu, with `"name":"Cheat_Menu.<name>"`. The order in plugins.js doesn't matter
+* Removing the file and its plugins.js entry removes the extension. Its saved state stays in the save files and comes back if the extension is added again
+
+Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] } }` onto `window.CheatMenuExtensions`. Feature and menu ids must start with `ext.`.
+
 Uninstall
 ---------
 

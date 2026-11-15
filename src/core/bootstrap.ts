@@ -1,4 +1,6 @@
+import { installBootHook } from './engine/bootHook.ts';
 import { installSaveHooks } from './engine/saveHooks.ts';
+import { installExtensions } from './extensions.ts';
 import type { Feature } from './feature.ts';
 import { installKeyboard, onKeyDown } from './input/keyboard.ts';
 import { emit, registerFeatures } from './registry.ts';
@@ -10,6 +12,8 @@ import { installPopout } from './ui/popout.ts';
 export type BootstrapOptions = {
   /** Menu ids in the order of the pre-v2 menu (save migration of the open menu). */
   v1MenuOrder: readonly string[];
+  /** Public api handed to game-specific extensions (`window.CheatMenuExtensions`). */
+  extensions?: { api: unknown; apiVersion: number };
 };
 
 function resetSession(): void {
@@ -48,4 +52,11 @@ export function bootstrap(
   });
 
   emit('onInit');
+
+  if (options.extensions) {
+    const host = installExtensions(window, options.extensions);
+    // once the game boots, saves may be restored — a feature registered
+    // after that would start from defaults and overwrite its saved slice
+    installBootHook(host.close);
+  }
 }

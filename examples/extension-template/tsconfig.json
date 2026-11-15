@@ -1,0 +1,20 @@
+{
+  // Points at the typings in ../../release/types (run `pnpm build` in the
+  // repo root first). Outside this repo, copy release/types into ./types and
+  // replace "../../release/types" with "./types" below.
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020", "DOM"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "types": [],
+    "paths": {
+      "cheat-menu": ["../../release/types/Cheat_Menu.d.ts"]
+    }
+  },
+  "include": ["src", "../../release/types/engine"]
+}

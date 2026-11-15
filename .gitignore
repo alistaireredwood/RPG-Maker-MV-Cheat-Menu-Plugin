@@ -9,7 +9,6 @@ lerna-debug.log*
 
 node_modules
 dist
-www
 dist-ssr
 *.local
 
@@ -28,3 +27,7 @@ release/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+test-game/
+
+examples/*/dist/

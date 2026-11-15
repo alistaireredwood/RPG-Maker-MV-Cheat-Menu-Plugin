@@ -1,0 +1,335 @@
+:root {
+  --cm-bg: rgba(2, 8, 18, 0.92);
+  --cm-border: #0e2a38;
+  --cm-text: #b8d8e8;
+  --cm-dim: #4a7a96;
+  --cm-cyan: #00c8f0;
+  --cm-green: #00e888;
+  --cm-red: #ff3d5a;
+  --cm-gold: #f0c040;
+  --cm-blue: #38aaff;
+  --cm-font: 'Courier New', Courier, monospace;
+}
+
+#cheat-menu-text {
+  position: fixed;
+  z-index: 1000;
+  background: var(--cm-bg);
+  border: 1px solid var(--cm-border);
+  border-left: 2px solid var(--cm-cyan);
+  box-shadow:
+    0 0 18px rgba(0, 200, 240, 0.12),
+    inset 0 0 40px rgba(0, 0, 0, 0.4);
+  color: var(--cm-text);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  text-align: center;
+  padding: 5px 6px;
+  border-spacing: 0;
+  letter-spacing: 0.02em;
+}
+
+#cheat-menu-indicator {
+  position: fixed;
+  z-index: 999;
+  background: rgba(2, 8, 18, 0.72);
+  border: 1px solid var(--cm-border);
+  border-left: 2px solid var(--cm-cyan);
+  box-shadow: 0 0 10px rgba(0, 200, 240, 0.08);
+  color: var(--cm-cyan);
+  font-size: 11px;
+  font-family: var(--cm-font);
+  letter-spacing: 0.05em;
+  padding: 3px 6px;
+  pointer-events: none;
+  text-shadow: 0 0 6px var(--cm-cyan);
+}
+
+.scroll-selector-row {
+  width: 100%;
+  text-align: center;
+}
+
+.scroll-selector-buttons:hover {
+  color: var(--cm-cyan);
+  text-shadow: 0 0 6px var(--cm-cyan);
+  cursor: pointer;
+}
+
+.cheat-menu-buttons:hover {
+  color: var(--cm-cyan);
+  text-shadow: 0 0 6px var(--cm-cyan);
+  cursor: pointer;
+}
+
+.cheat-menu-cell {
+  border-bottom: 1px solid var(--cm-border);
+  max-width: 80px;
+  width: 80px;
+  font-weight: normal;
+  font-size: 11px;
+  padding: 2px 3px;
+  color: var(--cm-text);
+}
+
+.cheat-menu-cell-title {
+  max-width: 80px;
+  width: 80px;
+  font-weight: bold;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cm-dim);
+  padding: 4px 3px 1px;
+  border-bottom: 1px solid var(--cm-border);
+}
+
+/* RPG Maker MV disables text selection globally, so game-data text (item/
+   weapon/armor/variable/switch/actor/map/stat names) needs an explicit
+   override to be selectable/copyable (e.g. untranslated JP names) —
+   scoped away from the plugin's own labels/buttons */
+.cheat-menu-selectable {
+  user-select: text !important;
+  cursor: text;
+}
+
+.cheat-menu-name {
+  width: 100px;
+  height: 26px; /* always 2 lines, so the menu doesn't jump */
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cheat-menu-name-text {
+  width: 100%;
+  line-height: 13px;
+  max-height: 26px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cheat-menu-word {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.cheat-menu-title-side {
+  text-align: right;
+  color: var(--cm-dim);
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.status-on {
+  color: var(--cm-green);
+  text-shadow: 0 0 4px rgba(0, 232, 136, 0.5);
+}
+.status-off {
+  color: var(--cm-red);
+  text-shadow: 0 0 4px rgba(255, 61, 90, 0.4);
+}
+
+.actor-name-highlight {
+  color: var(--cm-blue);
+}
+
+.error-text {
+  color: var(--cm-red);
+  font-style: italic;
+}
+
+.cheat-menu-text {
+  /* table sub-menu container */
+}
+
+/* --- GRID --- */
+.cheat-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+.cheat-menu-grid-button {
+  background: rgba(0, 20, 35, 0.6);
+  color: var(--cm-text);
+  border: 1px solid var(--cm-border);
+  border-radius: 2px;
+  padding: 5px 8px;
+  font-family: var(--cm-font);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    text-shadow 0.15s,
+    background 0.15s;
+  text-align: center;
+}
+
+.cheat-menu-grid-button:hover {
+  background: rgba(0, 200, 240, 0.07);
+  border-color: var(--cm-cyan);
+  color: var(--cm-cyan);
+  text-shadow: 0 0 8px rgba(0, 200, 240, 0.6);
+}
+
+/* --- BACK BUTTON --- */
+.cheat-menu-back-button {
+  cursor: pointer;
+  color: var(--cm-gold);
+  font-size: 11px;
+  text-align: left !important;
+  padding: 2px 0 5px 0 !important;
+  letter-spacing: 0.04em;
+}
+
+.cheat-menu-back-button:hover span {
+  text-decoration: underline;
+  text-shadow: 0 0 6px rgba(240, 192, 64, 0.5);
+}
+
+/* --- TOP BAR --- */
+.cheat-menu-topbar-cell {
+  padding: 0 0 4px 0 !important;
+}
+
+.cheat-menu-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--cm-border);
+}
+
+.cheat-menu-topbar-title {
+  color: var(--cm-dim);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cheat-menu-topbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  color: var(--cm-cyan);
+  border: 1px solid var(--cm-border);
+  cursor: pointer;
+}
+
+.cheat-menu-topbar-button:hover {
+  border-color: var(--cm-cyan);
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.35);
+}
+
+/* --- SEARCH INPUT --- */
+.cheat-menu-cell.cheat-menu-search-cell {
+  padding: 3px 2px;
+  max-width: none;
+  width: auto;
+}
+
+.cheat-menu-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1px solid var(--cm-border);
+  border-bottom: 1px solid var(--cm-cyan);
+  color: var(--cm-text);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  padding: 2px 5px;
+  outline: none;
+  letter-spacing: 0.02em;
+}
+
+.cheat-menu-search-input::placeholder {
+  color: var(--cm-dim);
+}
+
+.cheat-menu-search-input:focus {
+  border-bottom-color: var(--cm-cyan);
+  box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
+}
+
+/* --- AMOUNT INPUT --- */
+.cheat-menu-amount-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cm-border);
+  color: var(--cm-blue);
+  font-family: var(--cm-font);
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  padding: 2px 3px;
+  outline: none;
+  letter-spacing: 0.02em;
+}
+
+.cheat-menu-amount-input:focus {
+  border-bottom-color: var(--cm-cyan);
+  box-shadow: 0 0 4px rgba(0, 200, 240, 0.25);
+}
+
+/* --- CODE INPUT (Evaluate) --- */
+.cheat-menu-code-input {
+  display: block;
+  resize: vertical;
+  font-family: Consolas, 'Courier New', monospace;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.cheat-menu-eval-result {
+  display: block;
+  max-height: 160px;
+  overflow: auto;
+  font-family: Consolas, 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: left;
+}
+
+/* typed but not yet applied (Enter) */
+.cheat-menu-value-input.is-dirty {
+  font-style: italic;
+  border-bottom-style: dashed;
+}
+
+/* rejected on Enter (e.g. not a whole number) */
+.cheat-menu-value-input.is-invalid {
+  color: var(--cm-red);
+  border-bottom-color: var(--cm-red);
+}
+
+/* --- POP-OUT WINDOW (core/popout.ts) --- */
+body.cheat-menu-popout {
+  margin: 0;
+  background: #020812;
+  overflow-y: auto;
+}
+
+body.cheat-menu-popout #cheat-menu-text {
+  position: static;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: none;
+}

@@ -31,7 +31,8 @@ src/
     state.ts           selected actor + amount (persisted as the `shared` slice)
     controls/          actorSelector, amountSelector, listSelector,
                        inventorySection, resourceCheats, status labels
-    game/              teleport, numbers, resources (HP/MP/TP changes)
+    game/              teleport, numbers, resources (HP/MP/TP changes), systemNames
+    html.ts            escapeHtml
     inventoryFeature.ts  factory for the Items / Weapons / Armors features
 
   features/<name>/     one folder per cheat
@@ -141,6 +142,7 @@ localStorage["Cheat_Menu.prefs.<gameTitle>"] = { version: 1, <key>: { … }, …
 - `definePreference` only declares; storage is read on the first `get()` / `update()`, so it may be called at module scope. Before `$dataSystem` exists, values are kept in memory only.
 - `get()` returns the live object; `update(fn)` mutates it and writes right away; `reset()` restores the defaults in place.
 - Reading takes only known keys whose value has the same kind as the default (`readPrefSlice`, `preferencesFormat.ts`), since `localStorage` is easy to edit by hand. Slices of preferences not defined right now are kept on write, and data from a newer format version is never overwritten.
+- The preference key (`layout`, `variableNames`) is persisted, like a feature id: never rename it.
 - Per-save state stays in the feature's `state`. Pick by the question "should a new game reset this?".
 
 ## UI
@@ -206,6 +208,7 @@ Prefer these over re-implementing:
 | HP / MP / TP to 0 / 1 / half / full | `resourceCheats(ui, who, resource, apply)` + `changeResource` |
 | on/off status + toggle sound | `onOffLabel(on)`, `playToggleSound(on)` |
 | move the player | `teleport(mapId, x, y)` |
+| text from the user or game data into `innerHTML` | `escapeHtml(text)` (`shared/html.ts`) |
 
 When a second feature needs something a feature folder has, move it to `shared/` (`controls/` for UI, `game/` for engine logic) instead of importing across features.
 

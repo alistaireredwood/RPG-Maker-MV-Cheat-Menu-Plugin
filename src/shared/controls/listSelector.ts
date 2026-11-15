@@ -7,6 +7,17 @@ import type {
 
 export type Matcher<T = unknown> = (item: T, keyword: string) => boolean;
 
+/**
+ * What the list functions take: a `Matcher`, or one that also uses the
+ * item's index, for lists whose visibility depends on more than the item
+ * (Variables filter on the value, looked up by id).
+ */
+export type IdMatcher<T = unknown> = (
+  item: T,
+  keyword: string,
+  id: number,
+) => boolean;
+
 export const nameMatches: Matcher<{ name?: string } | null> = (item, keyword) =>
   !!item?.name && item.name.toLowerCase().includes(keyword);
 
@@ -17,7 +28,7 @@ export function findNextIndex<T>(
   data: readonly (T | null | undefined)[],
   currentIdx: number,
   direction: Direction,
-  matches: Matcher<T>,
+  matches: IdMatcher<T>,
   keyword: string,
   startIdx = 1,
 ): number | null {
@@ -29,7 +40,7 @@ export function findNextIndex<T>(
     if (idx < startIdx) idx = len - 1;
     else if (idx >= len) idx = startIdx;
     const item = data[idx];
-    if (item && matches(item, keyword)) return idx;
+    if (item && matches(item, keyword, idx)) return idx;
   }
   return null;
 }
@@ -37,7 +48,7 @@ export function findNextIndex<T>(
 export function getIndexInfo<T>(
   data: readonly (T | null | undefined)[],
   currentIdx: number,
-  matches: Matcher<T>,
+  matches: IdMatcher<T>,
   keyword: string,
   startIdx = 1,
 ): { index: number; total: number } {
@@ -45,7 +56,7 @@ export function getIndexInfo<T>(
   let index = 0;
   for (let i = startIdx; i < data.length; i++) {
     const item = data[i];
-    if (item && matches(item, keyword)) {
+    if (item && matches(item, keyword, i)) {
       total++;
       if (i === currentIdx) index = total;
     }
@@ -58,7 +69,7 @@ export function makeScroll<T>(config: {
   getData: () => readonly (T | null | undefined)[];
   getIdx: () => number;
   setIdx: (idx: number) => void;
-  matches: Matcher<T>;
+  matches: IdMatcher<T>;
   startIdx?: number;
 }): ScrollHandler {
   return function (direction) {

@@ -14,50 +14,63 @@ const entry = (label: string, original: string, custom = false) => ({
   label,
   original,
   custom,
+  named: true,
 });
 
+const unnamed = (label: string) => ({
+  label,
+  original: label,
+  custom: false,
+  named: false,
+});
+
+// Variables hide unnamed ids through the filter, not through the base labels
+const baseLabels = (names: string[]) =>
+  systemNameLabels(names, { autoIdLabels: false });
+
 describe('displayEntries', () => {
-  it('custom name → name from System.json → hidden in a game that names some', () => {
-    const base = systemNameLabels(['', 'Gold', 'Day', '']);
+  it('custom name → name from System.json → #0042', () => {
+    const base = baseLabels(['', 'Gold', 'Day', '']);
     expect(displayEntries(base, { 2: 'Today' })).toEqual([
       null,
       entry('Gold', 'Gold'),
       entry('Today', 'Day', true),
-      null,
+      unnamed('#3'),
     ]);
   });
 
-  it('custom name → #0042 in a game that names nothing', () => {
-    const base = systemNameLabels(Array<string>(12).fill(''));
+  it('a game that names nothing: every id is unnamed unless renamed', () => {
+    const base = baseLabels(Array<string>(12).fill(''));
     const entries = displayEntries(base, { 3: 'Quest' });
     expect(entries[3]).toEqual(entry('Quest', '#03', true));
-    expect(entries[4]).toEqual(entry('#04', '#04'));
+    expect(entries[4]).toEqual(unnamed('#04'));
   });
 
-  it('a custom name makes an unnamed id visible, with its id as the original', () => {
-    const base = systemNameLabels(['', 'Gold', '', '']);
+  it('a custom name makes an unnamed id named, with its id as the original', () => {
+    const base = baseLabels(['', 'Gold', '', '']);
     expect(displayEntries(base, { 2: 'Hidden one' })[2]).toEqual(
       entry('Hidden one', '#2', true),
     );
   });
 
   it('ignores blank, non-string and out-of-range overrides', () => {
-    const base = systemNameLabels(['', 'Gold', 'Day']);
-    const overrides = { 0: 'Zero', 1: '  ', 2: 7, 9: 'Far' } as never;
+    const base = baseLabels(['', 'Gold', 'Day', '']);
+    const overrides = { 0: 'Zero', 1: '  ', 2: 7, 3: '', 9: 'Far' } as never;
     expect(displayEntries(base, overrides)).toEqual([
       null,
       entry('Gold', 'Gold'),
       entry('Day', 'Day'),
+      unnamed('#3'),
     ]);
   });
 
   it('does not modify the cached base labels', () => {
-    const names = ['', 'Gold', 'Day'];
-    const base = systemNameLabels(names);
+    const names = ['', 'Gold', 'Day', ''];
+    const base = baseLabels(names);
     const before = [...base];
-    displayEntries(base, { 1: 'Money', 2: 'Today' });
+    displayEntries(base, { 1: 'Money', 2: 'Today', 3: 'Quest' });
     expect(base).toEqual(before);
-    expect(systemNameLabels(names)).toBe(base);
+    expect(baseLabels(names)).toBe(base);
   });
 });
 
@@ -180,7 +193,7 @@ describe('name store (per-game preference)', () => {
 
   it('variableEntries reflects renames right away', async () => {
     const store = await importStore();
-    const base = systemNameLabels(['', 'Gold']);
+    const base = baseLabels(['', 'Gold']);
     expect(store.variableEntries(base)[1]?.label).toBe('Gold');
     store.renameVariable(1, 'Money');
     expect(store.variableEntries(base)[1]?.label).toBe('Money');

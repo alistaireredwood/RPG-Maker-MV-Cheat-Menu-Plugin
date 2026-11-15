@@ -12,6 +12,8 @@ export type VariableEntry = {
   /** name from System.json, or `#0042` when it has none */
   original: string;
   custom: boolean;
+  /** has a custom name or one from System.json; the filters hide the rest */
+  named: boolean;
 };
 
 // localStorage is easy to edit by hand — only a non-blank string is a name
@@ -21,9 +23,10 @@ function customName(overrides: NameOverrides, id: number): string | null {
 }
 
 /**
- * Overrides layered on top of the base labels (`systemNameLabels`), which
- * stay untouched because they are cached per `System.json` array. An id the
- * base hides becomes visible once it has a custom name.
+ * Overrides layered on top of the base labels (`systemNameLabels` without
+ * `autoIdLabels`), which stay untouched because they are cached per
+ * `System.json` array. Every id gets an entry, so the filters can show the
+ * unnamed ones as `#0042`.
  */
 export function displayEntries(
   base: readonly (string | null)[],
@@ -31,14 +34,12 @@ export function displayEntries(
 ): (VariableEntry | null)[] {
   return base.map((baseLabel, id) => {
     if (id === 0) return null;
+    const original = baseLabel ?? idLabel(id, base.length);
     const custom = customName(overrides, id);
     if (custom === null) {
-      return baseLabel === null
-        ? null
-        : { label: baseLabel, original: baseLabel, custom: false };
+      return { label: original, original, custom: false, named: !!baseLabel };
     }
-    const original = baseLabel ?? idLabel(id, base.length);
-    return { label: custom, original, custom: true };
+    return { label: custom, original, custom: true, named: true };
   });
 }
 

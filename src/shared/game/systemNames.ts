@@ -1,4 +1,18 @@
-const cache = new WeakMap<readonly string[], readonly (string | null)[]>();
+type Labels = readonly (string | null)[];
+
+const caches = {
+  auto: new WeakMap<readonly string[], Labels>(),
+  plain: new WeakMap<readonly string[], Labels>(),
+};
+
+export type SystemNameOptions = {
+  /**
+   * Label every id `#0042` when the game names nothing (default `true`).
+   * Off for lists that let the user show unnamed ids on demand (Variables'
+   * filters), where unnamed ids are always `null`.
+   */
+  autoIdLabels?: boolean;
+};
 
 /**
  * Some games ship `System.json` with every variable / switch name blanked
@@ -11,10 +25,12 @@ const cache = new WeakMap<readonly string[], readonly (string | null)[]>();
  */
 export function systemNameLabels(
   names: readonly string[],
+  { autoIdLabels = true }: SystemNameOptions = {},
 ): readonly (string | null)[] {
+  const cache = autoIdLabels ? caches.auto : caches.plain;
   let labels = cache.get(names);
   if (!labels) {
-    labels = buildLabels(names);
+    labels = buildLabels(names, autoIdLabels);
     cache.set(names, labels);
   }
   return labels;
@@ -26,11 +42,14 @@ export function idLabel(id: number, count: number): string {
   return `#${String(id).padStart(width, '0')}`;
 }
 
-function buildLabels(names: readonly string[]): (string | null)[] {
+function buildLabels(
+  names: readonly string[],
+  autoIdLabels: boolean,
+): (string | null)[] {
   const anyNamed = names.some((name, i) => i > 0 && !!name);
   return names.map((name, i) => {
     if (i === 0) return null;
-    if (anyNamed) return name || null;
+    if (anyNamed || !autoIdLabels) return name || null;
     return idLabel(i, names.length);
   });
 }

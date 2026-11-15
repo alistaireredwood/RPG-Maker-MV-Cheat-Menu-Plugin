@@ -7,7 +7,7 @@ let stylesheet: HTMLLinkElement | null = null;
 export function getOverlay(): HTMLTableElement {
   if (!overlay) {
     overlay = document.createElement('table');
-    overlay.id = 'cheat-menu-text';
+    overlay.id = 'cheat-menu';
     // clicks inside the menu must not reach the game (e.g. touch-to-move)
     overlay.addEventListener('mousedown', (event) => event.stopPropagation());
   }

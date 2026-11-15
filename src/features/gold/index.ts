@@ -19,7 +19,15 @@ export default defineFeature({
         ui.cheatTitle();
         amountSelector(ui);
         ui.title('Gold');
-        ui.valueInput(String($gameParty.gold()), 'gold', setExact, applyAmount);
+        ui.valueInput(
+          String($gameParty.gold()),
+          'gold',
+          setExact,
+          applyAmount,
+          {
+            accept: 'integer',
+          },
+        );
       },
     },
   ],

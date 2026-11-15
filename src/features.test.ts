@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { features, V1_MENU_ORDER } from '@src/features.ts';
-import { migrateV1 } from '@src/core/persistence.ts';
+import { clone, migrateV1, readSlice } from '@src/core/persistence.ts';
 
 const ctx = { features, v1MenuOrder: V1_MENU_ORDER };
 
@@ -89,5 +89,59 @@ describe('v1 save migration (same slices the legacy adapters produced)', () => {
         expect.arrayContaining(Object.keys(slice)),
       );
     }
+  });
+});
+
+describe('Variables filter in saves (per save)', () => {
+  const variables = features.find((f) => f.id === 'variables')!;
+  const defaults = clone(variables.state!) as Record<string, unknown>;
+  const defaultFilter = {
+    showUnnamed: false,
+    hideFalsy: false,
+    types: [],
+    min: null,
+    max: null,
+  };
+
+  // what the registry + session do on the first menu open after a load
+  const restore = (saved: unknown) => {
+    const live = variables.state as Record<string, unknown>;
+    for (const key of Object.keys(live)) delete live[key];
+    Object.assign(live, readSlice(defaults, saved));
+    variables.onStateRestored?.(live);
+    return live;
+  };
+
+  it('a save without `filter` (older plugin version) gets the default filter', () => {
+    expect(restore({ selection: 8 })).toEqual({
+      selection: 8,
+      filter: defaultFilter,
+    });
+  });
+
+  it('a broken `filter` falls back to the defaults', () => {
+    expect(restore({ selection: 3, filter: 'broken' }).filter).toEqual(
+      defaultFilter,
+    );
+    expect(
+      restore({ filter: { showUnnamed: 1, types: [42], min: 'x', max: 5 } })
+        .filter,
+    ).toEqual({ ...defaultFilter, max: 5 });
+  });
+
+  it('a saved filter is restored', () => {
+    const filter = {
+      showUnnamed: true,
+      hideFalsy: true,
+      types: ['number'],
+      min: 1,
+      max: null,
+    };
+    expect(restore({ filter }).filter).toEqual(filter);
+  });
+
+  it('a new game starts with the default filter', () => {
+    restore({ filter: { ...defaultFilter, hideFalsy: true } });
+    expect(restore(undefined).filter).toEqual(defaultFilter);
   });
 });

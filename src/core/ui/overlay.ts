@@ -12,6 +12,7 @@ import { renderMainMenuGrid, resetGridFocus } from './grid.ts';
 import { closePopout, getMenuDocument } from './popout.ts';
 import { positionMenu } from './position.ts';
 import { runUpdating, setRenderer } from './render.ts';
+import { beginValueInputPass, endValueInputPass } from './widgetState.ts';
 import { appendBackButton, appendTopBar } from './topBar.ts';
 import { appendDescription, appendTitle } from './widgets/text.ts';
 
@@ -23,6 +24,7 @@ let renderTimer: ReturnType<typeof setInterval> | null = null;
 function renderMenu(): void {
   runUpdating(() => {
     clearKeyBindings();
+    beginValueInputPass();
 
     // a stale/unknown id (e.g. restored from a save, feature removed) would
     // render an empty overlay — fall back to the main grid instead
@@ -38,7 +40,7 @@ function renderMenu(): void {
       renderMainMenuGrid();
     } else {
       overlay.innerHTML = '';
-      overlay.className = 'cheat-menu-text';
+      overlay.className = 'cheat-menu-submenu';
 
       appendBackButton();
 
@@ -57,6 +59,7 @@ function renderMenu(): void {
 
     appendTopBar();
     positionMenu();
+    endValueInputPass();
   });
 }
 

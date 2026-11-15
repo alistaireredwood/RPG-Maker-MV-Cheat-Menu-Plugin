@@ -83,6 +83,7 @@ export function appendInventorySection(
       key3,
       key4,
       config.applyFn,
+      { accept: 'integer' },
     );
   } else {
     appendScrollSelector(count, key3, key4, config.applyFn);

@@ -1,4 +1,4 @@
-import { getOverlay } from '@src/core/ui/dom.ts';
+import { getOverlay, insertSectionStartRow } from '@src/core/ui/dom.ts';
 
 export type TitleAction = {
   /** SVG markup, e.g. from `core/ui/icons.ts` */
@@ -17,10 +17,9 @@ export function appendTitle(
   sideText?: string,
   options: TitleOptions = {},
 ): void {
-  const titleRow = getOverlay().insertRow();
-  const temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell-title';
+  const titleRow = insertSectionStartRow('cheat-menu-title-row');
   const titleText = titleRow.insertCell();
+  titleText.colSpan = 2;
   titleText.className = 'cheat-menu-cell-title';
   const sideCell = titleRow.insertCell();
   sideCell.className = 'cheat-menu-cell-title cheat-menu-title-side';
@@ -49,24 +48,11 @@ function createTitleAction(action: TitleAction): HTMLButtonElement {
   return button;
 }
 
-export function appendDescription(text: string): void {
-  const titleRow = getOverlay().insertRow();
-  let temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell';
-  const titleText = titleRow.insertCell();
-  titleText.className = 'cheat-menu-cell';
-  temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell';
-  titleText.innerHTML = text;
-}
-
-export function appendWideDescription(html: string): void {
+export function appendDescription(html: string): void {
   const row = getOverlay().insertRow();
   const cell = row.insertCell();
   cell.colSpan = 3;
   cell.className = 'cheat-menu-cell cheat-menu-search-cell';
-  // the table sizes itself to its widest content, so the text wraps to the
-  // width the other rows set instead of stretching the menu to one line
   const text = document.createElement('div');
   text.className = 'cheat-menu-wide-text';
   text.innerHTML = html;

@@ -13,7 +13,7 @@ import { closePopout, getMenuDocument } from './popout.ts';
 import { positionMenu } from './position.ts';
 import { runUpdating, setRenderer } from './render.ts';
 import { beginValueInputPass, endValueInputPass } from './widgetState.ts';
-import { appendBackButton, appendTopBar } from './topBar.ts';
+import { appendTopBar } from './topBar.ts';
 import { appendDescription, appendTitle } from './widgets/text.ts';
 
 const RENDER_INTERVAL_MS = 1000;
@@ -41,8 +41,6 @@ function renderMenu(): void {
     } else {
       overlay.innerHTML = '';
       overlay.className = 'cheat-menu-submenu';
-
-      appendBackButton();
 
       try {
         renderMenuEntry(menu.entry.id, createMenuBuilder());

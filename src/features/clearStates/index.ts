@@ -30,11 +30,9 @@ export default defineFeature({
         ui.cheat('Clear Party States', 'Activate', clearPartyStates);
         const actor = actorSelector(ui);
         ui.title('Current State');
-        ui.cheat(
-          'Number Effects:',
-          actor?.states()?.length ?? 0,
-          clearSelectedActorStates,
-        );
+        ui.cheat('Number Effects:', 'Clear', clearSelectedActorStates, {
+          value: actor?.states()?.length ?? 0,
+        });
       },
     },
   ],

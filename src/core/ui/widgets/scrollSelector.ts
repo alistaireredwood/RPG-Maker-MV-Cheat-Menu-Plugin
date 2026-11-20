@@ -1,6 +1,7 @@
 import { bindKey } from '@src/core/input/keyListeners.ts';
 import type { ActionKey } from '@src/core/input/keymap.ts';
 import { getOverlay } from '@src/core/ui/dom.ts';
+import { keyHint } from './keyHint.ts';
 
 export type Direction = 'left' | 'right';
 export type ScrollHandler = (direction: Direction, event?: MouseEvent) => void;
@@ -38,12 +39,39 @@ export function bindArrows(
   key2: ActionKey,
   scrollHandler: ScrollHandler,
 ): void {
-  leftButton.innerHTML = '←[' + key1 + ']';
-  rightButton.innerHTML = '[' + key2 + ']→';
+  leftButton.innerHTML = '←' + keyHint(key1);
+  rightButton.innerHTML = keyHint(key2) + '→';
   leftButton.addEventListener('mousedown', scrollHandler.bind(null, 'left'));
   rightButton.addEventListener('mousedown', scrollHandler.bind(null, 'right'));
   bindKey(key1, scrollHandler.bind(null, 'left'));
   bindKey(key2, scrollHandler.bind(null, 'right'));
+}
+
+export type ArrowRow = {
+  left: HTMLElement;
+  value: HTMLElement;
+  right: HTMLElement;
+};
+
+export function appendArrowRow(): ArrowRow {
+  const row = getOverlay().insertRow();
+  row.className = 'scroll-selector-row';
+  const cell = row.insertCell();
+  cell.colSpan = 3;
+  cell.className = 'cheat-menu-cell cheat-menu-arrow-cell';
+
+  const box = document.createElement('div');
+  box.className = 'cheat-menu-arrow-row';
+  const left = document.createElement('span');
+  left.className = 'scroll-selector-buttons';
+  const value = document.createElement('div');
+  value.className = 'cheat-menu-arrow-value';
+  const right = document.createElement('span');
+  right.className = 'scroll-selector-buttons';
+  box.append(left, value, right);
+  cell.appendChild(box);
+
+  return { left, value, right };
 }
 
 export function appendScrollSelector(
@@ -53,20 +81,13 @@ export function appendScrollSelector(
   scrollHandler: ScrollHandler,
   selectable?: boolean,
   showArrows = true,
-): void {
-  const scrollSelector = getOverlay().insertRow();
-  scrollSelector.className = 'scroll-selector-row';
-
-  const scrollLeftButton = scrollSelector.insertCell();
-  scrollLeftButton.className = 'scroll-selector-buttons cheat-menu-cell';
-
-  const scrollText = scrollSelector.insertCell();
-  scrollText.className = selectable
-    ? 'cheat-menu-cell cheat-menu-selectable'
-    : 'cheat-menu-cell';
-
-  const scrollRightButton = scrollSelector.insertCell();
-  scrollRightButton.className = 'scroll-selector-buttons cheat-menu-cell';
+): HTMLElement {
+  const {
+    left: scrollLeftButton,
+    value: scrollText,
+    right: scrollRightButton,
+  } = appendArrowRow();
+  if (selectable) scrollText.classList.add('cheat-menu-selectable');
 
   if (selectable) {
     const box = document.createElement('div');
@@ -82,7 +103,8 @@ export function appendScrollSelector(
     scrollText.innerHTML = text + '';
   }
 
-  if (!showArrows) return;
-
-  bindArrows(scrollLeftButton, scrollRightButton, key1, key2, scrollHandler);
+  if (showArrows) {
+    bindArrows(scrollLeftButton, scrollRightButton, key1, key2, scrollHandler);
+  }
+  return scrollText;
 }

@@ -14,6 +14,21 @@ export function getOverlay(): HTMLTableElement {
   return overlay;
 }
 
+export function insertSectionStartRow(className: string): HTMLTableRowElement {
+  const rows = getOverlay().rows;
+  const previous = rows[rows.length - 1];
+  if (
+    previous &&
+    !previous.classList.contains('cheat-menu-nav-row') &&
+    !previous.classList.contains('cheat-menu-search-row')
+  ) {
+    previous.classList.add('cheat-menu-section-end');
+  }
+  const row = getOverlay().insertRow();
+  row.className = className;
+  return row;
+}
+
 export function installStylesheet(): void {
   if (stylesheet) return;
   stylesheet = document.createElement('link');

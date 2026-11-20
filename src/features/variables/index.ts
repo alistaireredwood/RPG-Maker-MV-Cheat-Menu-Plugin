@@ -270,6 +270,7 @@ function renderSelector(
       `variableName:${id}`,
       (text) => commitName(id, shown, text),
       scroll,
+      { wide: true },
     );
   } else {
     const label = shown
@@ -310,15 +311,21 @@ function renderNameEditing(
   ui.scrollSelector(readOnlyLabel($gameVariables.value(id)), addAmount, {
     showArrows: false,
   });
-  ui.cheat('Reset name', entry ? escapeHtml(entry.original) : 'NULL', () => {
-    if (entry) resetName(id, entry);
-    else SoundManager.playBuzzer();
-  });
+  ui.cheat(
+    'Reset name',
+    entry ? escapeHtml(entry.original) : 'NULL',
+    () => {
+      if (entry) resetName(id, entry);
+      else SoundManager.playBuzzer();
+    },
+    { wide: true },
+  );
   const renamed = countNames(nameOverrides());
   ui.cheat(
     'Reset all names',
     renamed ? `${renamed} renamed` : 'None',
     resetAllNames,
+    { wide: true },
   );
 }
 

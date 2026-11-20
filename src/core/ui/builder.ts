@@ -8,7 +8,7 @@ import {
   type ButtonRow,
   type RowButton,
 } from './widgets/buttons.ts';
-import { appendCheat } from './widgets/cheat.ts';
+import { appendCheat, type CheatLayout } from './widgets/cheat.ts';
 import { appendCheatTitle } from './widgets/cheatTitle.ts';
 import { appendCodeInput } from './widgets/codeInput.ts';
 import {
@@ -19,7 +19,6 @@ import { appendSearchInput } from './widgets/searchInput.ts';
 import {
   appendDescription,
   appendTitle,
-  appendWideDescription,
   type TitleOptions,
 } from './widgets/text.ts';
 import type { NumberAccept } from './widgets/numberText.ts';
@@ -38,21 +37,26 @@ export type MenuBuilder = {
   /** Leaves keys unused, e.g. so later rows keep their key when one is hidden. */
   skipKeys: (count?: number) => void;
 
-  /** "Cheat" title + sub-menu switcher (keys 2/3, not allocated). */
+  /** Sub-menu switcher: the previous / next menu at keys 2 / 3 (not allocated). */
   cheatTitle: () => void;
   /** Section title. `actions`: icon buttons on the right, mouse only, no keys. */
   title: (text: string, sideText?: string, options?: TitleOptions) => void;
+  /** Text over the full width of the menu. */
   description: (html: string) => void;
+  /** Same as `description`; kept so extensions calling it still work. */
   wideDescription: (html: string) => void;
   /**
    * Label + clickable status button. Takes 1 key, or `key` reserved earlier
    * with `nextKey()` (keeps it stable when rows above it come and go).
+   * `value`: shown in the middle column, e.g. a count the button acts on.
+   * `wide`: the button takes the middle column too, aligned right — for long
+   * statuses such as map names.
    */
   cheat: (
     label: string,
     status: string | number | boolean | null,
     onActivate: (event?: MouseEvent) => void,
-    options?: { key?: ActionKey },
+    options?: { key?: ActionKey } & CheatLayout,
   ) => ActionKey;
   /** One full-width button. Takes 1 key (or `key`). */
   button: (button: RowButton, options?: { key?: ActionKey }) => void;
@@ -80,14 +84,15 @@ export type MenuBuilder = {
   ) => void;
   /**
    * Editable value with ←/→. Takes 2 keys when it shows arrows. `accept`
-   * limits typing to the characters of a number.
+   * limits typing to the characters of a number. `wide`: the field takes the
+   * full width instead of a value's narrow one — for text such as a name.
    */
   valueInput: (
     value: string,
     inputKey: string,
     onCommit: (text: string) => boolean | void,
     onScroll: ScrollHandler,
-    options?: { showArrows?: boolean; accept?: NumberAccept },
+    options?: { showArrows?: boolean; accept?: NumberAccept; wide?: boolean },
   ) => void;
   /** Two inputs in one row, e.g. a min – max range. Takes no keys. */
   valueInputPair: (
@@ -119,11 +124,11 @@ export function createMenuBuilder(): MenuBuilder {
     cheatTitle: appendCheatTitle,
     title: appendTitle,
     description: appendDescription,
-    wideDescription: appendWideDescription,
+    wideDescription: appendDescription,
 
     cheat(label, status, onActivate, options = {}) {
       const key = options.key ?? keys.next();
-      appendCheat(label, status, key, onActivate);
+      appendCheat(label, status, key, onActivate, options);
       return key;
     },
 
@@ -172,6 +177,7 @@ export function createMenuBuilder(): MenuBuilder {
       appendValueInput(value, inputKey, onCommit, left, right, onScroll, {
         showArrows,
         accept: options.accept,
+        wide: options.wide,
       });
     },
 

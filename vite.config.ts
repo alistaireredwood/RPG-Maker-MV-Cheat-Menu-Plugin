@@ -11,6 +11,9 @@ export default defineConfig({
   build: {
     target: 'chrome66',
     outDir: './release/www/js/plugins',
+    // fonts must end up inside Cheat_Menu.css — the only stylesheet file the
+    // patcher installs
+    assetsInlineLimit: (file) => file.endsWith('.woff2') || undefined,
     rolldownOptions: {
       input: {
         Cheat_Menu: 'src/main.ts',

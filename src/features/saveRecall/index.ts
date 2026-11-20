@@ -2,6 +2,7 @@ import { defineFeature } from '@src/core/feature.ts';
 import { renameV1Keys } from '@src/core/persistence.ts';
 import { updateMenu } from '@src/core/ui/render.ts';
 import { teleport } from '@src/shared/game/teleport.ts';
+import { escapeHtml } from '@src/shared/html.ts';
 
 const EMPTY = -1;
 
@@ -14,6 +15,9 @@ const state = {
 };
 
 const mapName = (mapId: number) => $dataMapInfos[mapId]?.name || 'NULL';
+
+const positionLabel = (mapId: number, x: number, y: number) =>
+  `${mapId}: ${escapeHtml(mapName(mapId))} (${x}, ${y})`;
 
 function savePosition(index: number): void {
   state.positions[index] = {
@@ -48,24 +52,21 @@ export default defineFeature({
       tier: 'advanced',
       render(ui) {
         ui.cheatTitle();
-        ui.title('Current Position: ');
+        ui.title('Current Position');
         const mapId = $gameMap.mapId();
-        if ($dataMapInfos[mapId]?.name) {
-          ui.description(`${mapId}: ${mapName(mapId)}`);
-          ui.description(`(${$gamePlayer.x}, ${$gamePlayer.y})`);
-        } else {
-          ui.description('NULL');
-        }
+        ui.description(
+          $dataMapInfos[mapId]?.name
+            ? positionLabel(mapId, $gamePlayer.x, $gamePlayer.y)
+            : 'NULL',
+        );
 
         state.positions.forEach(({ m, x, y }, index) => {
-          const saved = m !== EMPTY;
           ui.title(`Position ${index + 1}`);
-          ui.cheat('Save:', saved ? `${m}: ${mapName(m)}` : 'NULL', () =>
-            savePosition(index),
-          );
-          ui.cheat('Recall:', saved ? `(${x}, ${y})` : 'NULL', () =>
-            recallPosition(index),
-          );
+          ui.description(m !== EMPTY ? positionLabel(m, x, y) : 'NULL');
+          ui.buttonRow([
+            { label: 'Save', onActivate: () => savePosition(index) },
+            { label: 'Recall', onActivate: () => recallPosition(index) },
+          ]);
         });
       },
     },

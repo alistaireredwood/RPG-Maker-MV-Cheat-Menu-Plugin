@@ -1,18 +1,19 @@
 import { bindKey } from '@src/core/input/keyListeners.ts';
 import type { ActionKey } from '@src/core/input/keymap.ts';
 import { getOverlay } from '@src/core/ui/dom.ts';
+import { keyHint } from './keyHint.ts';
 
 export type RowButton = {
   label: string;
   onActivate: (event?: MouseEvent) => void;
 };
 
-function fillButton(cell: HTMLElement, button: RowButton, key: ActionKey) {
+function fillButton(target: HTMLElement, button: RowButton, key: ActionKey) {
   const inner = document.createElement('span');
   inner.className = 'cheat-menu-row-button';
-  inner.innerHTML = `${button.label}[${key}]`;
-  cell.appendChild(inner);
-  cell.addEventListener('mousedown', button.onActivate);
+  inner.innerHTML = button.label + keyHint(key);
+  target.appendChild(inner);
+  target.addEventListener('mousedown', button.onActivate);
   bindKey(key, button.onActivate);
 }
 
@@ -48,20 +49,36 @@ export type ButtonRow =
   readonly [RowButton, RowButton] | readonly [RowButton, RowButton, RowButton];
 
 /**
- * Equal buttons, one per column: two sit at the left and right edge, a third
- * goes in the middle (Apply / Reset / Cancel). `keys` are in button order.
+ * Equal buttons at the menu's edges: three take one column each (Apply /
+ * Reset / Cancel), two split the full width. `keys` are in button order.
  */
 export function appendButtonRow(
   buttons: ButtonRow,
   keys: readonly ActionKey[],
 ): void {
   const row = getOverlay().insertRow();
-  const cells = buttons.length === 2 ? [0, null, 1] : [0, 1, 2];
-  for (const index of cells) {
+
+  if (buttons.length === 2) {
     const cell = row.insertCell();
-    cell.className = 'cheat-menu-cell cheat-menu-button-cell';
-    if (index === null) continue;
-    cell.classList.add('cheat-menu-buttons');
-    fillButton(cell, buttons[index], keys[index]);
+    cell.colSpan = 3;
+    cell.className =
+      'cheat-menu-cell cheat-menu-button-cell cheat-menu-button-cell-wide';
+    const pair = document.createElement('div');
+    pair.className = 'cheat-menu-button-pair';
+    buttons.forEach((button, index) => {
+      const slot = document.createElement('span');
+      slot.className = 'cheat-menu-buttons';
+      fillButton(slot, button, keys[index]);
+      pair.appendChild(slot);
+    });
+    cell.appendChild(pair);
+    return;
+  }
+
+  for (const [index, button] of buttons.entries()) {
+    const cell = row.insertCell();
+    cell.className =
+      'cheat-menu-cell cheat-menu-button-cell cheat-menu-buttons';
+    fillButton(cell, button, keys[index]);
   }
 }

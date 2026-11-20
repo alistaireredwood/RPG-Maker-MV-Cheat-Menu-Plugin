@@ -7,7 +7,11 @@ import {
   widgetState,
 } from '@src/core/ui/widgetState.ts';
 import { sanitizeNumberText, type NumberAccept } from './numberText.ts';
-import { bindArrows, type ScrollHandler } from './scrollSelector.ts';
+import {
+  appendArrowRow,
+  bindArrows,
+  type ScrollHandler,
+} from './scrollSelector.ts';
 
 export type ValueField = {
   value: string;
@@ -26,6 +30,7 @@ export type ValueField = {
 export type ValueInputOptions = {
   showArrows?: boolean;
   accept?: NumberAccept;
+  wide?: boolean;
 };
 
 function createValueInput(field: ValueField): HTMLInputElement {
@@ -137,20 +142,19 @@ export function appendValueInput(
   scrollHandler: ScrollHandler,
   options: ValueInputOptions = {},
 ): void {
-  const row = getOverlay().insertRow();
-  row.className = 'scroll-selector-row';
-
-  const leftButton = row.insertCell();
-  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
-
-  const cell = row.insertCell();
-  cell.className = 'cheat-menu-cell';
-  cell.appendChild(
-    createValueInput({ value, inputKey, onCommit, accept: options.accept }),
-  );
-
-  const rightButton = row.insertCell();
-  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
+  const {
+    left: leftButton,
+    value: cell,
+    right: rightButton,
+  } = appendArrowRow();
+  const input = createValueInput({
+    value,
+    inputKey,
+    onCommit,
+    accept: options.accept,
+  });
+  if (options.wide) input.classList.add('cheat-menu-input-wide');
+  cell.appendChild(input);
 
   if (options.showArrows ?? true) {
     bindArrows(leftButton, rightButton, key1, key2, scrollHandler);

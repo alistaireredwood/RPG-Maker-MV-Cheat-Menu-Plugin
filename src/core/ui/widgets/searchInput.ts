@@ -1,4 +1,4 @@
-import { getOverlay } from '@src/core/ui/dom.ts';
+import { insertSectionStartRow } from '@src/core/ui/dom.ts';
 import { getMenuWindow } from '@src/core/ui/popout.ts';
 import { isUpdatingMenu, updateMenu } from '@src/core/ui/render.ts';
 import { widgetState } from '@src/core/ui/widgetState.ts';
@@ -8,7 +8,7 @@ export function appendSearchInput(
   stateKey: string,
   onSearchChange?: (keyword: string) => void,
 ): void {
-  const row = getOverlay().insertRow();
+  const row = insertSectionStartRow('cheat-menu-search-row');
   const cell = row.insertCell();
   cell.colSpan = 3;
   cell.className = 'cheat-menu-cell cheat-menu-search-cell';

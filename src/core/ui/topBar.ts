@@ -1,7 +1,13 @@
+import { findMenu } from '@src/core/registry.ts';
 import { store } from '@src/core/store.ts';
 import { getOverlay } from './dom.ts';
 import { isLayoutEditing, toggleLayoutEditing } from './grid.ts';
-import { ICON_EDIT, ICON_POP_IN, ICON_POP_OUT } from './icons.ts';
+import {
+  ICON_CHEVRON_LEFT,
+  ICON_EDIT,
+  ICON_POP_IN,
+  ICON_POP_OUT,
+} from './icons.ts';
 import { canPopout, togglePopout } from './popout.ts';
 import { updateMenu } from './render.ts';
 
@@ -39,8 +45,16 @@ export function appendTopBar(): void {
   const editing = store.currentMenuId === null && isLayoutEditing();
   const title = document.createElement('span');
   title.className = 'cheat-menu-topbar-title';
-  title.textContent = editing ? 'Cheat Menu · edit layout' : 'Cheat Menu';
-  bar.appendChild(title);
+  if (store.currentMenuId === null) {
+    title.textContent = editing ? 'Cheat Menu · edit layout' : 'Cheat Menu';
+    bar.appendChild(title);
+  } else {
+    const start = document.createElement('div');
+    start.className = 'cheat-menu-topbar-start';
+    start.appendChild(backButton());
+    title.textContent = findMenu(store.currentMenuId)?.entry.name ?? '';
+    bar.append(start, title);
+  }
 
   const actions = document.createElement('div');
   actions.className = 'cheat-menu-topbar-actions';
@@ -72,16 +86,18 @@ export function appendTopBar(): void {
   );
 }
 
-export function appendBackButton(): void {
-  const backRow = getOverlay().insertRow(0);
-  const backCell = backRow.insertCell();
-  backCell.colSpan = 3;
-  backCell.className = 'cheat-menu-back-button';
-  backCell.innerHTML = `<span>&larr; Back to Main Menu</span>`;
-
-  backCell.onclick = () => {
+function backButton(): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'cheat-menu-back-button';
+  button.innerHTML = ICON_CHEVRON_LEFT + 'Back';
+  button.title = 'Back to Main Menu';
+  button.tabIndex = -1;
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
     SoundManager.playSystemSound(1);
     store.currentMenuId = null;
     updateMenu();
-  };
+  });
+  return button;
 }

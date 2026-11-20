@@ -51,7 +51,9 @@ function navLink(direction: Direction, key: ActionKey): HTMLElement {
 }
 
 export function appendCheatTitle(): void {
-  const cell = getOverlay().insertRow().insertCell();
+  const row = getOverlay().insertRow();
+  row.className = 'cheat-menu-nav-row';
+  const cell = row.insertCell();
   cell.colSpan = 3;
   cell.className = 'cheat-menu-cell cheat-menu-arrow-cell';
 

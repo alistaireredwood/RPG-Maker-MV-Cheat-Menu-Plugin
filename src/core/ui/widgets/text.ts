@@ -1,4 +1,4 @@
-import { getOverlay } from '@src/core/ui/dom.ts';
+import { getOverlay, insertSectionStartRow } from '@src/core/ui/dom.ts';
 
 export type TitleAction = {
   /** SVG markup, e.g. from `core/ui/icons.ts` */
@@ -17,7 +17,7 @@ export function appendTitle(
   sideText?: string,
   options: TitleOptions = {},
 ): void {
-  const titleRow = getOverlay().insertRow();
+  const titleRow = insertSectionStartRow('cheat-menu-title-row');
   const titleText = titleRow.insertCell();
   titleText.colSpan = 2;
   titleText.className = 'cheat-menu-cell-title';

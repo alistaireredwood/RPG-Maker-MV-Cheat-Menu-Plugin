@@ -8,7 +8,7 @@ import {
   type ButtonRow,
   type RowButton,
 } from './widgets/buttons.ts';
-import { appendCheat } from './widgets/cheat.ts';
+import { appendCheat, type CheatLayout } from './widgets/cheat.ts';
 import { appendCheatTitle } from './widgets/cheatTitle.ts';
 import { appendCodeInput } from './widgets/codeInput.ts';
 import {
@@ -48,12 +48,14 @@ export type MenuBuilder = {
    * Label + clickable status button. Takes 1 key, or `key` reserved earlier
    * with `nextKey()` (keeps it stable when rows above it come and go).
    * `value`: shown in the middle column, e.g. a count the button acts on.
+   * `wide`: the button takes the middle column too, aligned right — for long
+   * statuses such as map names.
    */
   cheat: (
     label: string,
     status: string | number | boolean | null,
     onActivate: (event?: MouseEvent) => void,
-    options?: { key?: ActionKey; value?: string | number },
+    options?: { key?: ActionKey } & CheatLayout,
   ) => ActionKey;
   /** One full-width button. Takes 1 key (or `key`). */
   button: (button: RowButton, options?: { key?: ActionKey }) => void;
@@ -124,7 +126,7 @@ export function createMenuBuilder(): MenuBuilder {
 
     cheat(label, status, onActivate, options = {}) {
       const key = options.key ?? keys.next();
-      appendCheat(label, status, key, onActivate, options.value);
+      appendCheat(label, status, key, onActivate, options);
       return key;
     },
 

@@ -48,23 +48,29 @@ export default defineFeature({
       tier: 'advanced',
       render(ui) {
         ui.cheatTitle();
-        ui.title('Current Position: ');
+        ui.title('Current Position');
         const mapId = $gameMap.mapId();
         if ($dataMapInfos[mapId]?.name) {
-          ui.description(`${mapId}: ${mapName(mapId)}`);
-          ui.description(`(${$gamePlayer.x}, ${$gamePlayer.y})`);
+          ui.wideDescription(`${mapId}: ${mapName(mapId)}`);
+          ui.wideDescription(`(${$gamePlayer.x}, ${$gamePlayer.y})`);
         } else {
-          ui.description('NULL');
+          ui.wideDescription('NULL');
         }
 
         state.positions.forEach(({ m, x, y }, index) => {
           const saved = m !== EMPTY;
           ui.title(`Position ${index + 1}`);
-          ui.cheat('Save:', saved ? `${m}: ${mapName(m)}` : 'NULL', () =>
-            savePosition(index),
+          ui.cheat(
+            'Save:',
+            saved ? `${m}: ${mapName(m)}` : 'NULL',
+            () => savePosition(index),
+            { wide: true },
           );
-          ui.cheat('Recall:', saved ? `(${x}, ${y})` : 'NULL', () =>
-            recallPosition(index),
+          ui.cheat(
+            'Recall:',
+            saved ? `(${x}, ${y})` : 'NULL',
+            () => recallPosition(index),
+            { wide: true },
           );
         });
       },

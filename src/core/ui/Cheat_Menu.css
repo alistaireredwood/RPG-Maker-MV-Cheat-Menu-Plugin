@@ -126,6 +126,12 @@
   padding: 6px 0;
 }
 
+.cheat-menu-cell.cheat-menu-status-wide {
+  max-width: none;
+  width: auto;
+  text-align: right;
+}
+
 .cheat-menu-arrow-row {
   display: flex;
   align-items: center;
@@ -165,6 +171,7 @@
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--cm-dim);
   padding: 12px 4px 4px;
 }

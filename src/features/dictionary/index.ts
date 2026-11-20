@@ -82,14 +82,15 @@ function renderSources(ui: MenuBuilder, sources: SourceInfo[]): void {
   ui.title('Names from', 'highest first');
   const custom = countNames(nameOverrides());
   if (custom > 0) {
-    ui.description(`Your variable names: ${namesCount(custom)}`);
+    ui.wideDescription(`Your variable names: ${namesCount(custom)}`);
   }
+  // full width: a file name doesn't fit the middle cell of a row
   for (const source of sources) {
-    ui.description(
+    ui.wideDescription(
       `${escapeHtml(sourceLabel(source))}: ${namesCount(source.size)}`,
     );
   }
-  ui.description('The game (System.json)');
+  ui.wideDescription('The game (System.json)');
 }
 
 export default defineFeature({

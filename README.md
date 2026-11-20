@@ -26,7 +26,7 @@ Available Cheats Are
 * Edit Items, Weapons, Armor (with search by name)
   * Amounts can be picked from presets or typed in; Gold, Stats, Variables and item counts can also be set to an exact value by typing it and pressing Enter
 * Change player movement speed, optionally locking it so the game can't change it
-* Game Speed: speed up the whole game (map, events, battles, messages) up to x10
+* Game Speed: slow down (x0.25, x0.5) or speed up the whole game (map, events, battles, messages) up to x10. The picked speed takes effect on Apply; Reset goes back to x1
 * Unlock Controls: force mouse / touch movement and Ctrl message skipping in games that disable them
 * Clear Status/States Effects
 * Edit Variables/Switches (with search by name), with names from a dictionary file (see below)

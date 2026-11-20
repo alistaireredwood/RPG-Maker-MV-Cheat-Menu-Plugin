@@ -445,6 +445,13 @@
   width: auto;
 }
 
+/* no width of its own: fills the cell, never widens the menu */
+.cheat-menu-wide-text {
+  width: 0;
+  min-width: 100%;
+  overflow-wrap: break-word;
+}
+
 .cheat-menu-search-input {
   width: 100%;
   box-sizing: border-box;

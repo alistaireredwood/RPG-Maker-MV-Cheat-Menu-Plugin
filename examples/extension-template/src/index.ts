@@ -77,6 +77,13 @@ const extension: CheatMenuExtension = {
   name: 'example',
   apiVersion: 1,
   setup: (api) => [alwaysDash(api), storyVariable(api)],
+  // Labels in the Variables / Switches menus — for ids a game left unnamed
+  // (byId) or names to translate (byName). An extension may bring only
+  // these, without setup; Cheat_Menu.dictionary.json overrides them.
+  names: {
+    variables: { byId: { [VARIABLE_ID]: 'Story progress' } },
+    switches: { byName: { ボス撃破: 'Boss defeated' } },
+  },
 };
 
 (window.CheatMenuExtensions = window.CheatMenuExtensions || []).push(extension);

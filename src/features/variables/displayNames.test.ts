@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { prefsStorageKey } from '@src/core/preferencesFormat.ts';
+import {
+  applyDictionary,
+  parseDictionary,
+} from '@src/shared/game/dictionary.ts';
 import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import {
   countNames,
@@ -71,6 +75,33 @@ describe('displayEntries', () => {
     displayEntries(base, { 1: 'Money', 2: 'Today', 3: 'Quest' });
     expect(base).toEqual(before);
     expect(baseLabels(names)).toBe(base);
+  });
+});
+
+describe('displayEntries with a dictionary', () => {
+  const names = ['', '正気度', '', 'Gold'];
+  const section = parseDictionary(
+    { variables: { byId: { 2: 'Fatigue' }, byName: { 正気度: 'Sanity' } } },
+    () => {},
+  )!.variables;
+  const base = applyDictionary(section, names, baseLabels(names));
+
+  it('a dictionary name counts as the original: named, and what a reset restores', () => {
+    const entries = displayEntries(base, {}, names);
+    expect(entries[2]).toEqual(entry('Fatigue', 'Fatigue'));
+    expect(displayEntries(base, { 2: 'Mine' }, names)[2]).toEqual(
+      entry('Mine', 'Fatigue', true),
+    );
+  });
+
+  it('keeps the System.json name it replaced, for the search', () => {
+    const translated = displayEntries(base, {}, names)[1]!;
+    expect(translated).toEqual({
+      ...entry('Sanity', 'Sanity'),
+      systemName: '正気度',
+    });
+    expect(entryMatches(translated, '正気')).toBe(true);
+    expect(displayEntries(base, {}, names)[3]).not.toHaveProperty('systemName');
   });
 });
 

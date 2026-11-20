@@ -202,3 +202,66 @@ describe('extension isolation', () => {
     );
   });
 });
+
+describe('extension names', () => {
+  const onNames = vi.fn();
+  const installWithNames = () =>
+    installExtensions(target, { api, apiVersion: 1, onNames });
+  const names = { variables: { byId: { 1: 'Gold' } } };
+
+  afterEach(() => onNames.mockReset());
+
+  it('hands names to onNames with the extension name', () => {
+    installWithNames();
+    const f = makeFeature();
+    queue().push(descriptor([f], { name: 'named', names }));
+    expect(isRegistered(f)).toBe(true);
+    expect(onNames).toHaveBeenCalledWith('named', names);
+  });
+
+  it('an extension may bring only names, without setup', () => {
+    installWithNames();
+    queue().push({ name: 'dictionary', apiVersion: 1, names });
+    expect(onNames).toHaveBeenCalledWith('dictionary', names);
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  it('a rejected extension brings no names either', () => {
+    installWithNames();
+    queue().push(
+      descriptor([], {
+        name: 'broken',
+        names,
+        setup: () => {
+          throw new Error('boom');
+        },
+      }),
+    );
+    queue().push({ name: 'future', apiVersion: 2, names });
+    expect(onNames).not.toHaveBeenCalled();
+  });
+
+  it('a throwing onNames is logged and keeps the features', () => {
+    installExtensions(target, {
+      api,
+      apiVersion: 1,
+      onNames: () => {
+        throw new Error('names');
+      },
+    });
+    const f = makeFeature();
+    queue().push(descriptor([f], { name: 'named', names }));
+    expect(isRegistered(f)).toBe(true);
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('"named"'),
+      expect.any(Error),
+    );
+  });
+
+  it('rejects a setup that is not a function', () => {
+    installWithNames();
+    queue().push({ name: 'odd', apiVersion: 1, names, setup: 'x' });
+    expect(error).toHaveBeenCalledOnce();
+    expect(onNames).not.toHaveBeenCalled();
+  });
+});

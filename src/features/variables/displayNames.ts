@@ -9,10 +9,12 @@ export type NameOverrides = Readonly<Record<string, string>>;
 
 export type VariableEntry = {
   label: string;
-  /** name from System.json, or `#0042` when it has none */
+  /** name from the dictionary or System.json, or `#0042` when it has none */
   original: string;
+  /** the System.json name a dictionary replaced, still found by the search */
+  systemName?: string;
   custom: boolean;
-  /** has a custom name or one from System.json; the filters hide the rest */
+  /** has a custom name or an original one; the filters hide the rest */
   named: boolean;
 };
 
@@ -22,24 +24,37 @@ function customName(overrides: NameOverrides, id: number): string | null {
   return typeof name === 'string' && name.trim() ? name : null;
 }
 
+function originalEntry(
+  baseLabel: string | null,
+  id: number,
+  base: readonly (string | null)[],
+  systemNames: readonly string[],
+): Omit<VariableEntry, 'label' | 'custom'> {
+  const original = baseLabel ?? idLabel(id, base.length);
+  const systemName = (systemNames[id] || '').trim();
+  return systemName && systemName !== original
+    ? { original, systemName, named: !!baseLabel }
+    : { original, named: !!baseLabel };
+}
+
 /**
  * Overrides layered on top of the base labels (`systemNameLabels` without
- * `autoIdLabels`), which stay untouched because they are cached per
- * `System.json` array. Every id gets an entry, so the filters can show the
- * unnamed ones as `#0042`.
+ * `autoIdLabels`, then the dictionary), which stay untouched because they
+ * are cached. Every id gets an entry, so the filters can show the unnamed
+ * ones as `#0042`.
  */
 export function displayEntries(
   base: readonly (string | null)[],
   overrides: NameOverrides,
+  systemNames: readonly string[] = [],
 ): (VariableEntry | null)[] {
   return base.map((baseLabel, id) => {
     if (id === 0) return null;
-    const original = baseLabel ?? idLabel(id, base.length);
+    const entry = originalEntry(baseLabel, id, base, systemNames);
     const custom = customName(overrides, id);
-    if (custom === null) {
-      return { label: original, original, custom: false, named: !!baseLabel };
-    }
-    return { label: custom, original, custom: true, named: true };
+    return custom === null
+      ? { ...entry, label: entry.original, custom: false }
+      : { ...entry, label: custom, custom: true, named: true };
   });
 }
 
@@ -70,7 +85,8 @@ export function withName(
 
 export const entryMatches: Matcher<VariableEntry> = (entry, keyword) =>
   entry.label.toLowerCase().includes(keyword) ||
-  entry.original.toLowerCase().includes(keyword);
+  entry.original.toLowerCase().includes(keyword) ||
+  !!entry.systemName?.toLowerCase().includes(keyword);
 
 const namesPref = definePreference('variableNames', {
   names: {} as Record<string, string>,
@@ -99,16 +115,27 @@ export const resetAllVariableNames = (): void => namesPref.reset();
 // Every change replaces the `names` object, so its identity is the cache key.
 let cached: {
   base: readonly (string | null)[];
+  systemNames: readonly string[];
   names: NameOverrides;
   entries: readonly (VariableEntry | null)[];
 } | null = null;
 
 export function variableEntries(
   base: readonly (string | null)[],
+  systemNames: readonly string[] = [],
 ): readonly (VariableEntry | null)[] {
   const names = nameOverrides();
-  if (cached?.base !== base || cached.names !== names) {
-    cached = { base, names, entries: displayEntries(base, names) };
+  if (
+    cached?.base !== base ||
+    cached.systemNames !== systemNames ||
+    cached.names !== names
+  ) {
+    cached = {
+      base,
+      systemNames,
+      names,
+      entries: displayEntries(base, names, systemNames),
+    };
   }
   return cached.entries;
 }

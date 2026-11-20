@@ -1,9 +1,9 @@
 import type { ActionKey } from '@src/core/input/keymap.ts';
 import type { MenuBuilder } from '@src/core/ui/builder.ts';
-import { getOverlay } from '@src/core/ui/dom.ts';
 import { getMenuWindow } from '@src/core/ui/popout.ts';
 import { isUpdatingMenu, updateMenu } from '@src/core/ui/render.ts';
 import {
+  appendArrowRow,
   bindArrows,
   type Direction,
   type ScrollHandler,
@@ -98,14 +98,11 @@ const ALLOWED_KEYS = [
 export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   appendTitle('Amount');
 
-  const row = getOverlay().insertRow();
-  row.className = 'scroll-selector-row';
-
-  const leftButton = row.insertCell();
-  leftButton.className = 'scroll-selector-buttons cheat-menu-cell';
-
-  const cell = row.insertCell();
-  cell.className = 'cheat-menu-cell';
+  const {
+    left: leftButton,
+    value: cell,
+    right: rightButton,
+  } = appendArrowRow();
 
   const input = document.createElement('input');
   input.type = 'text';
@@ -180,9 +177,6 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
       input.setSelectionRange(len, len);
     });
   }
-
-  const rightButton = row.insertCell();
-  rightButton.className = 'scroll-selector-buttons cheat-menu-cell';
 
   bindArrows(leftButton, rightButton, key1, key2, scrollAmount);
 }

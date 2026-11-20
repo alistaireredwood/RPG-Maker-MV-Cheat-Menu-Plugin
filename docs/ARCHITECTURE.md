@@ -1,52 +1,30 @@
 # Architecture
 
-The plugin is a single script (`Cheat_Menu.js` + `Cheat_Menu.css`) loaded by RPG Maker MV/MZ as a classic `<script>` plugin. The source is TypeScript in `src/`, bundled by Vite into `release/www/js/plugins/`; `pnpm build:release` adds the patcher (`patcher/`, Go) and `plugins_patch.go.txt`, so `release/` is the complete distributable and the only build output.
+This document defines how the plugin is built and how its code is written. It is the source of truth: the code follows from it, not the other way round. When a change needs a rule that isn't here, or breaks one that is, update this document in the same change.
 
-The design has one goal: **every cheat is a self-contained feature folder**. Removing a feature means deleting its folder and its line in `src/features.ts`. Nothing else may break.
+The plugin ships as a single classic `<script>` plugin for RPG Maker MV/MZ (`Cheat_Menu.js` + `Cheat_Menu.css`), bundled from TypeScript in `src/`. `release/` is the only build output and must always be the complete distributable (plugin, patcher, typings).
 
-## Layout
+## Goal
 
-```
-src/
-  main.ts              entry: bootstrap(features, { v1MenuOrder, extensions })
-  features.ts          the only list of features (array order = grid order)
-  api.ts               public contract for game-specific extensions (types + API_VERSION)
-  createApi.ts         builds the frozen `api` object handed to extensions
+**Every cheat is a self-contained feature folder.** Removing a feature means deleting its folder and its line in `src/features.ts`. Nothing else may break. Every rule below serves this goal or the safety of the player's save.
 
-  core/                the menu itself; knows no concrete feature
-    bootstrap.ts       registers features, installs UI / input / engine hooks
-    extensions.ts      window.CheatMenuExtensions queue, extension validation
-    feature.ts         defineFeature(), Feature / MenuEntry types, lifecycle hooks
-    registry.ts        registered features, menu list, live state, emit(hook)
-    persistence.ts     pure save-format logic (v2 format, v1 migration)
-    session.ts         restore / save of core + feature state
-    preferences.ts     per-game settings in localStorage (definePreference)
-    store.ts           menu runtime state (open, position, current menu, …)
-    engine/            patchMethod, DataManager / Scene_Boot hooks, SceneManager.isGameActive
-    input/             key map, key bindings, keyboard handling (1, `, F7, F8, F9)
-    ui/                overlay, renderer, MenuBuilder, widgets, pop-out window, CSS,
-                       main grid + its layout (grid.ts, layout.ts, menuLayout.ts)
+## Layers
 
-  shared/              building blocks used by several features
-    state.ts           selected actor + amount (persisted as the `shared` slice)
-    controls/          actorSelector, amountSelector, listSelector,
-                       inventorySection, resourceCheats, status labels
-    game/              teleport, numbers, resources (HP/MP/TP changes), systemNames
-    html.ts            escapeHtml
-    inventoryFeature.ts  factory for the Items / Weapons / Armors features
+Every file in `src/` belongs to exactly one layer. A file loose in `src/` outside the app layer is an error.
 
-  features/<name>/     one folder per cheat
-    index.ts           export default defineFeature({...}) — the only public file
-    *.ts               private logic of the feature (+ *.test.ts)
+| Layer | Holds | Never holds |
+|---|---|---|
+| **app**: `main.ts`, `features.ts`, `api.ts`, `createApi.ts` | Assembly: the entry point, the one list of features (array order = default grid order), the public extension API | Feature logic, UI widgets |
+| **core** | The menu as a mechanism: feature registry and lifecycle, persistence and preferences, input, UI rendering and widgets, engine patching | Knowledge of any concrete feature or cheat |
+| **shared** | Building blocks used by two or more features: `controls/` for UI, `game/` for engine logic | Anything used by a single feature only |
+| **features/&lt;name&gt;** | One cheat. `index.ts` (`export default defineFeature({...})`) is its only public file; everything else is private to the folder | Code another feature needs |
+| **types** | Ambient typings (RPG Maker, NW.js, globals) | Runtime code |
 
-  types/               ambient typings: RPG Maker MV, NW.js, globals
-```
-
-## Layers and dependency rules
+Dependencies point one way:
 
 ```
-app (main.ts, features.ts, api.ts, createApi.ts) ──► features/<name>/index.ts ──► shared ──► core
-                                         └──────────────────────────────►┘
+app ──► features/<name>/index.ts ──► shared ──► core
+ └───────────────────────────────►┘
 ```
 
 | From | May import |
@@ -58,38 +36,33 @@ app (main.ts, features.ts, api.ts, createApi.ts) ──► features/<name>/index
 
 - A feature **never** imports another feature. Logic needed by two features moves to `shared/`.
 - `core` never imports `shared` or `features`. Core reaches features only through the hooks of the `Feature` contract.
-- Every file belongs to one of these layers. A file loose in `src/` (other than `main.ts` / `features.ts`) is an error.
 
-`eslint-plugin-boundaries` (`eslint.config.js`) enforces all of this as errors, and `pnpm build` fails on a violation.
+`eslint-plugin-boundaries` (`eslint.config.js`) enforces these rules as errors, so `pnpm build` fails on a violation. A new layer or folder kind needs a boundaries rule first.
 
 ## Modules and imports
 
-- **No eager imports and no import-time side effects.** Importing a module must not touch the DOM, the engine (`$game*`, prototypes, `DataManager`), timers or `localStorage`. Module scope may only declare constants, types, state objects and pure factories (`makeScroll(...)`, `makeApplyAmount(...)`). Everything that *does* something runs from `bootstrap()` or from a lifecycle hook (`onInit`, …), or lazily on first use (e.g. Evaluate reads its script from `localStorage` on the first render, not on import).
-  - Why: it keeps the start order explicit (`bootstrap()` is the single place that installs anything), and it keeps modules importable in unit tests without an engine or a DOM.
-- **No `import.meta.glob` / auto-discovery.** Features are imported explicitly in `src/features.ts`. A typo then fails the build instead of silently dropping a menu, and menu order is defined in one place.
-- **Import paths:** anything outside the file's own directory is imported through the `@src/...` alias (`import { defineFeature } from '@src/core/feature.ts'`), never `../`. Imports of the own directory or its subdirectories stay relative (`./godMode.ts`), so a feature folder can be moved or renamed without editing its files. The alias is defined once, in `tsconfig.json` `paths`.
-- **Explicit `.ts` extensions** in import paths (`allowImportingTsExtensions`, bundler resolution).
+- **No eager imports and no import-time side effects.** Importing a module must not touch the DOM, the engine (`$game*`, prototypes, `DataManager`), timers or `localStorage`. Module scope may only declare constants, types, state objects and pure factories (`makeScroll(...)`, `makeApplyAmount(...)`). Anything that *does* something runs from `bootstrap()`, from a lifecycle hook, or lazily on first use (Evaluate, for example, reads its saved script on the first render, not on import).
+  - Why: start order stays explicit (`bootstrap()` is the single place that installs anything), and every module can be imported in unit tests without an engine or a DOM.
+- **No `import.meta.glob` or auto-discovery.** Features are imported explicitly in `src/features.ts`.
+  - Why: a typo fails the build instead of silently dropping a menu, and menu order is defined in one place.
+- **Import paths:** anything outside the file's own directory goes through the `@src/...` alias (`tsconfig.json` `paths`), never `../`. Imports from the file's own directory or its subdirectories stay relative (`./godMode.ts`).
+  - Why: a feature folder can be moved or renamed without editing its files.
+- **Explicit `.ts` extensions** in import paths.
 
-## Start-up and lifecycle
+## Lifecycle
 
-`main.ts` calls `bootstrap(features, { v1MenuOrder })` once, when RPG Maker loads the plugin:
+`bootstrap(features, options)` is called once by `main.ts` and is the only place that installs anything (UI, input, engine hooks). Features act only through lifecycle hooks, which come with these guarantees:
 
-1. `registerFeatures(features)`: validates unique feature / menu ids and snapshots each `state` as its defaults.
-2. Installs the UI (overlay, stylesheet, `[1]` indicator), the pop-out support, keyboard handling and the `DataManager` hooks.
-3. `emit('onInit')`: features install their engine patches.
-4. Extensions: `window.CheatMenuExtensions` is drained and replaced by a queue that registers on `push` (see [Extensions](#game-specific-extensions)).
+| Hook | Runs | Use it for |
+|---|---|---|
+| `onInit` | once at boot, after all built-in features are registered; for an extension, as soon as it is registered | prototype patches via `patchMethod` |
+| `onNewGame` / `onLoad` | *before* the engine replaces its game objects | resetting runtime data tied to the old game objects |
+| `onStateRestored` | after state was restored from the save (or reset to defaults) | re-applying state to game objects: per-object patches, validating nested state |
+| `onSave` | right before state is written into the save | flushing runtime data into `state` |
 
-At runtime:
-
-| Event | What happens |
-|---|---|
-| `DataManager.setupNewGame` / `loadGame` | menu closes, `onNewGame` / `onLoad` hooks run *before* the engine replaces its game objects; state is marked "not restored" |
-| first `[1]` press after that | `restoreSession()`: core + feature state are read from `$gameSystem.CheatMenu` (or reset to defaults), then `onStateRestored` |
-| `DataManager.saveGame` | `onSave`, then state is written to `$gameSystem.CheatMenu`; skipped if the menu wasn't opened since the last load, so the loaded data stays untouched |
-
-Restoring is lazy because the game objects (`$gameActors`, `$gamePlayer`, …) only exist once a game is running. Hooks that re-install per-object patches (god mode, speed lock) belong in `onStateRestored`.
-
-A throwing hook is logged and skipped. The other features still run.
+- **Restoring is lazy**: state is restored on the first menu open after a new game or a load, not when the load happens. Why: game objects (`$gameActors`, `$gamePlayer`, …) only exist once a game is running. So never assume restored state in `onInit`, `onNewGame` or `onLoad`.
+- **A save never touches data the menu didn't restore.** If the menu wasn't opened since the last load, nothing is written, so the loaded data stays as it was.
+- **Isolation:** a throwing hook is logged and skipped, and the other features still run. A hook must not rely on another feature's hook having run.
 
 ## Feature contract
 
@@ -97,10 +70,8 @@ A throwing hook is logged and skipped. The other features still run.
 export default defineFeature({
   id: 'godMode',                 // persisted slice key — never rename
   state: godModeState,           // live persisted state (initial values = defaults)
-  onInit() {},                   // once at boot: prototype patches via patchMethod
-  onNewGame() {}, onLoad() {},   // a game is about to be (re)created
-  onStateRestored() {},          // state restored from the save: re-apply to game objects
-  onSave() {},                   // right before the save is written
+  onInit() {},
+  onStateRestored() {},
   migrateV1: (v1) => renameV1Keys(v1, { actors: 'godModeActors' }),
   menus: [
     { id: 'godMode', name: 'God Mode', render(ui, state) { /* … */ } },
@@ -108,145 +79,108 @@ export default defineFeature({
 });
 ```
 
-- **`state`** is a plain, JSON-serializable object owned by the feature module. It is the *live* object: the registry restores saves into it in place, so module code may keep a reference (`state.selection = idx`). Mutate it, never replace it. Values at registration are the defaults.
-- **Runtime-only data** (timers, caches, "lock installed" flags, the Game Speed multiplier) lives in module variables, not in `state`, and is reset in `onLoad` / `onNewGame` when it is tied to game objects.
-- **Ids** (`feature.id`, `menu.id`) are persisted: the feature id is the save slice key, and the menu id is stored as the open menu. Renaming one loses saved data.
-- **A feature may have several menus** (Party HP / MP / TP) or none (`sharedFeature`).
-- **`after`** (optional) places the feature's menus right after the given menu id in the grid. Meant for extensions; built-ins are ordered by `features.ts`.
-- **`menu.tier`** (optional, `'advanced'`) is the menu's default group in the grid; omitted means Basic, or for a feature with `after`, the group of that menu. Advanced is for tools that act on the game's internals and can break events or a save when used carelessly (Switches, Variables, Evaluate, Teleport, …). `features.test.ts` pins the built-in split.
-- **`migrateV1`** exists only for state that already lived in the pre-v2 flat save format. New features don't need it.
+- **`state`** is a plain, JSON-serializable object owned by the feature module. It is the *live* object: saves are restored into it in place, so module code may keep a reference to it. Mutate it, never replace it. Its values at registration are the defaults.
+- **Runtime-only data** (timers, caches, "patch installed" flags, multipliers) lives in module variables, never in `state`. Reset it in `onNewGame` / `onLoad` when it is tied to game objects.
+- **Ids are persisted.** `feature.id` is the save slice key and `menu.id` is stored as the open menu, so renaming either loses saved data. Pick a stable camelCase id once.
+- **A feature may have several menus or none.** Group menus that share state in one feature (Party HP / MP / TP). A feature with no menu may exist only to own shared state.
+- **`after`** places a feature's menus right after a given menu id. It is for extensions only; built-ins are ordered by `features.ts`.
+- **`menu.tier: 'advanced'`** is for tools that act on the game's internals and can break events or a save when used carelessly (Switches, Variables, Evaluate, Teleport). Everything else is Basic (the default). `features.test.ts` pins the built-in split, so changing a tier is a deliberate change.
+- **`migrateV1`** exists only for state that already lived in the pre-v2 save format. New features never add it.
 
 ## Persistence
 
-`$gameSystem.CheatMenu` (saved by the engine with the game):
+Per-save state lives in `$gameSystem.CheatMenu`, saved by the engine with the game, as one slice per feature id plus a core slice.
 
-```
-{ version: 2, core: { position, currentMenuId }, <featureId>: { …state }, … }
-```
+- **Pure format, thin glue.** Reading, writing and migrating the format is pure code with unit tests (`core/persistence.ts`). Only a thin layer (`core/session.ts`) touches `$gameSystem`.
+- **Reading is defensive.** Only keys present in a feature's defaults are taken (`readSlice`), so a save from another plugin version can't inject fields. Values are copied as they are, so a feature whose state holds nested objects validates them in `onStateRestored` (Variables' `normalizeFilter`).
+- **Writing preserves the unknown.** Slices of features that aren't registered are carried over, so removing a feature and adding it back doesn't lose its data.
+- **v1 saves stay loadable.** Each feature maps its own old keys (`migrateV1`), and `V1_MENU_ORDER` in `features.ts` maps the old open-menu index to a menu id. `V1_MENU_ORDER` is frozen. `src/features.test.ts` pins the migration of a full v1 save; extend it whenever a feature that existed in v1 gains state.
 
-- `persistence.ts` is pure and unit-tested. `session.ts` connects it to `$gameSystem`.
-- **Reading** takes only the keys present in the feature's defaults (`readSlice`), so a save from another plugin version can't inject fields. Values are copied as they are, though: a feature whose state holds a nested object (Variables' `filter`) validates it in `onStateRestored` (`normalizeFilter`).
-- **Writing** carries over slices of features that are not registered, so removing a feature and adding it back doesn't lose its data.
-- **v1 saves** (flat object, no `version`) are migrated on first restore: each feature maps its own old keys (`migrateV1`), and `V1_MENU_ORDER` in `features.ts` maps the old open-menu index to an id. `V1_MENU_ORDER` is frozen.
-- `src/features.test.ts` pins the migration of a full v1 save. Extend it when a feature that existed in v1 gains state.
+### Per-save state vs per-game preferences
 
-### Per-game preferences
+Ask: **"should a new game reset this?"** If yes, it goes in the feature's `state`. If no (display names, menu layout), it is a per-game preference declared with `definePreference(key, defaults)` (`core/preferences.ts`).
 
-Settings that belong to the game rather than to a save slot (display names, menu layout) must survive a new game and loading another save, so they don't go into `state`. They use `definePreference(key, defaults)` from `core/preferences.ts`:
-
-```
-localStorage["Cheat_Menu.prefs.<gameTitle>"] = { version: 1, <key>: { … }, … }
-```
-
-- The game title is part of the key because many MV games keep the default `package.json` name, and NW.js shares `localStorage` between apps with the same name.
-- `definePreference` only declares; storage is read on the first `get()` / `update()`, so it may be called at module scope. Before `$dataSystem` exists, values are kept in memory only.
-- `get()` returns the live object; `update(fn)` mutates it and writes right away; `reset()` restores the defaults in place.
-- Reading takes only known keys whose value has the same kind as the default (`readPrefSlice`, `preferencesFormat.ts`), since `localStorage` is easy to edit by hand. Slices of preferences not defined right now are kept on write, and data from a newer format version is never overwritten.
-- The preference key (`layout`, `variableNames`) is persisted, like a feature id: never rename it.
-- Per-save state stays in the feature's `state`. Pick by the question "should a new game reset this?".
+- Preferences live in `localStorage` under a key that includes the game title. Why: many MV games keep the default `package.json` name, and NW.js shares `localStorage` between apps with the same name.
+- `definePreference` only declares; storage is read on first use, so it may be called at module scope.
+- Reading takes only known keys whose value has the same kind as the default (`readPrefSlice`). Why: `localStorage` is easy to edit by hand.
+- Slices of preferences not defined right now are kept on write, and data from a newer format version is never overwritten.
+- The preference key is persisted like a feature id: never rename it.
 
 ## UI
 
 ### Render model
 
-The overlay (`<table id="cheat-menu">`) is **torn down and rebuilt on every `updateMenu()`**:
+- **The overlay is rebuilt from scratch on every render.** No DOM reference may outlive a render. State that must survive one (focus, caret, typed drafts, search terms) lives in `core/ui/widgetState.ts`, keyed by something stable, never by DOM identity or index.
+  - Why: an open menu re-renders every second so values changed by the game show up, and any click may rebuild it. The tick is skipped while text is selected or a textarea is focused, so the user's interaction isn't destroyed.
+- **Key bindings are re-bound on every render** by the widgets that draw them.
+- **A render may fail without breaking the menu.** A throwing `render` shows an error inside the menu.
+- **Never use the global `document` / `window` for overlay work** (focus, selection, `requestAnimationFrame`). Use `getMenuDocument()` / `getMenuWindow()` from `core/ui/popout.ts`. Why: the overlay can be moved into an always-on-top NW.js pop-out window (F7) that shares the game's JS context but has its own document.
 
-- No DOM references survive a render. State that must survive (focus, caret, typed drafts, search terms) lives in `core/ui/widgetState.ts`.
-- Key bindings are cleared and re-bound by the widgets on every render.
-- An open sub-menu re-renders every second so values changed by the game show up. The tick is skipped while text is selected or a textarea is focused.
-- A `render` that throws shows "Render failed" inside the menu instead of breaking it.
+### Drawing menus and keys
 
-### MenuBuilder and keys
-
-`render(ui)` draws only through the `MenuBuilder` (`core/ui/builder.ts`):
-
-- `ui.cheatTitle()` draws the sub-menu switcher on keys 2 / 3. Every menu starts with it.
-- `ui.title`, `ui.description`, `ui.wideDescription`: plain rows. `ui.title(text, side, { actions })` adds icon buttons (`core/ui/icons.ts`) on the right of the title. They are mouse only and take no keys, so adding or removing an icon never shifts the keys of later rows.
-- `ui.cheat(label, status, onActivate)` takes 1 key. `ui.scrollSelector(text, onScroll)` and `ui.valueInput(...)` take 2 keys (←/→) when they show arrows.
-- `ui.button(button)`: one full-width button, 1 key. `ui.buttons(main, side)`: a wide main button and a side button in one row (Evaluate: Run / Clear), 2 keys. `ui.buttonRow([left, right])` / `ui.buttonRow([left, middle, right])`: equal buttons, one per column, the outer ones at the menu's edges (Variables filters: Apply / Reset / Cancel), 1 key each.
-- `ui.section(className, render)` adds a class to every row `render` draws (plus `cheat-menu-section-first` / `-last`), e.g. to space out and frame a block such as Evaluate's help. `cheat-menu-buttons-section` puts 8px above a row of buttons.
-- `ui.valueInput(…, { accept: 'integer' | 'decimal' })` lets only the characters of a number be typed or pasted (Gold, Items, Stats, Variables' range); `onCommit` still validates. `ui.valueInputPair(left, right)` puts two inputs in one row (a min – max range), no keys. Drafts of every input on screen survive the 1 s refresh; a draft is dropped once its input is no longer drawn.
-- `ui.codeInput`, `ui.searchInput`: text inputs. They stop key propagation, so typing never triggers menu or game keys.
-
-Action keys are allocated in order: `4 5 6 7 8 9 0 - =`. A feature never hard-codes key numbers. Changing the order of rows changes their keys, and `ui.skipKeys(n)` keeps later keys stable when a row is conditionally hidden. A row drawn *below* optional rows can keep its key by reserving it first: `const key = ui.nextKey()` at the top of `render`, then `ui.cheat(…, { key })` / `ui.buttons(…, { keys })`. Fixed keys are 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
-
-The `core/ui/widgets/append*(…, key1, key2)` functions with explicit keys are the builder's building blocks. Features don't call them.
+- `render(ui)` draws **only** through the `MenuBuilder` (`core/ui/builder.ts`, each method documented there) and `shared/controls`. The low-level `core/ui/widgets/append*` functions are the builder's building blocks; features never call them.
+- **Every menu starts with `ui.cheatTitle()`** (the sub-menu switcher).
+- **Keys are never hard-coded.** Action keys (`4 5 6 7 8 9 0 - =`) are handed out in row order, so reordering rows changes their keys. To keep keys stable:
+  - when a row is conditionally hidden, `ui.skipKeys(n)` reserves its keys;
+  - a row drawn *below* optional rows reserves its key first (`const key = ui.nextKey()` at the top of `render`, then `ui.cheat(…, { key })`).
+- **Mouse-only controls take no keys** (icon buttons in titles), so adding or removing one never shifts the keys of later rows.
+- **Text inputs stop key propagation**, so typing never triggers menu or game keys. Numeric inputs restrict typed characters (`accept: 'integer' | 'decimal'`), but their commit handler still validates.
+- **Text from the user or the game goes through `escapeHtml`** (`shared/html.ts`) before it reaches `innerHTML`.
+- **Reserved keys**, never used by a feature: 1 (toggle menu), 2 / 3 (switch sub-menu), `` ` `` (move menu), F7 (pop-out), F8 (dev tools), F9 (engine debug menu).
 
 ### Main grid layout
 
-The grid shows the menus in groups: **Favourites**, **Basic**, **Advanced** and **Hidden**. Every group can be collapsed, and Advanced starts collapsed. Outside edit mode, Hidden and empty groups (so Favourites at first) are not drawn.
-
-- The registry order never changes, because extensions' `after` relies on it. The user's layout is computed on top of it by pure functions in `core/ui/layout.ts` (`getLayout`, `moveInGroup`, `setGroup`, `toggleCollapsed`), which are unit-tested.
-- `core/ui/menuLayout.ts` connects them to the registry and to the per-game preference `layout`: `{ order, groups, collapsed }`. `groups` holds only menus moved out of their default group (`tier`), so a later change of a default still reaches them.
-- A menu missing from the saved order (a new feature or extension) appears after its registry predecessor, in its default group. Unknown ids are ignored.
-- **Extensions:** the extension decides. A menu placed with `after` inherits the group of that menu, including a group the user moved it to, and sits right after it. Chains of `after` are followed. An explicit `tier` wins over `after`. An extension menu without `after` (or with an unknown one) goes to the end of Basic, whatever the saved order. The registry reports anchors through `getMenuPlacements()`.
-- Edit mode is the pencil in the top bar, shown on the grid only. Each menu gets ↑/↓ within its group and a group picker (★ / B / A / H). Favourites can only be filled here. "Reset layout" restores the defaults.
-- Keys 2/3 step through `navigationMenuIds()`: Favourites → Basic → Advanced, skipping Hidden. Collapsing is visual only.
-- The grid is rebuilt on every click, so focus is restored by a per-button key (`data-focus-key`), not by index. A button keeps focus even after ↑/↓ moved its row.
-
-### Pop-out window
-
-F7 moves the overlay into an always-on-top NW.js window that shares the game's JS context. Code touching the overlay's document (focus, selection, `requestAnimationFrame`) must use `getMenuDocument()` / `getMenuWindow()` from `core/ui/popout.ts`, never the global `document` / `window`.
+- **The registry order never changes** at runtime. Why: extensions' `after` relies on it. The user's layout (order, groups, collapsed state) is computed on top of it by pure, unit-tested functions (`core/ui/layout.ts`) and stored as a per-game preference.
+- **Store only deviations from the defaults.** A menu's group is saved only when the user moved it out of its default `tier`, so a later change of a default still reaches it.
+- **The layout tolerates change.** A menu missing from the saved layout (new feature or extension) appears after its registry predecessor, in its default group. Unknown ids are ignored.
+- **The extension decides where its menus go.** `after` inherits the group of the anchor menu (including one the user moved it to) and follows chains of `after`. An explicit `tier` wins over `after`. An extension menu without a known anchor goes to the end of Basic.
+- **Focus survives a rebuild through a stable per-button key**, not the button's index, so a button keeps focus after it was moved.
 
 ## Engine patches
 
-- Every patch of an engine method goes through `patchMethod(target, name, original => wrapper)` (`core/engine/patch.ts`). It returns `restore()`, which won't undo someone else's later patch.
-- Prototype patches (`Game_Player.prototype.moveByInput`, `SceneManager.updateScene`) are installed in `onInit` and check the feature's state on every call, so turning a cheat off needs no un-patching.
-- Per-object patches (god mode on one actor) are installed in `onStateRestored` / on demand, tracked in a `WeakMap`, and never stored on the object. Engine objects are saved by `JsonEx`, so flags on them would end up in save files.
-- Code calling engine APIs that games commonly override wraps the call (`try/catch` → show `?` / `NULL`) instead of breaking the whole menu.
+- **Every patch of an engine method goes through `patchMethod(target, name, original => wrapper)`** (`core/engine/patch.ts`). Its `restore()` won't undo someone else's later patch.
+- **Prototype patches** are installed once in `onInit` and check the feature's state on every call, so turning a cheat off needs no un-patching.
+- **Per-object patches** (god mode on one actor) are installed in `onStateRestored` or on demand, and tracked in a `WeakMap`. **Never store flags or data on engine objects.** Why: engine objects are saved by `JsonEx`, so anything on them ends up in save files.
+- **Engine APIs that games commonly override are called defensively**: `try/catch`, then show a placeholder (`?`, `NULL`) instead of breaking the whole menu.
 
-## Shared building blocks
+## Shared code
 
-Prefer these over re-implementing:
-
-| Need | Use |
-|---|---|
-| actor picker (shared selection) | `actorSelector(ui)` → selected `Game_Actor` |
-| amount picker + apply ±amount | `amountSelector(ui)` + `makeApplyAmount(fn)` |
-| typed exact value for a counter | `ui.valueInput(…, makeSetExact(get, applyDelta), …)` |
-| scroll / search an RPG Maker data array | `makeScroll`, `getIndexInfo`, `nameMatches` + `ui.searchInput` |
-| list filtered by more than the item (e.g. its value) | an `IdMatcher` (`(item, keyword, id)`) passed to `makeScroll` / `getIndexInfo`, so `index/total` counts the filtered list |
-| labels for `$dataSystem.variables` / `switches` | `systemNameLabels(names)`: `#0042` when the game names nothing; `{ autoIdLabels: false }` keeps unnamed ids `null` |
-| item / weapon / armor style feature | `defineInventoryFeature({...})` |
-| HP / MP / TP to 0 / 1 / half / full | `resourceCheats(ui, who, resource, apply)` + `changeResource` |
-| on/off status + toggle sound | `onOffLabel(on)`, `playToggleSound(on)` |
-| move the player | `teleport(mapId, x, y)` |
-| text from the user or game data into `innerHTML` | `escapeHtml(text)` (`shared/html.ts`) |
-
-When a second feature needs something a feature folder has, move it to `shared/` (`controls/` for UI, `game/` for engine logic) instead of importing across features.
+- Before writing a helper, check `src/shared/` and the `MenuBuilder`. Reuse wins over a local variant; extend the shared block if it almost fits.
+- When a second feature needs something a feature folder has, move it to `shared/` (`controls/` for UI, `game/` for engine logic) instead of importing across features.
+- Examples of what belongs there: the shared actor picker (`actorSelector`), the amount picker with its ±amount applier (`makeApplyAmount`), and a factory for a whole family of similar features (`defineInventoryFeature` for Items / Weapons / Armors).
 
 ## Game-specific extensions
 
-Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. A working example: `examples/extension-template/`.
+Separate scripts (`Cheat_Menu.<name>.js`) can add features without rebuilding the plugin. Background and the reasons behind each rule: [`game-specific-extensions.md`](game-specific-extensions.md). A working example lives in `examples/extension-template/`.
 
-- An extension pushes `{ name, apiVersion, setup(api) => features[] }` onto `window.CheatMenuExtensions`. Before Cheat Menu loads that is a plain array. `bootstrap()` drains it and replaces it with a queue that registers on `push`, so `plugins.js` order doesn't matter.
-- **Registration window:** pushes are accepted until the first `Scene_Boot.start` (`core/engine/bootHook.ts`), which runs *before* the original start because it calls `DataManager.setupNewGame` itself, and the menu can be opened on the title screen after that. At that point all plugin scripts have run, the menu can't be open and nothing has been restored from a save yet. Later pushes are ignored with a warning, because a feature registered after a restore would start from defaults and overwrite its saved slice.
-- `core/extensions.ts` validates before registering: matching `apiVersion` (otherwise skipped with a warning), `setup` returns an array, every feature and menu id starts with `ext.`, no `migrateV1`. Any error rejects the whole extension and is logged with its `name`. `registerFeatures` is all-or-nothing, so a rejected extension leaves no trace. Registered extension features get `onInit` right away.
-- `api` (`src/api.ts` + `src/createApi.ts`) is the only surface extensions see. It is frozen, and `createApi.test.ts` pins its keys, so growing it is a deliberate change. `api.ts` imports implementation modules as types only. It is the entry of `release/types/Cheat_Menu.d.ts` (`scripts/build-types.js`, rolldown + `rolldown-plugin-dts`), shipped together with the engine typings in `release/types/engine/`.
-- Bump `API_VERSION` only on a breaking change of `CheatMenuApi`. Additions keep it.
+- **One entry point.** An extension pushes `{ name, apiVersion, setup?(api) => features[], names? }` (at least one of `setup` / `names`) onto `window.CheatMenuExtensions`. It works whatever the `plugins.js` order: pushes made before the plugin loads are drained at boot, later ones register on `push`.
+- **Registration closes at the first `Scene_Boot.start`.** Later pushes are ignored with a warning. Why: by then all plugin scripts have run and nothing has been restored yet; a feature registered after a restore would start from defaults and overwrite its saved slice.
+- **Validation is all-or-nothing.** `apiVersion` must match, `setup` must return an array, every feature and menu id must start with `ext.`, and `migrateV1` isn't allowed. Any error rejects the whole extension (logged with its `name`) and leaves no trace in the registry.
+- **`api` is the only surface extensions see.** It is frozen, and `createApi.test.ts` pins its keys, so growing it is a deliberate change. `api.ts` imports implementation modules as types only; it is the entry of the published typings (`release/types/`).
+- **Bump `API_VERSION` only on a breaking change** of `CheatMenuApi`. Additions keep it.
+- **Data an extension provides goes into the descriptor, not into `api`** (as `names` does), so an older Cheat Menu ignores the field instead of rejecting the extension.
 
 ## Code style
 
-- **Target is Chromium 65** (MV 1.6's NW.js; `build.target: chrome66`). Vite transpiles syntax but adds no polyfills, so newer built-ins (`Array.prototype.flatMap` / `flat` / `at`, `Object.fromEntries`, `structuredClone`, …) must not be used outside tests. `tsconfig` `lib` is ES2020, so the type checker does not catch all of them.
-
+- **Target is Chromium 65** (MV 1.6's NW.js). Vite transpiles syntax but adds no polyfills, so newer built-ins (`Array.prototype.flatMap` / `flat` / `at`, `Object.fromEntries`, `structuredClone`, …) must not be used outside tests. `tsconfig` `lib` is ES2020, so the type checker doesn't catch all of them.
 - **Comments explain why, never what.** Engine quirks, MV / MZ differences, save-compatibility reasons and rejected alternatives deserve a comment. What the code does should be readable from names and small functions.
-- Pure logic goes in its own file (`format.ts`, `parseVariableInput.ts`, `resources.ts`) so it can be unit-tested without the engine.
-- Prettier formats everything (`pnpm format`), and ESLint (`typescript-eslint` recommended + boundaries) runs as part of the build.
+- **Pure logic goes in its own file** (`format.ts`, `parseVariableInput.ts`) so it can be unit-tested without the engine.
+- Prettier formats everything (`pnpm format`). ESLint (`typescript-eslint` recommended + boundaries) stays at 0 warnings and 0 errors and runs as part of the build.
 
 ## Testing
 
 - `pnpm test` (Vitest, Node environment) runs `src/**/*.test.ts` and is part of `pnpm build`.
-- Unit-test pure logic directly. Engine-dependent logic is tested with small fakes and `vi.stubGlobal` (see `features/godMode/godMode.test.ts`: fake actor + fake timers).
-- `features.test.ts` guards feature / menu id uniqueness and v1 save compatibility.
-- UI rendering isn't unit-tested. Verify it in the game (or a DOM smoke test of the built bundle).
+- Unit-test pure logic directly. Test engine-dependent logic with small fakes and `vi.stubGlobal` (as in `features/godMode/godMode.test.ts`: a fake actor plus fake timers), never with a real engine.
+- `features.test.ts` guards feature / menu id uniqueness, the Basic / Advanced split and v1 save compatibility.
+- UI rendering isn't unit-tested. Verify it in the game (or with a DOM smoke test of the built bundle).
 
 ## Adding a feature: checklist
 
 1. Create `src/features/<name>/index.ts` exporting `defineFeature({...})`. Pick a stable camelCase `id` (and menu `id`).
-2. Add the import and the array entry in `src/features.ts` at the desired grid position.
-3. Persisted values go in a module-level `state` object. Runtime-only values go in module variables.
+2. Add the import and the array entry in `src/features.ts` at the desired grid position. Set `tier: 'advanced'` if the menu acts on game internals.
+3. Persisted values go in a module-level `state` object. Runtime-only values go in module variables. Per-game settings use `definePreference`.
 4. Draw with `ui.cheatTitle()` first, then `MenuBuilder` widgets and `shared/controls`. No hard-coded keys.
 5. Engine patches: `patchMethod` in `onInit` (prototypes) or `onStateRestored` (game objects). Nothing at import time.
-6. Shared needs → `shared/`, never an import from another feature.
+6. Shared needs go to `shared/`, never an import from another feature.
 7. Pure logic in its own file + `*.test.ts`. If the feature replaces v1 state, add `migrateV1` and extend `features.test.ts`.
 8. `pnpm build` must pass (types, boundaries, tests, bundle).

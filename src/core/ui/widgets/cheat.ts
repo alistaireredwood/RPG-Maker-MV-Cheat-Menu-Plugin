@@ -28,6 +28,7 @@ export function appendCheat(
   const cheat = cheatRow.insertCell();
   cheat.className = 'cheat-menu-buttons cheat-menu-cell';
   if (layout.wide) {
+    cheatRow.className = 'cheat-menu-row-wide';
     cheat.colSpan = 2;
     cheat.classList.add('cheat-menu-status-wide');
   }

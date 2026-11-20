@@ -38,7 +38,7 @@ export type MenuBuilder = {
   /** Leaves keys unused, e.g. so later rows keep their key when one is hidden. */
   skipKeys: (count?: number) => void;
 
-  /** "Cheat" title + sub-menu switcher (keys 2/3, not allocated). */
+  /** Sub-menu switcher: the previous / next menu at keys 2 / 3 (not allocated). */
   cheatTitle: () => void;
   /** Section title. `actions`: icon buttons on the right, mouse only, no keys. */
   title: (text: string, sideText?: string, options?: TitleOptions) => void;

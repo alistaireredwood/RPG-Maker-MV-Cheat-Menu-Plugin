@@ -21,6 +21,8 @@ export const ICON_EDIT = svgIcon(
   '<path d="M11 2.5 13.5 5 6 12.5 3 13l.5-3Z"/><path d="M9.5 4 12 6.5"/>',
 );
 
+export const ICON_CHEVRON_LEFT = svgIcon('<path d="M10 3.5 5.5 8l4.5 4.5"/>');
+
 export const ICON_INFO = svgIcon(
   '<circle cx="8" cy="8" r="6"/><path d="M8 7.5V11"/><path d="M8 5h.01"/>',
 );

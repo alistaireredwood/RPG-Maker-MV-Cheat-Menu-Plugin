@@ -270,6 +270,7 @@ function renderSelector(
       `variableName:${id}`,
       (text) => commitName(id, shown, text),
       scroll,
+      { wide: true },
     );
   } else {
     const label = shown

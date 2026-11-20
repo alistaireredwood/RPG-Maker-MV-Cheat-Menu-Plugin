@@ -19,7 +19,6 @@ import { appendSearchInput } from './widgets/searchInput.ts';
 import {
   appendDescription,
   appendTitle,
-  appendWideDescription,
   type TitleOptions,
 } from './widgets/text.ts';
 import type { NumberAccept } from './widgets/numberText.ts';
@@ -42,7 +41,9 @@ export type MenuBuilder = {
   cheatTitle: () => void;
   /** Section title. `actions`: icon buttons on the right, mouse only, no keys. */
   title: (text: string, sideText?: string, options?: TitleOptions) => void;
+  /** Text over the full width of the menu. */
   description: (html: string) => void;
+  /** Same as `description`; kept so extensions calling it still work. */
   wideDescription: (html: string) => void;
   /**
    * Label + clickable status button. Takes 1 key, or `key` reserved earlier
@@ -83,14 +84,15 @@ export type MenuBuilder = {
   ) => void;
   /**
    * Editable value with ←/→. Takes 2 keys when it shows arrows. `accept`
-   * limits typing to the characters of a number.
+   * limits typing to the characters of a number. `wide`: the field takes the
+   * full width instead of a value's narrow one — for text such as a name.
    */
   valueInput: (
     value: string,
     inputKey: string,
     onCommit: (text: string) => boolean | void,
     onScroll: ScrollHandler,
-    options?: { showArrows?: boolean; accept?: NumberAccept },
+    options?: { showArrows?: boolean; accept?: NumberAccept; wide?: boolean },
   ) => void;
   /** Two inputs in one row, e.g. a min – max range. Takes no keys. */
   valueInputPair: (
@@ -122,7 +124,7 @@ export function createMenuBuilder(): MenuBuilder {
     cheatTitle: appendCheatTitle,
     title: appendTitle,
     description: appendDescription,
-    wideDescription: appendWideDescription,
+    wideDescription: appendDescription,
 
     cheat(label, status, onActivate, options = {}) {
       const key = options.key ?? keys.next();
@@ -175,6 +177,7 @@ export function createMenuBuilder(): MenuBuilder {
       appendValueInput(value, inputKey, onCommit, left, right, onScroll, {
         showArrows,
         accept: options.accept,
+        wide: options.wide,
       });
     },
 

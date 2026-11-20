@@ -18,9 +18,8 @@ export function appendTitle(
   options: TitleOptions = {},
 ): void {
   const titleRow = getOverlay().insertRow();
-  const temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell-title';
   const titleText = titleRow.insertCell();
+  titleText.colSpan = 2;
   titleText.className = 'cheat-menu-cell-title';
   const sideCell = titleRow.insertCell();
   sideCell.className = 'cheat-menu-cell-title cheat-menu-title-side';
@@ -49,18 +48,7 @@ function createTitleAction(action: TitleAction): HTMLButtonElement {
   return button;
 }
 
-export function appendDescription(text: string): void {
-  const titleRow = getOverlay().insertRow();
-  let temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell';
-  const titleText = titleRow.insertCell();
-  titleText.className = 'cheat-menu-cell';
-  temp = titleRow.insertCell();
-  temp.className = 'cheat-menu-cell';
-  titleText.innerHTML = text;
-}
-
-export function appendWideDescription(html: string): void {
+export function appendDescription(html: string): void {
   const row = getOverlay().insertRow();
   const cell = row.insertCell();
   cell.colSpan = 3;

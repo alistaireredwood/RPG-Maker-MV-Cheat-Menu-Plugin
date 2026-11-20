@@ -21,7 +21,6 @@ export function appendCodeInput(
   textarea.spellcheck = false;
   textarea.autocomplete = 'off';
   textarea.value = value;
-  textarea.placeholder = 'Ctrl+Enter: run';
 
   const remember = () => {
     widgetState.activeCodeInput = {

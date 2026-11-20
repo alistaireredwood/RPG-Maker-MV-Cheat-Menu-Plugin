@@ -124,17 +124,42 @@
   padding: 6px 0;
 }
 
-.cheat-menu-row-wide > .cheat-menu-cell:first-child {
+.cheat-menu-cheat-row > .cheat-menu-cell:first-child {
   padding-left: 0;
   text-align: left;
+}
+
+.cheat-menu-cheat-row > .cheat-menu-cell:last-child {
+  padding-right: 0;
+  text-align: right;
 }
 
 .cheat-menu-cell.cheat-menu-status-wide {
   max-width: none;
   width: auto;
   padding-left: 12px;
-  padding-right: 0;
-  text-align: right;
+}
+
+.cheat-menu-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 72px;
+  box-sizing: border-box;
+  padding: 2px 4px 2px 8px;
+  border: 1px solid var(--cm-border);
+  border-radius: var(--cm-radius);
+  background: var(--cm-surface);
+  text-align: left;
+}
+
+.cheat-menu-status > .cheat-menu-key {
+  margin-right: 0;
+}
+
+.cheat-menu-buttons:hover .cheat-menu-status {
+  border-color: var(--cm-cyan);
+  background: var(--cm-cyan-tint);
 }
 
 .cheat-menu-arrow-row {
@@ -186,10 +211,14 @@
   text-overflow: ellipsis;
 }
 
-.cheat-menu-arrow-value > .cheat-menu-amount-input[inputmode] {
+.cheat-menu-arrow-value > .cheat-menu-amount-input {
   display: block;
   max-width: 128px;
   margin: 0 auto;
+}
+
+.cheat-menu-arrow-value > .cheat-menu-input-wide {
+  max-width: none;
 }
 
 .cheat-menu-cell-title {
@@ -201,8 +230,14 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
+  text-align: left;
   color: var(--cm-dim);
-  padding: 12px 4px 4px;
+  padding: 12px 4px 4px 0;
+}
+
+.cheat-menu-cell-title:first-child {
+  max-width: none;
+  width: auto;
 }
 
 .cheat-menu-selectable {
@@ -240,6 +275,7 @@
 }
 
 .cheat-menu-title-side {
+  padding-right: 0;
   text-align: right;
   text-transform: none;
   letter-spacing: normal;
@@ -353,7 +389,7 @@
 }
 
 .status-off {
-  color: var(--cm-red);
+  color: var(--cm-dim);
   font-weight: 500;
 }
 
@@ -626,6 +662,7 @@
   width: 0;
   min-width: 100%;
   overflow-wrap: break-word;
+  text-align: left;
 }
 
 .cheat-menu-search-input {

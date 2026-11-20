@@ -14,6 +14,7 @@ export function appendCheat(
   layout: CheatLayout = {},
 ): void {
   const cheatRow = getOverlay().insertRow();
+  cheatRow.className = 'cheat-menu-cheat-row';
 
   const cheatTitle = cheatRow.insertCell();
   cheatTitle.className = 'cheat-menu-cell';
@@ -28,11 +29,13 @@ export function appendCheat(
   const cheat = cheatRow.insertCell();
   cheat.className = 'cheat-menu-buttons cheat-menu-cell';
   if (layout.wide) {
-    cheatRow.className = 'cheat-menu-row-wide';
     cheat.colSpan = 2;
     cheat.classList.add('cheat-menu-status-wide');
   }
-  cheat.innerHTML = statusText + keyHint(key);
+  const status = document.createElement('span');
+  status.className = 'cheat-menu-status';
+  status.innerHTML = statusText + keyHint(key);
+  cheat.appendChild(status);
 
   cheat.addEventListener('mousedown', clickHandler);
   bindKey(key, clickHandler);

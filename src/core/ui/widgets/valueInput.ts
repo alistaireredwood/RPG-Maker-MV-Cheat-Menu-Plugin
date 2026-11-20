@@ -30,6 +30,7 @@ export type ValueField = {
 export type ValueInputOptions = {
   showArrows?: boolean;
   accept?: NumberAccept;
+  wide?: boolean;
 };
 
 function createValueInput(field: ValueField): HTMLInputElement {
@@ -146,9 +147,14 @@ export function appendValueInput(
     value: cell,
     right: rightButton,
   } = appendArrowRow();
-  cell.appendChild(
-    createValueInput({ value, inputKey, onCommit, accept: options.accept }),
-  );
+  const input = createValueInput({
+    value,
+    inputKey,
+    onCommit,
+    accept: options.accept,
+  });
+  if (options.wide) input.classList.add('cheat-menu-input-wide');
+  cell.appendChild(input);
 
   if (options.showArrows ?? true) {
     bindArrows(leftButton, rightButton, key1, key2, scrollHandler);

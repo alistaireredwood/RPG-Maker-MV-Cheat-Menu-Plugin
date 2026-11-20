@@ -43,8 +43,6 @@ export function appendTopBar(): void {
     title.textContent = editing ? 'Cheat Menu · edit layout' : 'Cheat Menu';
     bar.appendChild(title);
   } else {
-    // a sub-menu already names itself in its cheat switcher, so the bar
-    // gives its space to the way back
     bar.appendChild(backButton());
   }
 

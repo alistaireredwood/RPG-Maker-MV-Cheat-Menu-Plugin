@@ -53,10 +53,6 @@ export type ArrowRow = {
   right: HTMLElement;
 };
 
-/**
- * `←  value  →` row. One cell over all three columns, so the arrows take only
- * their own width instead of a whole column and the value gets the rest.
- */
 export function appendArrowRow(): ArrowRow {
   const row = getOverlay().insertRow();
   row.className = 'scroll-selector-row';
@@ -78,7 +74,6 @@ export function appendArrowRow(): ArrowRow {
   return { left, value, right };
 }
 
-/** Returns the element holding `text`. */
 export function appendScrollSelector(
   text: string | number,
   key1: ActionKey,

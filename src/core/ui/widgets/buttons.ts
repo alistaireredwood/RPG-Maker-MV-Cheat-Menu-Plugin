@@ -59,8 +59,6 @@ export function appendButtonRow(
   const row = getOverlay().insertRow();
 
   if (buttons.length === 2) {
-    // one column each would leave the middle one empty and squeeze the
-    // labels, so the pair spans all three columns instead
     const cell = row.insertCell();
     cell.colSpan = 3;
     cell.className =

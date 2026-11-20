@@ -85,8 +85,39 @@ A game can get its own cheats (a custom currency, story variables as toggles, �
 * Put the extension next to the plugin as `www/js/plugins/Cheat_Menu.<name>.js` (or `js/plugins/` for MZ)
 * Run patcher.exe: it finds `Cheat_Menu.*.js` files by itself. Patching by hand works the same way as for Cheat_Menu, with `"name":"Cheat_Menu.<name>"`. The order in plugins.js doesn't matter
 * Removing the file and its plugins.js entry removes the extension. Its saved state stays in the save files and comes back if the extension is added again
+* Load extensions only through plugins.js: one registered after the game has started (e.g. pasted into the console) is ignored
 
-Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] } }` onto `window.CheatMenuExtensions`. Feature and menu ids must start with `ext.`.
+Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] }, names }` onto `window.CheatMenuExtensions`. Both `setup` and `names` are optional, but at least one must be there:
+
+* `setup` returns the extension's cheats. Feature and menu ids must start with `ext.`
+* `names` labels variables and switches in the same format as the [names dictionary](#variable-and-switch-names-dictionary) (an extension may consist of names only). A dictionary file overrides them
+
+Background and design decisions: [`docs/game-specific-extensions.md`](docs/game-specific-extensions.md).
+
+Variable and switch names dictionary
+------------------------------------
+
+Many games leave variables and switches unnamed, or name them in a language you don't read. A dictionary fills in and translates those names in the Variables and Switches menus. It changes only the labels shown in the menu, never the game's data.
+
+* Put `Cheat_Menu.dictionary.json` next to the plugin: `www/js/plugins/` (or `js/plugins/` for MZ). No plugins.js entry is needed
+* A variable you renamed in the Variables menu keeps your name
+
+```json
+{
+  "format": 1,
+  "variables": {
+    "byId": { "12": "Story progress" },
+    "byName": { "所持金上限": "Gold limit" }
+  },
+  "switches": {
+    "byName": { "ボス撃破": "Boss defeated" }
+  }
+}
+```
+
+* `byId` names an id directly and wins over `byName`
+* `byName` replaces a name the game already has (as written in `data/System.json`), e.g. a translation
+* Both sections and both lists are optional. Invalid entries are skipped with a warning in the console (F8)
 
 Uninstall
 ---------

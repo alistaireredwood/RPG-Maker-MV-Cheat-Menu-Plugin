@@ -19,6 +19,7 @@ describe('feature list', () => {
       .map((m) => m.id);
     expect(advanced.sort()).toEqual(
       [
+        'dictionary',
         'evaluate',
         'saveGame',
         'saveRecall',

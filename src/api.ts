@@ -1,6 +1,8 @@
-// The public contract for game-specific extensions
-// (docs/game-specific-extensions.md) and the entry of release/types/Cheat_Menu.d.ts.
-// Everything an extension can reach is listed here — keep it narrow.
+// The public contract for game-specific extensions and the entry of
+// release/types/Cheat_Menu.d.ts. Everything an extension can reach is listed
+// here — keep it narrow, so internals can change without breaking extensions.
+// Why it is shaped this way and how to change it (createApi.test.ts,
+// API_VERSION): docs/game-specific-extensions.md.
 //
 // Implementation modules are imported as types only: extensions are a
 // separate bundle and get the values through `api` at runtime (createApi.ts).
@@ -18,6 +20,7 @@ import type * as InventorySection from '@src/shared/controls/inventorySection.ts
 import type * as ListSelector from '@src/shared/controls/listSelector.ts';
 import type * as ResourceCheats from '@src/shared/controls/resourceCheats.ts';
 import type * as Status from '@src/shared/controls/status.ts';
+import type { DictionaryNames } from '@src/shared/game/dictionary.ts';
 import type * as Numbers from '@src/shared/game/numbers.ts';
 import type * as Resources from '@src/shared/game/resources.ts';
 import type * as SystemNames from '@src/shared/game/systemNames.ts';
@@ -28,6 +31,10 @@ import type * as SharedState from '@src/shared/state.ts';
 export type { Feature, MenuEntry } from '@src/core/feature.ts';
 export type { MenuBuilder } from '@src/core/ui/builder.ts';
 export type { ExtensionDescriptor, ExtensionQueue };
+export type {
+  DictionaryNames,
+  NameSection,
+} from '@src/shared/game/dictionary.ts';
 
 /** Bumped only on a breaking change of the api; additions keep it. */
 export const API_VERSION = 1;
@@ -79,7 +86,11 @@ export type CheatMenuApi = {
   };
 };
 
-export type CheatMenuExtension = ExtensionDescriptor<CheatMenuApi>;
+/** `names` takes the sections of `Cheat_Menu.dictionary.json`, and loses to it. */
+export type CheatMenuExtension = ExtensionDescriptor<
+  CheatMenuApi,
+  DictionaryNames
+>;
 
 declare global {
   interface Window {

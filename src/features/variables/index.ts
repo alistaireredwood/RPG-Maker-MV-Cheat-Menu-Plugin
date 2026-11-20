@@ -14,6 +14,7 @@ import {
   type IdMatcher,
 } from '@src/shared/controls/listSelector.ts';
 import { onOffLabel, playToggleSound } from '@src/shared/controls/status.ts';
+import { dictionaryLabels } from '@src/shared/game/dictionarySources.ts';
 import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import { escapeHtml } from '@src/shared/html.ts';
 import {
@@ -22,9 +23,8 @@ import {
   renameVariable,
   resetAllVariableNames,
   resetVariableName,
-  variableEntries,
-  type VariableEntry,
-} from './displayNames.ts';
+} from '@src/shared/game/variableNames.ts';
+import { variableEntries, type VariableEntry } from './displayNames.ts';
 import {
   defaultFilter,
   isDefaultFilter,
@@ -58,10 +58,17 @@ let editingNames = false;
 /** the filter being edited in the panel; `null` while the panel is closed */
 let filterDraft: VariableFilter | null = null;
 
-const entries = () =>
-  variableEntries(
-    systemNameLabels($dataSystem.variables, { autoIdLabels: false }),
+const entries = () => {
+  const names = $dataSystem.variables;
+  return variableEntries(
+    dictionaryLabels(
+      'variables',
+      names,
+      systemNameLabels(names, { autoIdLabels: false }),
+    ),
+    names,
   );
+};
 
 const exists = (id: number) => $dataSystem.variables[id] != undefined;
 

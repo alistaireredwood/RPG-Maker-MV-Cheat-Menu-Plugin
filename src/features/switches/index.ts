@@ -5,8 +5,9 @@ import { getSearchKeyword } from '@src/core/ui/widgetState.ts';
 import {
   getIndexInfo,
   makeScroll,
-  type Matcher,
+  type IdMatcher,
 } from '@src/shared/controls/listSelector.ts';
+import { dictionaryLabels } from '@src/shared/game/dictionarySources.ts';
 import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import { playToggleSound } from '@src/shared/controls/status.ts';
 import { escapeHtml } from '@src/shared/html.ts';
@@ -17,10 +18,17 @@ const state = {
   selection: 1,
 };
 
-const switchMatches: Matcher<string> = (label, keyword) =>
-  label.toLowerCase().includes(keyword);
+// a translated switch is still found by its name from System.json
+const switchMatches: IdMatcher<string> = (label, keyword, id) =>
+  label.toLowerCase().includes(keyword) ||
+  (($dataSystem.switches[id] as string | undefined) || '')
+    .toLowerCase()
+    .includes(keyword);
 
-const labels = () => systemNameLabels($dataSystem.switches);
+const labels = () => {
+  const names = $dataSystem.switches;
+  return dictionaryLabels('switches', names, systemNameLabels(names));
+};
 
 const scroll = makeScroll({
   stateKey: SEARCH_KEY,
@@ -35,7 +43,7 @@ const scroll = makeScroll({
 
 function jumpToFirstMatch(keyword: string): void {
   const idx = labels().findIndex(
-    (label) => label !== null && switchMatches(label, keyword),
+    (label, id) => label !== null && switchMatches(label, keyword, id),
   );
   if (idx > 0) state.selection = idx;
 }

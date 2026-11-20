@@ -26,10 +26,10 @@ Available Cheats Are
 * Edit Items, Weapons, Armor (with search by name)
   * Amounts can be picked from presets or typed in; Gold, Stats, Variables and item counts can also be set to an exact value by typing it and pressing Enter
 * Change player movement speed, optionally locking it so the game can't change it
-* Game Speed: speed up the whole game (map, events, battles, messages) up to x10
+* Game Speed: slow down (x0.25, x0.5) or speed up the whole game (map, events, battles, messages) up to x10. The picked speed takes effect on Apply; Reset goes back to x1
 * Unlock Controls: force mouse / touch movement and Ctrl message skipping in games that disable them
 * Clear Status/States Effects
-* Edit Variables/Switches (with search by name)
+* Edit Variables/Switches (with search by name), with names from a dictionary file (see below)
 * Save/Recall Location and Teleport
   * Be careful not to skip game events
   * If you teleport off the map lower X,Y and teleport again to fix it.
@@ -85,8 +85,41 @@ A game can get its own cheats (a custom currency, story variables as toggles, �
 * Put the extension next to the plugin as `www/js/plugins/Cheat_Menu.<name>.js` (or `js/plugins/` for MZ)
 * Run patcher.exe: it finds `Cheat_Menu.*.js` files by itself. Patching by hand works the same way as for Cheat_Menu, with `"name":"Cheat_Menu.<name>"`. The order in plugins.js doesn't matter
 * Removing the file and its plugins.js entry removes the extension. Its saved state stays in the save files and comes back if the extension is added again
+* Load extensions only through plugins.js: one registered after the game has started (e.g. pasted into the console) is ignored
 
-Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] } }` onto `window.CheatMenuExtensions`. Feature and menu ids must start with `ext.`.
+Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] }, names }` onto `window.CheatMenuExtensions`. Both `setup` and `names` are optional, but at least one must be there:
+
+* `setup` returns the extension's cheats. Feature and menu ids must start with `ext.`
+* `names` labels variables and switches in the same format as the [names dictionary](#variable-and-switch-names-dictionary) (an extension may consist of names only). A dictionary file overrides them
+
+Background and design decisions: [`docs/game-specific-extensions.md`](docs/game-specific-extensions.md).
+
+Variable and switch names dictionary
+------------------------------------
+
+Many games leave variables and switches unnamed, or name them in a language you don't read. A dictionary fills in and translates those names in the Variables and Switches menus. It changes only the labels shown in the menu, never the game's data.
+
+* Put `Cheat_Menu.dictionary.json` next to the plugin: `www/js/plugins/` (or `js/plugins/` for MZ). No plugins.js entry is needed
+* Or import a dictionary file in the Dictionary menu (Import file…), without touching the game folder. It is kept for this game, replaces an earlier import and wins over `Cheat_Menu.dictionary.json`
+* Copy all names (Dictionary menu) puts every name the Variables and Switches menus show, your own variable names included, on the clipboard as a dictionary to share or keep
+* A variable you renamed in the Variables menu keeps your name
+
+```json
+{
+  "format": 1,
+  "variables": {
+    "byId": { "12": "Story progress" },
+    "byName": { "所持金上限": "Gold limit" }
+  },
+  "switches": {
+    "byName": { "ボス撃破": "Boss defeated" }
+  }
+}
+```
+
+* `byId` names an id directly and wins over `byName`
+* `byName` replaces a name the game already has (as written in `data/System.json`), e.g. a translation
+* Both sections and both lists are optional. Invalid entries are skipped with a warning in the console (F8)
 
 Uninstall
 ---------

@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { prefsStorageKey } from '@src/core/preferencesFormat.ts';
+import {
+  applyDictionary,
+  parseDictionary,
+} from '@src/shared/game/dictionary.ts';
 import { systemNameLabels } from '@src/shared/game/systemNames.ts';
 import {
-  countNames,
   displayEntries,
   entryMatches,
-  withName,
-  withoutName,
   type VariableEntry,
 } from './displayNames.ts';
 
@@ -74,47 +74,30 @@ describe('displayEntries', () => {
   });
 });
 
-describe('countNames', () => {
-  it('counts only names that are applied', () => {
-    expect(countNames({})).toBe(0);
-    expect(countNames({ 1: 'Money', 2: 'Today' })).toBe(2);
+describe('displayEntries with a dictionary', () => {
+  const names = ['', '正気度', '', 'Gold'];
+  const section = parseDictionary(
+    { variables: { byId: { 2: 'Fatigue' }, byName: { 正気度: 'Sanity' } } },
+    () => {},
+  )!.variables;
+  const base = applyDictionary(section, names, baseLabels(names));
+
+  it('a dictionary name counts as the original: named, and what a reset restores', () => {
+    const entries = displayEntries(base, {}, names);
+    expect(entries[2]).toEqual(entry('Fatigue', 'Fatigue'));
+    expect(displayEntries(base, { 2: 'Mine' }, names)[2]).toEqual(
+      entry('Mine', 'Fatigue', true),
+    );
   });
 
-  it('skips blank and non-string entries edited into localStorage', () => {
-    const overrides = { 1: 'Money', 2: '', 3: '  ', 4: 7, 5: null } as never;
-    expect(countNames(overrides)).toBe(1);
-  });
-});
-
-describe('withName / withoutName', () => {
-  it('sets a trimmed name without mutating the input', () => {
-    const overrides = { 1: 'Money' };
-    expect(withName(overrides, 2, '  Today ')).toEqual({
-      1: 'Money',
-      2: 'Today',
+  it('keeps the System.json name it replaced, for the search', () => {
+    const translated = displayEntries(base, {}, names)[1]!;
+    expect(translated).toEqual({
+      ...entry('Sanity', 'Sanity'),
+      systemName: '正気度',
     });
-    expect(overrides).toEqual({ 1: 'Money' });
-  });
-
-  it('replaces an existing name', () => {
-    expect(withName({ 2: 'Old' }, 2, 'New')).toEqual({ 2: 'New' });
-  });
-
-  it('an empty or whitespace-only name is a reset', () => {
-    expect(withName({ 1: 'Money', 2: 'Today' }, 2, '')).toEqual({
-      1: 'Money',
-    });
-    expect(withName({ 2: 'Today' }, 2, ' \t ')).toEqual({});
-  });
-
-  it('a name equal to the original is a reset, not a copy', () => {
-    expect(withName({ 2: 'Today' }, 2, 'Day', 'Day')).toEqual({});
-  });
-
-  it('resets a single name', () => {
-    const overrides = { 1: 'Money', 2: 'Today' };
-    expect(withoutName(overrides, 1)).toEqual({ 2: 'Today' });
-    expect(overrides).toEqual({ 1: 'Money', 2: 'Today' });
+    expect(entryMatches(translated, '正気')).toBe(true);
+    expect(displayEntries(base, {}, names)[3]).not.toHaveProperty('systemName');
   });
 });
 
@@ -133,7 +116,7 @@ describe('entryMatches', () => {
   });
 });
 
-describe('name store (per-game preference)', () => {
+describe('variableEntries', () => {
   class FakeStorage {
     items = new Map<string, string>();
     getItem = (key: string) => this.items.get(key) ?? null;
@@ -142,20 +125,8 @@ describe('name store (per-game preference)', () => {
     };
   }
 
-  let storage: FakeStorage;
-
-  const importStore = async () => {
-    vi.resetModules();
-    return import('./displayNames.ts');
-  };
-
-  const storedNames = (title: string) =>
-    JSON.parse(storage.items.get(prefsStorageKey(title)) ?? '{}').variableNames
-      ?.names;
-
   beforeEach(() => {
-    storage = new FakeStorage();
-    vi.stubGlobal('localStorage', storage);
+    vi.stubGlobal('localStorage', new FakeStorage());
     vi.stubGlobal('$dataSystem', { gameTitle: 'Game A' });
   });
 
@@ -163,41 +134,15 @@ describe('name store (per-game preference)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('sets, resets one and resets all names, writing each change', async () => {
-    const store = await importStore();
-    store.renameVariable(1, 'Money');
-    store.renameVariable(2, 'Today');
-    expect(store.nameOverrides()).toEqual({ 1: 'Money', 2: 'Today' });
-    expect(storedNames('Game A')).toEqual({ 1: 'Money', 2: 'Today' });
-
-    store.resetVariableName(1);
-    expect(store.nameOverrides()).toEqual({ 2: 'Today' });
-    expect(storedNames('Game A')).toEqual({ 2: 'Today' });
-
-    store.resetAllVariableNames();
-    expect(store.nameOverrides()).toEqual({});
-    expect(storedNames('Game A')).toEqual({});
-  });
-
-  it('survives a restart (a fresh module reads the stored names)', async () => {
-    (await importStore()).renameVariable(3, 'Quest');
-    expect((await importStore()).nameOverrides()).toEqual({ 3: 'Quest' });
-  });
-
-  it('keeps the names of different games apart', async () => {
-    const store = await importStore();
-    store.renameVariable(1, 'Money');
-    vi.stubGlobal('$dataSystem', { gameTitle: 'Game B' });
-    expect(store.nameOverrides()).toEqual({});
-  });
-
-  it('variableEntries reflects renames right away', async () => {
-    const store = await importStore();
+  it('reflects renames right away', async () => {
+    vi.resetModules();
+    const store = await import('@src/shared/game/variableNames.ts');
+    const display = await import('./displayNames.ts');
     const base = baseLabels(['', 'Gold']);
-    expect(store.variableEntries(base)[1]?.label).toBe('Gold');
+    expect(display.variableEntries(base)[1]?.label).toBe('Gold');
     store.renameVariable(1, 'Money');
-    expect(store.variableEntries(base)[1]?.label).toBe('Money');
+    expect(display.variableEntries(base)[1]?.label).toBe('Money');
     store.resetAllVariableNames();
-    expect(store.variableEntries(base)[1]?.label).toBe('Gold');
+    expect(display.variableEntries(base)[1]?.label).toBe('Gold');
   });
 });

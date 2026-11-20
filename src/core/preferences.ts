@@ -20,10 +20,16 @@ type Loaded = {
 
 let loaded: Loaded | null = null;
 
-function currentStorageKey(): string | null {
+/** `undefined` until the engine has loaded System.json. */
+export function currentGameTitle(): string | undefined {
   const title =
     typeof $dataSystem !== 'undefined' ? $dataSystem?.gameTitle : undefined;
-  return typeof title === 'string' ? prefsStorageKey(title) : null;
+  return typeof title === 'string' ? title : undefined;
+}
+
+function currentStorageKey(): string | null {
+  const title = currentGameTitle();
+  return title === undefined ? null : prefsStorageKey(title);
 }
 
 function readStorage(key: string): string | null {

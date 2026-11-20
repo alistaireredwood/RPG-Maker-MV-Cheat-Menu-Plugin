@@ -3,13 +3,28 @@ import { emit, registerFeatures } from './registry.ts';
 
 export const EXTENSION_ID_PREFIX = 'ext.';
 
-/** What a game-specific extension pushes onto `window.CheatMenuExtensions`. */
-export type ExtensionDescriptor<Api> = {
+/**
+ * What a game-specific extension pushes onto `window.CheatMenuExtensions`:
+ * `setup`, `names` or both.
+ */
+export type ExtensionDescriptor<Api, Names = unknown> = {
   /** Shown in error messages — the features' ids are unknown until `setup` ran. */
   name: string;
   /** Major version of the api the extension was written against. */
   apiVersion: number;
-  setup(api: Api): readonly Feature<object>[];
+  setup?(api: Api): readonly Feature<object>[];
+  /**
+   * A field rather than an `api` call: a Cheat Menu that predates it ignores
+   * the field and still loads the features.
+   */
+  names?: Names;
+};
+
+export type ExtensionOptions<Api> = {
+  api: Api;
+  apiVersion: number;
+  /** Receives `names` of every extension that loaded. */
+  onNames?: (extensionName: string, names: unknown) => void;
 };
 
 export type ExtensionQueue<Api> = {
@@ -52,17 +67,35 @@ function checkFeatures(features: unknown): readonly Feature<object>[] {
   return features;
 }
 
-function load<Api>(
+function isDescriptor(
   descriptor: unknown,
-  options: { api: Api; apiVersion: number },
+): descriptor is Record<string, unknown> & { name: string } {
+  if (!isRecord(descriptor) || typeof descriptor.name !== 'string') {
+    return false;
+  }
+  const { setup, names } = descriptor;
+  return setup === undefined
+    ? names !== undefined
+    : typeof setup === 'function';
+}
+
+function loadNames<Api>(
+  name: string,
+  names: unknown,
+  options: ExtensionOptions<Api>,
 ): void {
-  if (
-    !isRecord(descriptor) ||
-    typeof descriptor.name !== 'string' ||
-    typeof descriptor.setup !== 'function'
-  ) {
+  if (names === undefined || !options.onNames) return;
+  try {
+    options.onNames(name, names);
+  } catch (e) {
+    console.error(`[CheatMenu] extension "${name}": names failed to load:`, e);
+  }
+}
+
+function load<Api>(descriptor: unknown, options: ExtensionOptions<Api>): void {
+  if (!isDescriptor(descriptor)) {
     console.error(
-      '[CheatMenu] invalid extension, expected { name, apiVersion, setup }:',
+      '[CheatMenu] invalid extension, expected { name, apiVersion, setup and / or names }:',
       descriptor,
     );
     return;
@@ -76,17 +109,19 @@ function load<Api>(
     return;
   }
 
-  let features: readonly Feature<object>[];
+  const { setup } = descriptor as ExtensionDescriptor<Api>;
+  let features: readonly Feature<object>[] = [];
   try {
-    features = checkFeatures(
-      (descriptor as ExtensionDescriptor<Api>).setup(options.api),
-    );
-    registerFeatures(features);
+    if (setup) {
+      features = checkFeatures(setup(options.api));
+      registerFeatures(features);
+    }
   } catch (e) {
     console.error(`[CheatMenu] extension "${name}" failed to load:`, e);
     return;
   }
   emit('onInit', features);
+  loadNames(name, descriptor.names, options);
 }
 
 /**
@@ -96,7 +131,7 @@ function load<Api>(
  */
 export function installExtensions<Api>(
   target: QueueTarget,
-  options: { api: Api; apiVersion: number },
+  options: ExtensionOptions<Api>,
 ): ExtensionHost {
   let open = true;
 

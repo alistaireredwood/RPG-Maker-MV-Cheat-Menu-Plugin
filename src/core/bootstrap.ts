@@ -1,6 +1,6 @@
 import { installBootHook } from './engine/bootHook.ts';
 import { installSaveHooks } from './engine/saveHooks.ts';
-import { installExtensions } from './extensions.ts';
+import { installExtensions, type ExtensionOptions } from './extensions.ts';
 import type { Feature } from './feature.ts';
 import { installKeyboard, onKeyDown } from './input/keyboard.ts';
 import { emit, registerFeatures } from './registry.ts';
@@ -13,7 +13,7 @@ export type BootstrapOptions = {
   /** Menu ids in the order of the pre-v2 menu (save migration of the open menu). */
   v1MenuOrder: readonly string[];
   /** Public api handed to game-specific extensions (`window.CheatMenuExtensions`). */
-  extensions?: { api: unknown; apiVersion: number };
+  extensions?: ExtensionOptions<unknown>;
 };
 
 function resetSession(): void {

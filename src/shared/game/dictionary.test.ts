@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   applyDictionary,
   DICTIONARY_FORMAT,
+  dictionarySize,
+  dictionaryToFile,
   EMPTY_DICTIONARY,
   findConflicts,
   mergeDictionaries,
@@ -219,5 +221,45 @@ describe('toDictionaryFile', () => {
     expect(warn).not.toHaveBeenCalled();
     expect(entries(dictionary!.variables.byId)).toEqual([[1, 'Gold']]);
     expect(file).not.toHaveProperty('game');
+  });
+});
+
+describe('dictionarySize', () => {
+  it('counts every byId and byName entry of every section', () => {
+    expect(dictionarySize(EMPTY_DICTIONARY)).toBe(0);
+    const { dictionary } = parse({
+      variables: {
+        byId: { 1: 'Gold', 2: 'Day' },
+        byName: { 正気度: 'Sanity' },
+      },
+      switches: { byName: { ボス撃破: 'Boss defeated' } },
+    });
+    expect(dictionarySize(dictionary!)).toBe(4);
+  });
+});
+
+describe('dictionaryToFile', () => {
+  it('keeps byName and drops what parseDictionary skipped', () => {
+    const { dictionary } = parse({
+      variables: {
+        byId: { 1: 'Gold', '03': 'Bad id' },
+        byName: { 正気度: 'Sanity' },
+      },
+      switches: { byId: { 2: '   ' } },
+    });
+    expect(dictionaryToFile(dictionary!, 'Some Game')).toEqual({
+      format: DICTIONARY_FORMAT,
+      game: 'Some Game',
+      variables: { byId: { 1: 'Gold' }, byName: { 正気度: 'Sanity' } },
+    });
+  });
+
+  it('reads back as the same dictionary', () => {
+    const { dictionary } = parse({
+      variables: { byId: { 4: 'Day' } },
+      switches: { byName: { ボス撃破: 'Boss defeated' } },
+    });
+    const file = JSON.parse(JSON.stringify(dictionaryToFile(dictionary!)));
+    expect(parse(file).dictionary).toEqual(dictionary);
   });
 });

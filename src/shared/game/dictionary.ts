@@ -221,3 +221,45 @@ export function toDictionaryFile(
   }
   return file;
 }
+
+export const dictionarySize = (dictionary: Dictionary): number =>
+  DICTIONARY_SECTIONS.reduce(
+    (sum, section) =>
+      sum + dictionary[section].byId.size + dictionary[section].byName.size,
+    0,
+  );
+
+const toRecord = <K extends string | number>(
+  map: ReadonlyMap<K, string>,
+): Record<K, string> => {
+  const record = {} as Record<K, string>;
+  map.forEach((name, key) => {
+    // a plain assignment of `__proto__` would set the prototype, not a name
+    Object.defineProperty(record, key, {
+      value: name,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  });
+  return record;
+};
+
+/**
+ * A parsed dictionary back as a file, `byName` included — unlike
+ * `toDictionaryFile`, which writes what the menu shows. Kept to store an
+ * import already cleaned of the entries `parseDictionary` skipped.
+ */
+export function dictionaryToFile(
+  dictionary: Dictionary,
+  game?: string,
+): DictionaryFile {
+  const file: DictionaryFile = { format: DICTIONARY_FORMAT };
+  if (game !== undefined) file.game = game;
+  for (const section of DICTIONARY_SECTIONS) {
+    const { byId, byName } = dictionary[section];
+    if (byId.size === 0 && byName.size === 0) continue;
+    file[section] = { byId: toRecord(byId), byName: toRecord(byName) };
+  }
+  return file;
+}

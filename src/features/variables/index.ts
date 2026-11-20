@@ -23,9 +23,8 @@ import {
   renameVariable,
   resetAllVariableNames,
   resetVariableName,
-  variableEntries,
-  type VariableEntry,
-} from './displayNames.ts';
+} from '@src/shared/game/variableNames.ts';
+import { variableEntries, type VariableEntry } from './displayNames.ts';
 import {
   defaultFilter,
   isDefaultFilter,

@@ -3,6 +3,7 @@ import { sharedFeature } from '@src/shared/state.ts';
 
 import armors from '@src/features/armors/index.ts';
 import clearStates from '@src/features/clearStates/index.ts';
+import dictionary from '@src/features/dictionary/index.ts';
 import enemyRecovery from '@src/features/enemyRecovery/index.ts';
 import evaluate from '@src/features/evaluate/index.ts';
 import exp from '@src/features/exp/index.ts';
@@ -31,6 +32,7 @@ export const features: Feature<object>[] = [
   gameSpeed,
   switches,
   variables,
+  dictionary,
   godMode,
   exp,
   partyRecovery,

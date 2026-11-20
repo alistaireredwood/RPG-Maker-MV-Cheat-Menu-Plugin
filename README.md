@@ -29,7 +29,7 @@ Available Cheats Are
 * Game Speed: speed up the whole game (map, events, battles, messages) up to x10
 * Unlock Controls: force mouse / touch movement and Ctrl message skipping in games that disable them
 * Clear Status/States Effects
-* Edit Variables/Switches (with search by name)
+* Edit Variables/Switches (with search by name), with names from a dictionary file (see below)
 * Save/Recall Location and Teleport
   * Be careful not to skip game events
   * If you teleport off the map lower X,Y and teleport again to fix it.
@@ -100,6 +100,8 @@ Variable and switch names dictionary
 Many games leave variables and switches unnamed, or name them in a language you don't read. A dictionary fills in and translates those names in the Variables and Switches menus. It changes only the labels shown in the menu, never the game's data.
 
 * Put `Cheat_Menu.dictionary.json` next to the plugin: `www/js/plugins/` (or `js/plugins/` for MZ). No plugins.js entry is needed
+* Or import a dictionary file in the Dictionary menu (Import file…), without touching the game folder. It is kept for this game, replaces an earlier import and wins over `Cheat_Menu.dictionary.json`
+* Copy all names (Dictionary menu) puts every name the Variables and Switches menus show, your own variable names included, on the clipboard as a dictionary to share or keep
 * A variable you renamed in the Variables menu keeps your name
 
 ```json

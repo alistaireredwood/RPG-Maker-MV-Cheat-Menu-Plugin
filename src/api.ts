@@ -1,6 +1,8 @@
-// The public contract for game-specific extensions
-// (docs/game-specific-extensions.md) and the entry of release/types/Cheat_Menu.d.ts.
-// Everything an extension can reach is listed here — keep it narrow.
+// The public contract for game-specific extensions and the entry of
+// release/types/Cheat_Menu.d.ts. Everything an extension can reach is listed
+// here — keep it narrow, so internals can change without breaking extensions.
+// Why it is shaped this way and how to change it (createApi.test.ts,
+// API_VERSION): docs/game-specific-extensions.md.
 //
 // Implementation modules are imported as types only: extensions are a
 // separate bundle and get the values through `api` at runtime (createApi.ts).

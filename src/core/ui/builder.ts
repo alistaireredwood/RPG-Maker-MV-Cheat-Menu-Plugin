@@ -47,12 +47,13 @@ export type MenuBuilder = {
   /**
    * Label + clickable status button. Takes 1 key, or `key` reserved earlier
    * with `nextKey()` (keeps it stable when rows above it come and go).
+   * `value`: shown in the middle column, e.g. a count the button acts on.
    */
   cheat: (
     label: string,
     status: string | number | boolean | null,
     onActivate: (event?: MouseEvent) => void,
-    options?: { key?: ActionKey },
+    options?: { key?: ActionKey; value?: string | number },
   ) => ActionKey;
   /** One full-width button. Takes 1 key (or `key`). */
   button: (button: RowButton, options?: { key?: ActionKey }) => void;
@@ -123,7 +124,7 @@ export function createMenuBuilder(): MenuBuilder {
 
     cheat(label, status, onActivate, options = {}) {
       const key = options.key ?? keys.next();
-      appendCheat(label, status, key, onActivate);
+      appendCheat(label, status, key, onActivate, options.value);
       return key;
     },
 

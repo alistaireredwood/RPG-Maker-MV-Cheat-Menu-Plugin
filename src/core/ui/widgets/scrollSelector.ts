@@ -1,6 +1,7 @@
 import { bindKey } from '@src/core/input/keyListeners.ts';
 import type { ActionKey } from '@src/core/input/keymap.ts';
 import { getOverlay } from '@src/core/ui/dom.ts';
+import { keyHint } from './keyHint.ts';
 
 export type Direction = 'left' | 'right';
 export type ScrollHandler = (direction: Direction, event?: MouseEvent) => void;
@@ -38,8 +39,8 @@ export function bindArrows(
   key2: ActionKey,
   scrollHandler: ScrollHandler,
 ): void {
-  leftButton.innerHTML = '←[' + key1 + ']';
-  rightButton.innerHTML = '[' + key2 + ']→';
+  leftButton.innerHTML = '←' + keyHint(key1);
+  rightButton.innerHTML = keyHint(key2) + '→';
   leftButton.addEventListener('mousedown', scrollHandler.bind(null, 'left'));
   rightButton.addEventListener('mousedown', scrollHandler.bind(null, 'right'));
   bindKey(key1, scrollHandler.bind(null, 'left'));

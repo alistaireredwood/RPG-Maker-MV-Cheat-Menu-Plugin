@@ -65,8 +65,6 @@ export function appendWideDescription(html: string): void {
   const cell = row.insertCell();
   cell.colSpan = 3;
   cell.className = 'cheat-menu-cell cheat-menu-search-cell';
-  // the table sizes itself to its widest content, so the text wraps to the
-  // width the other rows set instead of stretching the menu to one line
   const text = document.createElement('div');
   text.className = 'cheat-menu-wide-text';
   text.innerHTML = html;

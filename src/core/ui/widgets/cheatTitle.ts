@@ -1,6 +1,7 @@
 import { KEYS } from '@src/core/input/keymap.ts';
 import { findMenu } from '@src/core/registry.ts';
 import { store } from '@src/core/store.ts';
+import { getOverlay } from '@src/core/ui/dom.ts';
 import { navigationMenuIds } from '@src/core/ui/menuLayout.ts';
 import { updateMenu } from '@src/core/ui/render.ts';
 import type { Direction } from './scrollSelector.ts';
@@ -25,4 +26,6 @@ export function appendCheatTitle(): void {
   const name = findMenu(store.currentMenuId)?.entry.name ?? '';
   appendTitle('Cheat');
   appendScrollSelector(name, KEYS.KEY_2, KEYS.KEY_3, scrollCheat);
+  const rows = getOverlay().rows;
+  rows[rows.length - 1].cells[1].classList.add('cheat-menu-current');
 }

@@ -128,6 +128,12 @@ The template shows the expected output:
 - the same target as Cheat Menu (`chrome66`), for the same reason: MV 1.6's NW.js and no polyfills;
 - a file name of `Cheat_Menu.<name>.js`, because the file name becomes the plugin name in `plugins.js` and the `Cheat_Menu.` prefix is how the patcher finds it.
 
+Inside this repo, extensions live in `extensions/<name>/` (git-ignored except its README and `tsconfig.base.json`) and `pnpm build:game <name>` (`scripts/build-game.js`) produces the same output without a per-extension Vite config:
+
+- the folder name is the plugin name, so the build script knows no game and the convention replaces a manifest;
+- it rebuilds `release/` from scratch, so `release/www/` holds Cheat Menu plus that one game's script and `Cheat_Menu.dictionary.json`, never files left from another game;
+- the template stays standalone, for authors working outside this repo.
+
 ## Changing the contract
 
 When adding to `api`:

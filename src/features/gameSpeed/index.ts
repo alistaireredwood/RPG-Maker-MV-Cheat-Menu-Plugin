@@ -4,8 +4,7 @@ import type { Direction } from '@src/core/ui/widgets/scrollSelector.ts';
 import { currentSpeed, installSpeedControl, setSpeed } from './speedControl.ts';
 import { formatSpeed, NORMAL_SPEED, stepSpeed } from './speeds.ts';
 
-// Slows down or speeds up the whole game (map, events, battles, animations,
-// messages). Deliberately not persisted, so loading another save doesn't
+// Deliberately not persisted, so loading another save doesn't
 // silently restore a changed speed. The selection takes effect only on
 // Apply, so stepping to x10 doesn't run the game at every speed on the way.
 

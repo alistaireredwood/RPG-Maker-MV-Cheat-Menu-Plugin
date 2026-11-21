@@ -8,7 +8,6 @@ export function setRenderer(fn: () => void): void {
   renderer = fn;
 }
 
-/** Tears down and rebuilds the whole overlay. */
 export function updateMenu(): void {
   renderer?.();
 }

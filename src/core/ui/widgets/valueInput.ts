@@ -161,7 +161,6 @@ export function appendValueInput(
   }
 }
 
-/** Two inputs in the outer columns of one row, e.g. a min – max range. */
 export function appendValueInputPair(
   left: ValueField,
   right: ValueField,

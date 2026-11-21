@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 	"github.com/robertkrimen/otto/ast"
 	"github.com/robertkrimen/otto/parser"
 )
@@ -66,6 +67,10 @@ func ResolveEngineType(pwd string, selected string) *RPGMakerEngineType {
 }
 
 func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPluginJs bool) PatchResult {
+	// a blank entry makes the game load "js/plugins/.js" and crash
+	if strings.TrimSpace(patcherName) == "" {
+		return panicEngineType("refusing to patch a plugin without a name")
+	}
 	_, err := os.Stat(pluginsDotJs)
 	if err != nil {
 		return panicEngineType(fmt.Sprintf("%s does NOT exist", pluginsDotJs))
@@ -83,7 +88,6 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 			for _, expression := range vd.List {
 				if expression.Name == "$plugins" {
 					if plugins, ok := expression.Initializer.(*ast.ArrayLiteral); ok {
-						// check this game has whether been patched
 						for _, value := range plugins.Value {
 							if item, ok := value.(*ast.ObjectLiteral); ok {
 								for _, property := range item.Value {
@@ -98,7 +102,6 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 								}
 							}
 						}
-						// inject a json at the end of the array
 						pluginsArrayRightBracketIndex := plugins.Idx1()
 						readyForInjection := false
 						var prefixBytes []byte
@@ -151,10 +154,8 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 								extraBytes = []byte("\n")
 							}
 							if shouldBackupPluginJs {
-								backupFileName := pluginsDotJs + ".bak"
-								err = os.WriteFile(backupFileName, pluginsDotJsContent, 0o666)
-								if err != nil {
-									return panicEngineType(fmt.Sprintf("failed to backup %s as %s", pluginsDotJs, backupFileName))
+								if err = backupPluginsJs(pluginsDotJs, pluginsDotJsContent); err != nil {
+									return panicEngineType(err.Error())
 								}
 							}
 							err = os.WriteFile(
@@ -189,6 +190,11 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 
 const Auto = "Auto"
 
+const (
+	mainPluginName     = "Cheat_Menu"
+	dictionaryFileName = "Cheat_Menu.dictionary.json"
+)
+
 var RPGMakerEngineTypes = []RPGMakerEngineType{
 	{
 		Name: Auto,
@@ -206,8 +212,28 @@ var RPGMakerEngineTypes = []RPGMakerEngineType{
 			// (optional, not every plugin has one).
 			copyPluginFile(pwd, pluginName+".js", true)
 			copyPluginFile(pwd, pluginName+".css", false)
+			// Cheat Menu fetches its dictionary relative to index.html, which
+			// in MZ means js/plugins too
+			if pluginName == mainPluginName {
+				copyPluginFile(pwd, dictionaryFileName, false)
+			}
 		},
 	},
+}
+
+// An existing backup is kept: every later patch run would otherwise replace
+// the game's original plugins.js with an already patched one.
+func backupPluginsJs(pluginsDotJs string, content []byte) error {
+	backupFileName := pluginsDotJs + ".bak"
+	if _, err := os.Stat(backupFileName); err == nil {
+		_, _ = Yellow.Printf("\"%s\" already exists, keeping it as the backup\n", backupFileName)
+		return nil
+	}
+	if err := os.WriteFile(backupFileName, content, 0o666); err != nil {
+		return fmt.Errorf("failed to backup %s as %s", pluginsDotJs, backupFileName)
+	}
+	_, _ = Cyan.Printf("backup saved to \"%s\"\n", backupFileName)
+	return nil
 }
 
 // copyPluginFile copies www/js/plugins/<fileName> to js/plugins/<fileName>.

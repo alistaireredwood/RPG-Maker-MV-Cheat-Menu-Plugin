@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **`src/`** — the plugin, TypeScript + Vite (root `package.json` / `pnpm`)
 - **`patcher/`** — Go CLI dropped into a game folder alongside the plugin; injects plugin entries into the game's `plugins.js` — see `patcher/CLAUDE.md`
+- **`extensions/<name>/`** — local, git-ignored game-specific extensions (script and/or dictionary); `pnpm build:game <name>` builds `release/` for that one game — see `extensions/README.md`
 - **`examples/extension-template/`** — minimal game-specific extension built against `release/types` (`pnpm exec tsc -p examples/extension-template` after `pnpm build`)
 - **`docs/`** — `ARCHITECTURE.md` (rules for the architecture and the code), `game-specific-extensions.md` (public extension API: background and the reasons behind its rules)
 

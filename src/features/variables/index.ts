@@ -55,7 +55,6 @@ const state = {
 };
 
 let editingNames = false;
-/** the filter being edited in the panel; `null` while the panel is closed */
 let filterDraft: VariableFilter | null = null;
 
 const entries = () => {
@@ -297,7 +296,6 @@ function renderValue(ui: MenuBuilder, id: number): void {
     );
     return;
   }
-  // arrays / objects stay read-only
   ui.scrollSelector(readOnlyLabel(value), addAmount, { showArrows: false });
 }
 

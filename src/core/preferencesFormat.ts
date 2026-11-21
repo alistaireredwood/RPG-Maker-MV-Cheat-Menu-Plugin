@@ -1,5 +1,3 @@
-// Pure format of the per-game preferences — unit tested in preferencesFormat.test.ts.
-//
 // Layout of the stored JSON: { version: 1, <preferenceKey>: { ... }, ... }
 
 import { clone } from './persistence.ts';

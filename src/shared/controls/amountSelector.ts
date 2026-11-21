@@ -39,8 +39,6 @@ export function snapToPreset(
 }
 
 export function scrollAmount(direction: Direction): void {
-  // typed amount takes over from here; clear it so the display reverts to
-  // the hardcoded amounts list on this and future renders
   amountInput.text = null;
 
   if (amountInput.custom !== null) {
@@ -148,8 +146,6 @@ export function appendAmountSelection(key1: ActionKey, key2: ActionKey): void {
   input.addEventListener('blur', () => {
     if (!isUpdatingMenu()) {
       amountInput.focused = false;
-      // an empty/cleared field with no valid typed amount reverts to the
-      // hardcoded value once the user clicks away
       if (amountInput.custom === null) {
         amountInput.text = null;
       }

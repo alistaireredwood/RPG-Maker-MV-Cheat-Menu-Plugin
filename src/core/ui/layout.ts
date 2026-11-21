@@ -1,6 +1,5 @@
-// Pure layout of the main grid — unit tested in layout.test.ts. The registry
-// order is never changed (extensions' `after` relies on it); the user's
-// layout is computed on top of it.
+// The registry order is never changed (extensions' `after` relies on it);
+// the user's layout is computed on top of it.
 
 export const GROUPS = ['favourite', 'basic', 'advanced', 'hidden'] as const;
 export type Group = (typeof GROUPS)[number];

@@ -1,4 +1,5 @@
 import { defineFeature } from '@src/core/feature.ts';
+import { listedActorIds, resolveActorId } from '@src/shared/game/actors.ts';
 
 export const AMOUNTS: readonly number[] = [
   1, 10, 100, 1000, 10000, 100000, 1000000,
@@ -23,8 +24,20 @@ export const amountInput = {
 export const currentAmount = (): number =>
   amountInput.custom ?? AMOUNTS[sharedState.amountIndex];
 
-export const getSelectedActor = (): Game_Actor | null =>
-  $gameActors.actor(sharedState.selectedActor);
+export const getListedActorIds = (): number[] =>
+  typeof $dataActors === 'undefined'
+    ? []
+    : listedActorIds(
+        $dataActors,
+        ($gameActors as unknown as { _data: Game_Actor[] })._data ?? [],
+      );
+
+export function getSelectedActor(): Game_Actor | null {
+  const id = resolveActorId(sharedState.selectedActor, getListedActorIds());
+  if (id === null) return null;
+  sharedState.selectedActor = id;
+  return $gameActors.actor(id);
+}
 
 export const sharedFeature = defineFeature({
   id: 'shared',

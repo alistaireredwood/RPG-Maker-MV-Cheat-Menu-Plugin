@@ -30,4 +30,9 @@ release/
 
 test-game/
 
+# game-specific extensions stay local
+extensions/*
+!extensions/README.md
+!extensions/tsconfig.base.json
+
 examples/*/dist/

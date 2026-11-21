@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"os"
 	"path"
-	"strings"
 	"github.com/manifoldco/promptui"
 )
 
@@ -94,7 +93,6 @@ func main() {
 		return
 	}
 
-	// read plugins_patch.txt
 	pluginsPatchBytes, err := os.ReadFile(path.Join(pwd, pluginsPatchFileName))
 	if err != nil {
 		_, _ = RedUnderline.Printf("failed to read file %s\n", pluginsPatchFileName)
@@ -102,7 +100,7 @@ func main() {
 	}
 	pluginsPatchContent := string(pluginsPatchBytes)
 
-	pluginNames = strings.Split(pluginsPatchContent, "\n")
+	pluginNames = PluginNamesToPatch(pwd, pluginsPatchContent)
 
 	promptBackUpPluginJs()
 

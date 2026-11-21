@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 
-// The file name becomes the plugin name in plugins.js: Cheat_Menu.example.js
-// -> {"name":"Cheat_Menu.example", ...}. Keeping the "Cheat_Menu." prefix lets
-// the patcher find it.
+// The file name becomes the plugin name in plugins.js; the patcher finds
+// extensions by the "Cheat_Menu." prefix.
 const PLUGIN_FILE = 'Cheat_Menu.example.js';
 
 export default defineConfig({

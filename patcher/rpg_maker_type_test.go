@@ -14,7 +14,6 @@ var $plugins =
 ];
 `
 
-// writeGameFile creates a file (and its parent dirs) under a game root.
 func writeGameFile(t *testing.T, root string, rel string, content string) string {
 	t.Helper()
 	full := path.Join(root, rel)
@@ -37,10 +36,6 @@ func engineByName(t *testing.T, name string) *RPGMakerEngineType {
 	t.Fatalf("engine %q not found", name)
 	return nil
 }
-
-/////////////////////////////////////////////////
-// ResolveEngineType
-/////////////////////////////////////////////////
 
 func TestResolveAutoDetectsMV(t *testing.T) {
 	dir := t.TempDir()
@@ -93,10 +88,6 @@ func TestResolveUnknownEngineFails(t *testing.T) {
 	}
 }
 
-/////////////////////////////////////////////////
-// InjectPatchPlugin
-/////////////////////////////////////////////////
-
 func TestInjectIntoEmptyArray(t *testing.T) {
 	dir := t.TempDir()
 	pluginsJs := writeGameFile(t, dir, "js/plugins.js", "var $plugins = [];\n")
@@ -111,6 +102,25 @@ func TestInjectIntoEmptyArray(t *testing.T) {
 	}
 	if !strings.Contains(string(content), `"name":"Cheat_Menu"`) {
 		t.Fatalf("plugin not injected: %s", content)
+	}
+}
+
+func TestInjectRefusesBlankName(t *testing.T) {
+	dir := t.TempDir()
+	original := "var $plugins = [];\n"
+	pluginsJs := writeGameFile(t, dir, "js/plugins.js", original)
+
+	for _, name := range []string{"", "  ", "\r"} {
+		if result := InjectPatchPlugin(pluginsJs, name, false); result != PatchFailed {
+			t.Fatalf("name %q: expected PatchFailed, got %v", name, result)
+		}
+	}
+	content, err := os.ReadFile(pluginsJs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != original {
+		t.Fatalf("plugins.js changed: %s", content)
 	}
 }
 
@@ -192,10 +202,6 @@ func TestInjectWithoutPluginsArrayFails(t *testing.T) {
 	}
 }
 
-/////////////////////////////////////////////////
-// Backup behaviour
-/////////////////////////////////////////////////
-
 func TestBackupHoldsOriginalContent(t *testing.T) {
 	dir := t.TempDir()
 	pluginsJs := writeGameFile(t, dir, "js/plugins.js", populatedPluginsJs)
@@ -210,6 +216,26 @@ func TestBackupHoldsOriginalContent(t *testing.T) {
 	}
 	if string(backup) != populatedPluginsJs {
 		t.Fatal("backup must hold the original unpatched content")
+	}
+}
+
+func TestBackupIsNotOverwrittenByLaterRuns(t *testing.T) {
+	dir := t.TempDir()
+	pluginsJs := writeGameFile(t, dir, "js/plugins.js", populatedPluginsJs)
+
+	if result := InjectPatchPlugin(pluginsJs, "Cheat_Menu", true); result != Patched {
+		t.Fatalf("expected Patched, got %v", result)
+	}
+	if result := InjectPatchPlugin(pluginsJs, "Cheat_Menu.someGame", true); result != Patched {
+		t.Fatalf("expected Patched, got %v", result)
+	}
+
+	backup, err := os.ReadFile(pluginsJs + ".bak")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(backup) != populatedPluginsJs {
+		t.Fatalf("backup must keep the original content, got %s", backup)
 	}
 }
 
@@ -237,10 +263,6 @@ func TestNoBackupWhenAlreadyPatched(t *testing.T) {
 		t.Fatal("backup must not be written when nothing was injected")
 	}
 }
-
-/////////////////////////////////////////////////
-// MZ PostPatch (plugin file copy)
-/////////////////////////////////////////////////
 
 func TestMZPostPatchCopiesPluginFile(t *testing.T) {
 	dir := t.TempDir()
@@ -303,6 +325,48 @@ func TestMZPostPatchWithoutStylesheet(t *testing.T) {
 	}
 	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.css")); err == nil {
 		t.Fatal("no stylesheet should be created when the source has none")
+	}
+}
+
+func TestMZPostPatchCopiesDictionary(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "plugin")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.dictionary.json", "dict v2")
+	writeGameFile(t, dir, "js/plugins/Cheat_Menu.dictionary.json", "dict v1")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu")
+
+	got, err := os.ReadFile(path.Join(dir, "js/plugins/Cheat_Menu.dictionary.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "dict v2" {
+		t.Fatalf("expected refreshed dictionary, got %q", got)
+	}
+}
+
+func TestMZPostPatchWithoutDictionary(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "plugin")
+	writeGameFile(t, dir, "js/plugins/.keep", "")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu")
+
+	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.dictionary.json")); err == nil {
+		t.Fatal("no dictionary should be created when the source has none")
+	}
+}
+
+func TestMZPostPatchCopiesDictionaryOnlyWithMainPlugin(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.ext.js", "ext")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.dictionary.json", "dict")
+	writeGameFile(t, dir, "js/plugins/.keep", "")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu.ext")
+
+	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.dictionary.json")); err == nil {
+		t.Fatal("an extension must not copy the dictionary")
 	}
 }
 

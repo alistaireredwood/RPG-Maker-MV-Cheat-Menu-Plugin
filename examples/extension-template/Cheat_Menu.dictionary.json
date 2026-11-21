@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "game": "Example Game",
+  "variables": {
+    "byId": { "2": "Days passed", "3": "Reputation" },
+    "byName": { "所持金上限": "Gold limit" }
+  },
+  "switches": {
+    "byId": { "5": "Bridge repaired" },
+    "byName": { "仲間加入": "Companion joined" }
+  }
+}

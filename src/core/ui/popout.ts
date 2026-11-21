@@ -81,10 +81,6 @@ const setupPopoutDocument = (popupWindow: Window, doc: Document) => {
   );
 };
 
-/**
- * Makes sure the live popup document is set up and hosts the overlay.
- * Returns false while the popup isn't reachable yet.
- */
 const ensureAttached = (): boolean => {
   if (!popoutWin) return false;
 
@@ -159,7 +155,6 @@ export function openPopout(): void {
 }
 
 /**
- * Closes the pop-out window and moves the overlay back into the game window.
  * `keepMenuOpen` decides whether the overlay reappears in-game (F7 dock) or
  * the whole menu closes (window X button / menu toggle key).
  */

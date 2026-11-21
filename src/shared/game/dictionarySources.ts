@@ -74,7 +74,6 @@ function warnConflicts(added: Source): void {
   }
 }
 
-/** `name` goes into warnings, e.g. `extension "example"`. */
 export function addDictionary(
   kind: DictionaryKind,
   name: string,
@@ -97,7 +96,7 @@ export function addDictionary(
 export type ImportResult =
   { ok: true; size: number; warnings: number } | { ok: false; error: string };
 
-/** Replaces the previous import. `name` is shown in the source list. */
+/** Replaces the previous import. */
 export function importDictionary(name: string, raw: unknown): ImportResult {
   const warnings: string[] = [];
   const dictionary = parseDictionary(raw, (message) => {

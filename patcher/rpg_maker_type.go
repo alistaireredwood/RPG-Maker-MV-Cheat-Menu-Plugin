@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 	"github.com/robertkrimen/otto/ast"
 	"github.com/robertkrimen/otto/parser"
 )
@@ -66,6 +67,10 @@ func ResolveEngineType(pwd string, selected string) *RPGMakerEngineType {
 }
 
 func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPluginJs bool) PatchResult {
+	// a blank entry makes the game load "js/plugins/.js" and crash
+	if strings.TrimSpace(patcherName) == "" {
+		return panicEngineType("refusing to patch a plugin without a name")
+	}
 	_, err := os.Stat(pluginsDotJs)
 	if err != nil {
 		return panicEngineType(fmt.Sprintf("%s does NOT exist", pluginsDotJs))

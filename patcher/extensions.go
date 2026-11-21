@@ -47,6 +47,10 @@ func FindExtensionPlugins(pwd string) []string {
 	return names
 }
 
+func PluginNamesToPatch(pwd string, listContent string) []string {
+	return MergePluginNames(strings.Split(listContent, "\n"), FindExtensionPlugins(pwd))
+}
+
 // MergePluginNames appends the found extensions to the listed plugins,
 // trimming blanks (the list file may have CRLF line endings) and duplicates.
 func MergePluginNames(listed []string, found []string) []string {

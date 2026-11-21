@@ -114,6 +114,25 @@ func TestInjectIntoEmptyArray(t *testing.T) {
 	}
 }
 
+func TestInjectRefusesBlankName(t *testing.T) {
+	dir := t.TempDir()
+	original := "var $plugins = [];\n"
+	pluginsJs := writeGameFile(t, dir, "js/plugins.js", original)
+
+	for _, name := range []string{"", "  ", "\r"} {
+		if result := InjectPatchPlugin(pluginsJs, name, false); result != PatchFailed {
+			t.Fatalf("name %q: expected PatchFailed, got %v", name, result)
+		}
+	}
+	content, err := os.ReadFile(pluginsJs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != original {
+		t.Fatalf("plugins.js changed: %s", content)
+	}
+}
+
 func TestInjectIntoPopulatedArray(t *testing.T) {
 	dir := t.TempDir()
 	pluginsJs := writeGameFile(t, dir, "js/plugins.js", populatedPluginsJs)

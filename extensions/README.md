@@ -37,7 +37,13 @@ script sets the output.
 
 ```sh
 pnpm build:game <name>
+pnpm build:game
 ```
+
+Without a name it builds the only game there is, or lists the games to pick
+from when there are more. A folder with neither `src/index.ts` nor a dictionary
+is not a game. Outside a terminal (CI, piped input) more than one game needs
+the name.
 
 This rebuilds `release/` with Cheat Menu, the patcher and the files of that one
 game. Then copy `www/`, `patcher.exe` and `plugins_patch.go.txt` from

@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import { copyFileSync, existsSync, readdirSync, readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
+import { createInterface } from 'readline/promises';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
 
@@ -11,11 +12,46 @@ const DICTIONARY = 'Cheat_Menu.dictionary.json';
 // the name ends up in a file name and in the game's plugins.js
 const VALID_NAME = /^[A-Za-z0-9_-]+$/;
 
+const isGame = (dir) =>
+  existsSync(resolve(dir, 'src/index.ts')) ||
+  existsSync(resolve(dir, DICTIONARY));
+
 function available() {
   if (!existsSync(extensionsDir)) return [];
   return readdirSync(extensionsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && VALID_NAME.test(entry.name))
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        VALID_NAME.test(entry.name) &&
+        isGame(resolve(extensionsDir, entry.name)),
+    )
     .map((entry) => entry.name);
+}
+
+async function pickGame(names) {
+  names.forEach((game, i) => console.log(`  ${i + 1}) ${game}`));
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    for (;;) {
+      const answer = (await rl.question('Build which game? ')).trim();
+      const picked =
+        names[Number(answer) - 1] ?? names.find((n) => n === answer);
+      if (picked) return picked;
+      console.log(`  enter 1–${names.length} or a name from the list`);
+    }
+  } finally {
+    rl.close();
+  }
+}
+
+async function chooseGame() {
+  const names = available();
+  if (names.length === 0) fail('no games in extensions/');
+  if (names.length === 1) return names[0];
+  if (!process.stdin.isTTY) {
+    fail('more than one game: pass one, e.g. pnpm build:game <name>');
+  }
+  return pickGame(names);
 }
 
 function fail(message) {
@@ -29,8 +65,7 @@ function fail(message) {
   process.exit(1);
 }
 
-const name = process.argv[2];
-if (!name) fail('usage: pnpm build:game <name>');
+const name = process.argv[2] ?? (await chooseGame());
 if (!VALID_NAME.test(name)) fail(`"${name}" is not a valid name`);
 
 const gameDir = resolve(extensionsDir, name);

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"os"
 	"path"
-	"strings"
 	"github.com/manifoldco/promptui"
 )
 
@@ -102,7 +101,7 @@ func main() {
 	}
 	pluginsPatchContent := string(pluginsPatchBytes)
 
-	pluginNames = strings.Split(pluginsPatchContent, "\n")
+	pluginNames = PluginNamesToPatch(pwd, pluginsPatchContent)
 
 	promptBackUpPluginJs()
 

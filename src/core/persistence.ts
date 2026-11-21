@@ -1,5 +1,3 @@
-// Pure save-format logic (no engine globals) — unit tested in persistence.test.ts.
-//
 // v2 layout of $gameSystem.CheatMenu:
 //   { version: 2, core: { position, currentMenuId }, <featureId>: { ... }, ... }
 //

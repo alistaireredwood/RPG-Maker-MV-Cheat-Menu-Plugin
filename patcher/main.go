@@ -93,7 +93,6 @@ func main() {
 		return
 	}
 
-	// read plugins_patch.txt
 	pluginsPatchBytes, err := os.ReadFile(path.Join(pwd, pluginsPatchFileName))
 	if err != nil {
 		_, _ = RedUnderline.Printf("failed to read file %s\n", pluginsPatchFileName)

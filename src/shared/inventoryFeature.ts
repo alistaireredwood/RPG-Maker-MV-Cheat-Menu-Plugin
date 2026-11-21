@@ -6,7 +6,6 @@ import { makeScroll, nameMatches } from './controls/listSelector.ts';
 
 type InventoryItem = DataItem | DataWeapon | DataArmor;
 
-/** Items / Weapons / Armors: same menu over a different data array. */
 export function defineInventoryFeature(config: {
   id: string;
   menuName: string;

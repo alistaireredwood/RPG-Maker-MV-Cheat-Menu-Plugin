@@ -13,9 +13,8 @@ import {
   SNIPPET_GROUPS,
 } from './snippets.ts';
 
-// Runs arbitrary JavaScript in the game's global scope — useful when a game
-// blocks the F8 dev tools, or as a quick reusable macro. The script is kept in
-// localStorage (not the save file), so it survives new games and other saves.
+// The script is kept in localStorage (not the save file), so it survives new
+// games and other saves.
 
 const STORAGE_KEY = 'Cheat_Menu.evaluateScript';
 

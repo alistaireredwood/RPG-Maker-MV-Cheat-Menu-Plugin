@@ -41,7 +41,6 @@ export type MenuBuilder = {
   cheatTitle: () => void;
   /** Section title. `actions`: icon buttons on the right, mouse only, no keys. */
   title: (text: string, sideText?: string, options?: TitleOptions) => void;
-  /** Text over the full width of the menu. */
   description: (html: string) => void;
   /** Same as `description`; kept so extensions calling it still work. */
   wideDescription: (html: string) => void;

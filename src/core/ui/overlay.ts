@@ -131,7 +131,6 @@ export function installUi(): void {
   installStylesheet();
   installIndicator();
   setRenderer(renderMenu);
-  // set initial indicator position/text before the menu is ever opened
   positionMenu();
   window.addEventListener('resize', () => positionMenu());
 }

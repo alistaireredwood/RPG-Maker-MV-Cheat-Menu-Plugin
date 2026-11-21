@@ -88,7 +88,6 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 			for _, expression := range vd.List {
 				if expression.Name == "$plugins" {
 					if plugins, ok := expression.Initializer.(*ast.ArrayLiteral); ok {
-						// check this game has whether been patched
 						for _, value := range plugins.Value {
 							if item, ok := value.(*ast.ObjectLiteral); ok {
 								for _, property := range item.Value {
@@ -103,7 +102,6 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 								}
 							}
 						}
-						// inject a json at the end of the array
 						pluginsArrayRightBracketIndex := plugins.Idx1()
 						readyForInjection := false
 						var prefixBytes []byte

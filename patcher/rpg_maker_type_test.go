@@ -14,7 +14,6 @@ var $plugins =
 ];
 `
 
-// writeGameFile creates a file (and its parent dirs) under a game root.
 func writeGameFile(t *testing.T, root string, rel string, content string) string {
 	t.Helper()
 	full := path.Join(root, rel)
@@ -37,10 +36,6 @@ func engineByName(t *testing.T, name string) *RPGMakerEngineType {
 	t.Fatalf("engine %q not found", name)
 	return nil
 }
-
-/////////////////////////////////////////////////
-// ResolveEngineType
-/////////////////////////////////////////////////
 
 func TestResolveAutoDetectsMV(t *testing.T) {
 	dir := t.TempDir()
@@ -92,10 +87,6 @@ func TestResolveUnknownEngineFails(t *testing.T) {
 		t.Fatalf("expected nil for unknown engine, got %v", engineType)
 	}
 }
-
-/////////////////////////////////////////////////
-// InjectPatchPlugin
-/////////////////////////////////////////////////
 
 func TestInjectIntoEmptyArray(t *testing.T) {
 	dir := t.TempDir()
@@ -211,10 +202,6 @@ func TestInjectWithoutPluginsArrayFails(t *testing.T) {
 	}
 }
 
-/////////////////////////////////////////////////
-// Backup behaviour
-/////////////////////////////////////////////////
-
 func TestBackupHoldsOriginalContent(t *testing.T) {
 	dir := t.TempDir()
 	pluginsJs := writeGameFile(t, dir, "js/plugins.js", populatedPluginsJs)
@@ -276,10 +263,6 @@ func TestNoBackupWhenAlreadyPatched(t *testing.T) {
 		t.Fatal("backup must not be written when nothing was injected")
 	}
 }
-
-/////////////////////////////////////////////////
-// MZ PostPatch (plugin file copy)
-/////////////////////////////////////////////////
 
 func TestMZPostPatchCopiesPluginFile(t *testing.T) {
 	dir := t.TempDir()

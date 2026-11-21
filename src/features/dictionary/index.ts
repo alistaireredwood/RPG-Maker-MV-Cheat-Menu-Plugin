@@ -23,7 +23,6 @@ import {
   type Message,
 } from './transfer.ts';
 
-// Imports, exports and lists the names the Variables and Switches menus show.
 // The imported dictionary is a per-game preference (in dictionarySources),
 // so only the last message lives here.
 

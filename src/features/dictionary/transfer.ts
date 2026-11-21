@@ -43,7 +43,6 @@ export function exportMessage(count: number, copied: boolean): Message {
   return { ok: true, text: `Copied ${namesCount(count)} to the clipboard` };
 }
 
-/** `undefined` for JSON that doesn't parse. */
 export function parseJson(text: string): { value: unknown } | undefined {
   try {
     return { value: JSON.parse(text) };

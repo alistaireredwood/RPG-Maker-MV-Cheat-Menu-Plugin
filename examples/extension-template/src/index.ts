@@ -1,13 +1,10 @@
-// A Cheat Menu extension: plain script, loaded by RPG Maker from plugins.js
-// next to Cheat_Menu.js, in any order. Only types are imported — everything
-// at runtime comes through `api`.
+// Only types are imported: everything at runtime comes through `api`.
 import type { CheatMenuApi, CheatMenuExtension } from 'cheat-menu';
 
 const VARIABLE_ID = 1;
 
 function alwaysDash(api: CheatMenuApi) {
-  // persisted in the save: declare every field with its default, fields
-  // missing here are not saved
+  // fields missing here are not saved
   const state = { on: false };
 
   return api.defineFeature({
@@ -49,7 +46,6 @@ function storyVariable(api: CheatMenuApi) {
 
   return api.defineFeature({
     id: 'ext.example.storyVariable',
-    // next to the built-in Variables menu instead of the end of the grid
     after: 'variables',
     menus: [
       {
@@ -77,9 +73,7 @@ const extension: CheatMenuExtension = {
   name: 'example',
   apiVersion: 1,
   setup: (api) => [alwaysDash(api), storyVariable(api)],
-  // Labels in the Variables / Switches menus — for ids a game left unnamed
-  // (byId) or names to translate (byName). An extension may bring only
-  // these, without setup; Cheat_Menu.dictionary.json overrides them.
+  // Cheat_Menu.dictionary.json overrides these
   names: {
     variables: { byId: { [VARIABLE_ID]: 'Story progress' } },
     switches: { byName: { ボス撃破: 'Boss defeated' } },

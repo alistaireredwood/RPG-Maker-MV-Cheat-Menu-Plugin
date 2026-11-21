@@ -232,6 +232,26 @@ func TestBackupHoldsOriginalContent(t *testing.T) {
 	}
 }
 
+func TestBackupIsNotOverwrittenByLaterRuns(t *testing.T) {
+	dir := t.TempDir()
+	pluginsJs := writeGameFile(t, dir, "js/plugins.js", populatedPluginsJs)
+
+	if result := InjectPatchPlugin(pluginsJs, "Cheat_Menu", true); result != Patched {
+		t.Fatalf("expected Patched, got %v", result)
+	}
+	if result := InjectPatchPlugin(pluginsJs, "Cheat_Menu.someGame", true); result != Patched {
+		t.Fatalf("expected Patched, got %v", result)
+	}
+
+	backup, err := os.ReadFile(pluginsJs + ".bak")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(backup) != populatedPluginsJs {
+		t.Fatalf("backup must keep the original content, got %s", backup)
+	}
+}
+
 func TestNoBackupWhenDisabled(t *testing.T) {
 	dir := t.TempDir()
 	pluginsJs := writeGameFile(t, dir, "js/plugins.js", populatedPluginsJs)

@@ -5,12 +5,12 @@ const created = (name: string) => ({ name: () => name });
 
 describe('listedActorIds', () => {
   it('skips id 0, missing entries and blank names', () => {
-    const data = [null, { name: 'Harold' }, { name: '' }, null, { name: ' ' }];
+    const data = [null, { name: 'Actor A' }, { name: '' }, null, { name: ' ' }];
     expect(listedActorIds(data, [])).toEqual([1]);
   });
 
   it('uses the in-game name of created actors', () => {
-    const data = [null, { name: '' }, { name: 'Therese' }];
+    const data = [null, { name: '' }, { name: 'Actor B' }];
     expect(
       listedActorIds(data, [null, created('Renamed'), created('')]),
     ).toEqual([1]);

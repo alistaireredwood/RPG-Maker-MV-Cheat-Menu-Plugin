@@ -43,6 +43,21 @@ func TestMergePluginNamesKeepsOrderAndDropsDuplicatesAndBlanks(t *testing.T) {
 	}
 }
 
+func TestPluginNamesToPatchReadsListFileAndFindsExtensions(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.someGame.js", "")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.dictionary.json", "")
+
+	for _, list := range []string{"Cheat_Menu\n", "Cheat_Menu\r\n", "Cheat_Menu"} {
+		got := PluginNamesToPatch(dir, list)
+		want := []string{"Cheat_Menu", "Cheat_Menu.someGame"}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("list %q: got %q, want %q", list, got, want)
+		}
+	}
+}
+
 func TestMZPostPatchKeepsPluginAlreadyInJsPlugins(t *testing.T) {
 	dir := t.TempDir()
 	// an extension dropped straight into the MZ plugin dir has no www copy

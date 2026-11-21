@@ -156,10 +156,8 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 								extraBytes = []byte("\n")
 							}
 							if shouldBackupPluginJs {
-								backupFileName := pluginsDotJs + ".bak"
-								err = os.WriteFile(backupFileName, pluginsDotJsContent, 0o666)
-								if err != nil {
-									return panicEngineType(fmt.Sprintf("failed to backup %s as %s", pluginsDotJs, backupFileName))
+								if err = backupPluginsJs(pluginsDotJs, pluginsDotJsContent); err != nil {
+									return panicEngineType(err.Error())
 								}
 							}
 							err = os.WriteFile(
@@ -223,6 +221,21 @@ var RPGMakerEngineTypes = []RPGMakerEngineType{
 			}
 		},
 	},
+}
+
+// An existing backup is kept: every later patch run would otherwise replace
+// the game's original plugins.js with an already patched one.
+func backupPluginsJs(pluginsDotJs string, content []byte) error {
+	backupFileName := pluginsDotJs + ".bak"
+	if _, err := os.Stat(backupFileName); err == nil {
+		_, _ = Yellow.Printf("\"%s\" already exists, keeping it as the backup\n", backupFileName)
+		return nil
+	}
+	if err := os.WriteFile(backupFileName, content, 0o666); err != nil {
+		return fmt.Errorf("failed to backup %s as %s", pluginsDotJs, backupFileName)
+	}
+	_, _ = Cyan.Printf("backup saved to \"%s\"\n", backupFileName)
+	return nil
 }
 
 // copyPluginFile copies www/js/plugins/<fileName> to js/plugins/<fileName>.

@@ -189,6 +189,11 @@ func InjectPatchPlugin(pluginsDotJs string, patcherName string, shouldBackupPlug
 
 const Auto = "Auto"
 
+const (
+	mainPluginName     = "Cheat_Menu"
+	dictionaryFileName = "Cheat_Menu.dictionary.json"
+)
+
 var RPGMakerEngineTypes = []RPGMakerEngineType{
 	{
 		Name: Auto,
@@ -206,6 +211,11 @@ var RPGMakerEngineTypes = []RPGMakerEngineType{
 			// (optional, not every plugin has one).
 			copyPluginFile(pwd, pluginName+".js", true)
 			copyPluginFile(pwd, pluginName+".css", false)
+			// Cheat Menu fetches its dictionary relative to index.html, which
+			// in MZ means js/plugins too
+			if pluginName == mainPluginName {
+				copyPluginFile(pwd, dictionaryFileName, false)
+			}
 		},
 	},
 }

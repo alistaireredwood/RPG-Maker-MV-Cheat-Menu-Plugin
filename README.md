@@ -87,7 +87,7 @@ A game can get its own cheats (a custom currency, story variables as toggles, â€
 * Removing the file and its plugins.js entry removes the extension. Its saved state stays in the save files and comes back if the extension is added again
 * Load extensions only through plugins.js: one registered after the game has started (e.g. pasted into the console) is ignored
 
-Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] }, names }` onto `window.CheatMenuExtensions`. Both `setup` and `names` are optional, but at least one must be there:
+Writing one: see `examples/extension-template/` (TypeScript + Vite) and the typings in `types/` of the release. Working in this repo, put it in `extensions/<name>/` and build with `pnpm build:game <name>` (see `extensions/README.md`). An extension pushes `{ name, apiVersion: 1, setup(api) { return [features] }, names }` onto `window.CheatMenuExtensions`. Both `setup` and `names` are optional, but at least one must be there:
 
 * `setup` returns the extension's cheats. Feature and menu ids must start with `ext.`
 * `names` labels variables and switches in the same format as the [names dictionary](#variable-and-switch-names-dictionary) (an extension may consist of names only). A dictionary file overrides them

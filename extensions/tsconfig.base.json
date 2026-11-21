@@ -1,0 +1,17 @@
+{
+  // paths resolve against this file, not the extending one
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020", "DOM"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "types": [],
+    "paths": {
+      "cheat-menu": ["../release/types/Cheat_Menu.d.ts"]
+    }
+  }
+}

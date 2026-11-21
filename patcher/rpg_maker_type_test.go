@@ -306,6 +306,48 @@ func TestMZPostPatchWithoutStylesheet(t *testing.T) {
 	}
 }
 
+func TestMZPostPatchCopiesDictionary(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "plugin")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.dictionary.json", "dict v2")
+	writeGameFile(t, dir, "js/plugins/Cheat_Menu.dictionary.json", "dict v1")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu")
+
+	got, err := os.ReadFile(path.Join(dir, "js/plugins/Cheat_Menu.dictionary.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "dict v2" {
+		t.Fatalf("expected refreshed dictionary, got %q", got)
+	}
+}
+
+func TestMZPostPatchWithoutDictionary(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.js", "plugin")
+	writeGameFile(t, dir, "js/plugins/.keep", "")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu")
+
+	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.dictionary.json")); err == nil {
+		t.Fatal("no dictionary should be created when the source has none")
+	}
+}
+
+func TestMZPostPatchCopiesDictionaryOnlyWithMainPlugin(t *testing.T) {
+	dir := t.TempDir()
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.ext.js", "ext")
+	writeGameFile(t, dir, "www/js/plugins/Cheat_Menu.dictionary.json", "dict")
+	writeGameFile(t, dir, "js/plugins/.keep", "")
+
+	engineByName(t, "MZ").PostPatch(dir, "Cheat_Menu.ext")
+
+	if _, err := os.Stat(path.Join(dir, "js/plugins/Cheat_Menu.dictionary.json")); err == nil {
+		t.Fatal("an extension must not copy the dictionary")
+	}
+}
+
 func TestMVHasNoPostPatch(t *testing.T) {
 	if engineByName(t, "MV").PostPatch != nil {
 		t.Fatal("MV must not define a PostPatch step")

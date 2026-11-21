@@ -6,27 +6,21 @@ import {
   type Direction,
 } from '@src/core/ui/widgets/scrollSelector.ts';
 import { appendTitle } from '@src/core/ui/widgets/text.ts';
-import { getSelectedActor, sharedState } from '@src/shared/state.ts';
+import { stepActorId } from '@src/shared/game/actors.ts';
+import { escapeHtml } from '@src/shared/html.ts';
+import {
+  getListedActorIds,
+  getSelectedActor,
+  sharedState,
+} from '@src/shared/state.ts';
 
 export function scrollActor(direction: Direction): void {
-  const gameActorsData = ($gameActors as unknown as { _data: Game_Actor[] })
-    ._data;
-
-  if (direction == 'left') {
-    sharedState.selectedActor--;
-
-    if (sharedState.selectedActor < 0) {
-      sharedState.selectedActor =
-        gameActorsData && gameActorsData.length > 0
-          ? gameActorsData.length - 1
-          : 0;
-    }
-  } else {
-    sharedState.selectedActor++;
-    if (gameActorsData && sharedState.selectedActor >= gameActorsData.length) {
-      sharedState.selectedActor = 0;
-    }
-  }
+  const next = stepActorId(
+    sharedState.selectedActor,
+    getListedActorIds(),
+    direction === 'left' ? -1 : 1,
+  );
+  if (next !== null) sharedState.selectedActor = next;
 
   if (SoundManager) SoundManager.playSystemSound(0);
   updateMenu();
@@ -39,7 +33,7 @@ export function appendActorSelection(key1: ActionKey, key2: ActionKey): void {
   const actor = getSelectedActor();
 
   if (actor && actor.name()) {
-    actorNameDisplay = `<span class='actor-name-highlight'>${actor.name()}</span>`;
+    actorNameDisplay = `<span class='actor-name-highlight'>${escapeHtml(actor.name())}</span>`;
   } else {
     actorNameDisplay = `<span class="error-text">NULL</span>`;
   }
